@@ -15,6 +15,10 @@
 <body>
 <div id="appShell">
   <header class="app-topbar">
+    <button type="button" id="sidebarToggle" class="global-sidebar-toggle" title="القائمة الجانبية" aria-label="فتح أو طي القائمة الجانبية" aria-expanded="true">
+      <span></span><span></span><span></span>
+    </button>
+
     <div class="app-brand">
       <span class="app-brand-mark">S</span>
       <span class="app-brand-copy"><strong>SIYB</strong><small>Digital Workshop Tools</small></span>
@@ -32,9 +36,6 @@
     <div class="app-top-actions">
       <span class="app-connection"><i></i><span data-i18n="offlineReady">جاهز للعمل دون إنترنت</span></span>
       <button id="languageToggle" class="app-language-button" type="button" aria-label="Switch language">EN</button>
-      <button type="button" id="sidebarToggle" class="global-sidebar-toggle" title="القائمة الجانبية" aria-label="فتح أو طي القائمة الجانبية">
-        <span></span><span></span><span></span>
-      </button>
     </div>
   </header>
 
@@ -46,7 +47,7 @@
           <span class="global-sidebar-mark">S</span>
           <span class="global-sidebar-brand-copy"><strong>SIYB Tools</strong><small>Digital Workshop</small></span>
         </div>
-        <button type="button" id="sidebarCollapse" class="sidebar-collapse-button" title="طي القائمة" aria-label="طي القائمة">‹</button>
+        <button type="button" id="sidebarCollapse" class="sidebar-collapse-button" title="طي الشريط الجانبي" aria-label="طي الشريط الجانبي"><span class="sidebar-collapse-chevron" aria-hidden="true"></span></button>
       </div>
 
       <div class="sidebar-context">
@@ -56,7 +57,6 @@
 
       <nav class="global-sidebar-nav" id="globalSidebarNav">
         <div class="sidebar-empty-state" id="sidebarEmptyState">
-          <span>☰</span>
           <p>اختر وضع العمل من الشريط العلوي لعرض الوحدات المتاحة.</p>
         </div>
 
@@ -113,7 +113,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>SIYB Digital Workshop Tools</span><span>Prototype 0.2.2 · Offline-first PWA</span>
+        <span>SIYB Digital Workshop Tools</span><span>Prototype 0.2.3 · Offline-first PWA</span>
       </footer>
     </main>
   </div>
