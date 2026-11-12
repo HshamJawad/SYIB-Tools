@@ -256,7 +256,17 @@ async function exportXLSX(){
  const buffer=await wb.xlsx.writeBuffer(),blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='business-costing-studio.xlsx';a.click();URL.revokeObjectURL(url);toast('تم تجهيز ملف Excel');
 }
 
-function toast(s){const t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function toast(s){
+ let t=$('toast');
+ if(!t){
+  t=document.createElement('div');
+  t.id='toast';t.className='toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');
+  const root=$('costingModuleRoot')||document.body;root.appendChild(t);
+ }
+ t.textContent=s;t.classList.add('show');
+ clearTimeout(t._hideTimer);
+ t._hideTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
 ['manufacturingOH','generalOH','currency','business','period'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='manufacturingOH'||id==='generalOH')activeExample='custom';calculate()}));
 $('exampleSelect').addEventListener('change',e=>{
  const k=e.target.value;
@@ -266,6 +276,6 @@ $('exampleSelect').addEventListener('change',e=>{
  loadScenario(k);
  });
 loadExample();
-window.loadExample=loadExample; window.removeProduct=removeProduct; window.exportCSV=exportCSV; window.exportXLSX=exportXLSX;
+window.loadExample=loadExample; window.addProduct=addProduct; window.removeProduct=removeProduct; window.exportCSV=exportCSV; window.exportXLSX=exportXLSX;
 
 };
