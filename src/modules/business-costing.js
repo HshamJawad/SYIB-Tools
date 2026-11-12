@@ -316,10 +316,11 @@ async function exportPDF(){
   const margin=11,tableW=pageW-margin*2,bottom=14;
   let y=37;
   const visual=(v)=>arabic.bidiVisual(arabic.shapeArabic(String(v==null?'':v)));
-  const drawText=(value,x,yy,size=8,align='right')=>{
+  const drawVisual=(value,x,yy,size=8,align='right')=>{
    pdf.setFont(fontName,'normal');pdf.setFontSize(size);
-   pdf.text(visual(value),x,yy,{align});
+   pdf.text(value,x,yy,{align});
   };
+  const drawText=(value,x,yy,size=8,align='right')=>drawVisual(visual(value),x,yy,size,align);
   const pageHeader=(continuation=false)=>{
    pdf.setFillColor(18,61,86);pdf.rect(0,0,pageW,25,'F');
    pdf.setTextColor(255,255,255);
@@ -347,11 +348,11 @@ async function exportPDF(){
      const w=scaled[i];x-=w;
      pdf.setFillColor(36,91,117);pdf.setDrawColor(210,222,229);pdf.rect(x,y,w,headerH,'FD');
      const lines=pdf.splitTextToSize(arabic.shapeArabic(String(h)),w-4).slice(0,2);
-     lines.forEach((line,k)=>drawText(arabic.bidiVisual(line),x+w-2,y+3.8+k*3.5,7.2));
+     lines.forEach((line,k)=>drawVisual(arabic.bidiVisual(line),x+w-2,y+3.8+k*3.5,7.2));
     });
     y+=headerH;
    };
-   paintHeader();
+   paintHeader();pdf.setTextColor(40,55,65);
    rows.forEach((row,ri)=>{
     const wrapped=row.map((v,i)=>{
      const shaped=arabic.shapeArabic(String(v==null?'—':v));
@@ -362,14 +363,14 @@ async function exportPDF(){
     if(y+rowH>pageH-bottom){
      newPage();
      pdf.setTextColor(18,61,86);drawText(title+' (متابعة)',pageW-margin,y,10);y+=5;
-     paintHeader();
+     paintHeader();pdf.setTextColor(40,55,65);
     }
     let x=pageW-margin;
     row.forEach((v,i)=>{
      const w=scaled[i];x-=w;
      pdf.setFillColor(ri%2===0?248:255,ri%2===0?251:255,ri%2===0?252:255);
      pdf.setDrawColor(218,227,232);pdf.rect(x,y,w,rowH,'FD');
-     wrapped[i].forEach((line,k)=>drawText(arabic.bidiVisual(line),x+w-2.2,y+4+k*3.8,7.2));
+     wrapped[i].forEach((line,k)=>drawVisual(arabic.bidiVisual(line),x+w-2.2,y+4+k*3.8,7.2));
     });
     y+=rowH;
    });
