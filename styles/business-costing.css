@@ -128,3 +128,7 @@
  #costingModuleRoot .layout{grid-template-columns:1.4fr 1fr}
  #costingModuleRoot .layout>aside{display:block}
 }
+
+/* Specificity overrides for inherited legacy header/main rules */
+#costingModuleRoot header.costing-topbar{background:#fff;color:#203345;padding:0 clamp(16px,2.5vw,34px);border-radius:0}
+#costingModuleRoot main.costing-content{max-width:none;margin:0;padding:0 clamp(14px,2.5vw,34px) 28px}
