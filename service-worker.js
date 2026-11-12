@@ -69,7 +69,7 @@ self.addEventListener("fetch", (event) => {
   })());
 });
 
-// The update is activated only after an explicit user action in the app banner.
+// Release note: v0.3.0 update flow is ready for the Pages deployment.\n// The update is activated only after an explicit user action in the app banner.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();
 });
