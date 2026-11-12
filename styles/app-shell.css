@@ -118,11 +118,7 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
  .workspace-page-badge small{display:none}
  .app-main{padding:19px 10px}
 }
-.ltr .app-topbar,.ltr .app-body{direction:ltr}
-.ltr .global-sidebar{right:auto;left:0}
-.ltr .app-main{margin-right:0;margin-left:var(--sidebar-width)}
-.ltr.sidebar-collapsed .app-main{margin-left:78px}
-@media(max-width:900px){.ltr .global-sidebar{left:0;right:auto;transform:translateX(-105%)}.ltr.sidebar-open .global-sidebar{transform:translateX(0)}.ltr .app-main{margin-left:0}}
+/* Layout direction follows the actual interface language (<html dir>). */
 
 .global-sidebar-toggle{display:grid;align-content:center;justify-items:center;gap:4px;width:36px;height:36px;border:1px solid #e0e8ed;border-radius:9px;background:#fff;cursor:pointer}
 .global-sidebar-toggle span{display:block;width:16px;height:2px;border-radius:2px;background:#2a5368}
@@ -133,7 +129,7 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
  .mode-switch{flex:1;width:auto;min-width:0;max-width:none;justify-self:auto}
  .app-top-actions{position:static;display:flex;flex:0 0 auto;gap:5px}
  .app-language-button{min-width:31px;padding:0 5px}
- .global-sidebar-toggle{width:33px;height:34px;flex:0 0 33px}
+ .global-sidebar-toggle{width:34px;height:34px;flex:0 0 34px}
 }
 
 .welcome-mode-hint{display:flex;align-items:center;gap:12px;max-width:680px;margin-top:26px;padding:15px 17px;border:1px solid #dceae9;border-radius:12px;background:#edf6f5;color:#4c7477;font-size:11px;line-height:1.9}
@@ -143,4 +139,44 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
  .app-body{padding-top:0!important}
  .app-main{margin:0!important;padding:0!important;min-height:0!important}
  #costingModuleRoot main.costing-content{max-width:none!important;margin:0!important;padding:0!important}
+}
+
+/* Direction-aware placement: Arabic sidebar on the right, English sidebar on the left. */
+html[dir="rtl"] .app-topbar{direction:rtl;grid-template-columns:42px minmax(145px,1fr) auto minmax(130px,1fr)}
+html[dir="ltr"] .app-topbar{direction:ltr;grid-template-columns:42px minmax(145px,1fr) auto minmax(130px,1fr)}
+.global-sidebar{right:auto;left:auto;inset-inline-start:auto;inset-inline-end:0;direction:inherit}
+.app-main{margin-left:0;margin-right:0;margin-inline-end:var(--sidebar-width);direction:inherit}
+.sidebar-collapse-button{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;margin:0;padding:0;border:1px solid #ffffff32;border-radius:9px;background:#ffffff0c;color:#fff;line-height:1;text-align:center;cursor:pointer}
+.sidebar-collapse-chevron{display:grid;place-items:center;width:100%;height:100%;font:600 22px/1 Arial,sans-serif;transform:translateY(-1px)}
+.sidebar-collapse-chevron::before{content:"›"}
+html[dir="ltr"] .sidebar-collapse-chevron::before{content:"‹"}
+.global-sidebar-head{justify-content:space-between;gap:12px}
+.global-sidebar-brand{flex:1}
+.global-nav-item{text-align:start}
+.global-nav-item.active{box-shadow:inset 3px 0 0 var(--app-teal)}
+html[dir="rtl"] .global-nav-item.active{box-shadow:inset -3px 0 0 var(--app-teal)}
+
+@media(max-width:1050px){
+ html[dir="rtl"] .app-topbar,html[dir="ltr"] .app-topbar{grid-template-columns:40px minmax(90px,.65fr) auto minmax(95px,.65fr);gap:10px;padding-inline:12px}
+ .mode-switch-button{padding-inline:10px}
+}
+@media(max-width:900px){
+ html[dir="rtl"] .app-topbar,html[dir="ltr"] .app-topbar{display:flex;justify-content:space-between;gap:9px;padding-inline:10px}
+ .app-brand{display:none}
+ .global-sidebar{width:280px}
+ html[dir="rtl"] .global-sidebar{right:auto;left:auto;transform:translateX(105%)}
+ html[dir="ltr"] .global-sidebar{left:auto;right:auto;transform:translateX(-105%)}
+ html[dir="rtl"] body.sidebar-open .global-sidebar,html[dir="ltr"] body.sidebar-open .global-sidebar{transform:translateX(0)}
+ html[dir="rtl"] body.sidebar-collapsed .global-sidebar{transform:translateX(105%)}
+ html[dir="ltr"] body.sidebar-collapsed .global-sidebar{transform:translateX(-105%)}
+ html[dir="rtl"] .app-main,html[dir="ltr"] .app-main{margin:0}
+ .sidebar-collapse-button{display:none}
+ .global-sidebar-toggle{width:36px;height:36px;flex:0 0 36px}
+ .app-top-actions{display:flex;align-items:center;gap:7px}
+}
+@media(max-width:620px){
+ html[dir="rtl"] .app-topbar,html[dir="ltr"] .app-topbar{padding-inline:8px;gap:7px}
+ .mode-switch{flex:1;min-width:0}
+ .global-sidebar-toggle{width:34px;height:34px;flex-basis:34px}
+ .app-top-actions{flex:0 0 auto;gap:5px}
 }
