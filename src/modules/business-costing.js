@@ -74,16 +74,6 @@ function loadScenario(key){
   $('business').value='شركة نادية للنسيج';$('period').value='شهري';$('currency').value='MAD';
   $('manufacturingOH').value=8150;$('generalOH').value=9770;
   notice='مثال شركة نادية للنسيج من كتيب ILO، الجزء الثاني، الصفحات المطبوعة 28–45. أُدخلت بيانات المنتجين من سجل التكاليف، واستُخدمت النفقات الشهرية 8,150 درهم للتصنيع غير المباشر و9,770 درهم للنفقات العامة. يعتمد الكتيب نسباً مقربة (0.14 و0.17) في المثال التوضيحي؛ لذلك قد تختلف النتائج عند استخدام النسب الدقيقة.';
- }else if(key==='previous'){
-  // Preserve the illustrative starter dataset from the first Business Costing Studio prototype.
-  // These are demo figures, not figures transcribed from the ILO handbook.
-  products=[
-   {name:'الوزرة – بيانات تجريبية سابقة',units:100,materials:30400,labor:26800,price:0},
-   {name:'المعطف – بيانات تجريبية سابقة',units:50,materials:12000,labor:9000,price:0}
-  ];
-  $('business').value='مقاولة تجريبية – المثال السابق';$('period').value='شهري';$('currency').value='MAD';
-  $('manufacturingOH').value=8150;$('generalOH').value=9470;
-  notice='هذا هو المثال التجريبي الذي ظهر في النسخة السابقة V1.0، وقد أُبقي كخيار للمقارنة واستمرارية الورشة. الأرقام افتراضية للتدريب وليست منقولة من كتيب ILO ولا ينبغي التعامل معها كبيانات شركة حقيقية.';
  }else if(key==='salon'){
   // SIYB exercise: Hair & Beauty Salon, service categories, printed pages 84–86.
   // From ledger: direct materials face 3,200; feet 1,200; body 7,200.
@@ -230,15 +220,6 @@ function calculateOverheadExercise(){
  const first=overheadProducts[0].direct;$('ohFirstIndirect').textContent=dm>0?(first*rate).toFixed(2):'—';$('ohFirstTotal').textContent=dm>0?(first*(1+rate)).toFixed(2):'—';
 }
 
-function exportCSV(){
- const direct=products.reduce((s,p)=>s+p.materials+p.labor,0),mfg=val('manufacturingOH'),gen=val('generalOH'),mr=direct?mfg/direct:0,gr=direct?gen/direct:0;
- const rows=[['Business Costing Studio'],['المقاولة',$('business').value],['الفترة',$('period').value],['العملة',$('currency').value],[],['المنتج','الوحدات','المواد المباشرة الإجمالية','العمل المباشر الإجمالي','مواد/وحدة','عمل/وحدة','تصنيع غير مباشر/وحدة','نفقات عامة/وحدة','التكلفة الكاملة/وحدة','سعر البيع','ربح/وحدة']];
- products.forEach(p=>{const b=p.units>0?(p.materials+p.labor)/p.units:0,full=b*(1+mr+gr);rows.push([p.name,p.units,p.materials,p.labor,p.units?p.materials/p.units:0,p.units?p.labor/p.units:0,b*mr,b*gr,full,p.price||'',p.price>0?p.price-full:'']);});
- rows.push([],['إجمالي التكاليف المباشرة',direct],['نفقات التصنيع غير المباشرة',mfg],['النفقات العامة',gen],['نسبة نفقات التصنيع غير المباشرة',mr],['نسبة النفقات العامة',gr]);
- const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
- const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='business-costing-studio.csv';a.click();URL.revokeObjectURL(url);toast('تم تجهيز ملف CSV');
-}
-
 async function exportXLSX(){
  if(!window.ExcelJS){toast('مكتبة Excel غير متاحة');return;}
  const wb=new ExcelJS.Workbook(); wb.creator='SIYB Digital Workshop Tools'; wb.subject='Business Costing Studio V1.5'; wb.title='Business Costing Studio';
@@ -267,6 +248,26 @@ function toast(s){
  clearTimeout(t._hideTimer);
  t._hideTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
+
+const appRoot=$('costingModuleRoot');
+const isCompactViewport=()=>window.matchMedia('(max-width: 900px)').matches;
+function closeMobileSidebar(){appRoot.classList.remove('sidebar-open');}
+function toggleSidebar(){
+ if(isCompactViewport()){
+  appRoot.classList.toggle('sidebar-open');
+ }else{
+  appRoot.classList.toggle('sidebar-collapsed');
+ }
+}
+$('sidebarToggle').addEventListener('click',toggleSidebar);
+$('sidebarCollapse').addEventListener('click',()=>{
+ if(isCompactViewport()) closeMobileSidebar();
+ else appRoot.classList.toggle('sidebar-collapsed');
+});
+$('sidebarBackdrop').addEventListener('click',closeMobileSidebar);
+$('costingBackHome').addEventListener('click',()=>{const back=$('backHome');if(back)back.click();});
+$('costingNavItem').addEventListener('click',closeMobileSidebar);
+
 ['manufacturingOH','generalOH','currency','business','period'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='manufacturingOH'||id==='generalOH')activeExample='custom';calculate()}));
 $('exampleSelect').addEventListener('change',e=>{
  const k=e.target.value;
@@ -276,6 +277,6 @@ $('exampleSelect').addEventListener('change',e=>{
  loadScenario(k);
  });
 loadExample();
-window.loadExample=loadExample; window.addProduct=addProduct; window.removeProduct=removeProduct; window.exportCSV=exportCSV; window.exportXLSX=exportXLSX;
+window.loadExample=loadExample; window.addProduct=addProduct; window.removeProduct=removeProduct; window.exportXLSX=exportXLSX;
 
 };
