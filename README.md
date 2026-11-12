@@ -1,10 +1,12 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.2.6 — Global export controls**
+**Prototype 0.2.7 — Full-width responsive workspace**
 
 A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
 ## Application architecture
+
+The workspace occupies the full width remaining beside the persistent sidebar. Desktop margins reserve the sidebar width once only, both when expanded and when collapsed; mobile layout uses the full viewport width.
 
 - A fixed global top bar contains the Business Mode and Training Mode selectors.
 - A persistent right-hand sidebar belongs to the entire application, not to an individual module.
