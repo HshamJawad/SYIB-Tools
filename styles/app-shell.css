@@ -507,3 +507,15 @@ html[dir="ltr"] .app-main{
 .welcome-guide-sidebar-step{margin-top:18px;padding-top:17px;border-top:1px solid #e8eef1}
 .welcome-guide-sidebar-step .welcome-guide-step-content h3{margin-bottom:5px}
 @media(max-width:620px){.welcome-guide{margin-top:20px;padding:17px 15px}.welcome-guide-modes{grid-template-columns:1fr;gap:8px}.welcome-guide-mode{padding:10px 12px}}
+
+
+/* v0.3.12: compact the welcome top whitespace and keep step numbers inline. */
+.welcome-screen{
+  margin:8px auto 22px!important;
+  padding:8px 10px 20px!important;
+}
+.welcome-guide-step{display:block!important}
+.welcome-guide-step-content h3{margin:2px 0 11px!important}
+@media(max-width:620px){
+  .welcome-screen{margin:4px auto 18px!important;padding:6px 6px 16px!important}
+}
