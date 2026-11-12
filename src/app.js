@@ -14,6 +14,95 @@
   let costingScriptPromise = null;
   let waitingWorker = null;
 
+  const toWesternDigits = (value) => String(value ?? "").replace(/[٠-٩]/g, digit => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+  const toArabicDigits = (value) => String(value ?? "").replace(/[0-9]/g, digit => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]);
+  const localizeDigits = (value) => language === "ar" ? toArabicDigits(value) : toWesternDigits(value);
+
+  window.SIYBParseNumber = (value) => {
+    const normalized = toWesternDigits(value)
+      .replace(/[٬,]/g, "")
+      .replace(/[٫]/g, ".")
+      .replace(/[−]/g, "-")
+      .trim();
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  function localizeNumericControl(control) {
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
+    if (control.type === "number") {
+      control.type = "text";
+      control.inputMode = "decimal";
+      control.dataset.siybNumeric = "true";
+      control.setAttribute("autocomplete", "off");
+    }
+    if (document.activeElement === control) return;
+    if (control.value && /[0-9٠-٩]/.test(control.value)) {
+      control.value = localizeDigits(control.value);
+    }
+    if (control.placeholder && /[0-9٠-٩]/.test(control.placeholder)) {
+      control.placeholder = localizeDigits(control.placeholder);
+    }
+  }
+
+  function localizeTextNode(node) {
+    if (!node || node.nodeType !== Node.TEXT_NODE || !/[0-9٠-٩]/.test(node.nodeValue || "")) return;
+    const parent = node.parentElement;
+    if (!parent || parent.closest("script,style,noscript,code,pre,textarea,[contenteditable='true']")) return;
+    const next = localizeDigits(node.nodeValue);
+    if (next !== node.nodeValue) node.nodeValue = next;
+  }
+
+  function refreshLocaleDigits(root = document.body) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) localizeTextNode(node);
+    if (root.nodeType === Node.ELEMENT_NODE && root.matches("input,textarea")) localizeNumericControl(root);
+    root.querySelectorAll?.("input,textarea").forEach(localizeNumericControl);
+  }
+
+  document.addEventListener("focusin", (event) => {
+    const control = event.target;
+    if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) {
+      if (control.dataset.siybNumeric === "true" || /[٠-٩]/.test(control.value || "")) {
+        control.value = toWesternDigits(control.value);
+      }
+    }
+  });
+  document.addEventListener("input", (event) => {
+    const control = event.target;
+    if (control instanceof HTMLInputElement && (control.dataset.siybNumeric === "true" || /[٠-٩]/.test(control.value || ""))) {
+      const start = control.selectionStart;
+      const before = control.value;
+      control.value = toWesternDigits(before);
+      if (start !== null && control === document.activeElement) {
+        const delta = before.length - control.value.length;
+        try { control.setSelectionRange(Math.max(0, start - delta), Math.max(0, start - delta)); } catch (_) {}
+      }
+    }
+  }, true);
+  document.addEventListener("focusout", (event) => {
+    const control = event.target;
+    if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) {
+      localizeNumericControl(control);
+    }
+  });
+
+  const localeDigitObserver = new MutationObserver((records) => {
+    records.forEach((record) => {
+      if (record.type === "characterData") {
+        localizeTextNode(record.target);
+      } else {
+        record.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) localizeTextNode(node);
+          else if (node.nodeType === Node.ELEMENT_NODE) refreshLocaleDigits(node);
+        });
+      }
+    });
+  });
+  localeDigitObserver.observe(document.documentElement, {subtree:true,childList:true,characterData:true});
+
   function t(key) {
     return (window.SIYB_TRANSLATIONS && window.SIYB_TRANSLATIONS[language] || {})[key] || key;
   }
@@ -25,6 +114,7 @@
     document.querySelectorAll("[data-i18n]").forEach((node) => {
       node.textContent = t(node.dataset.i18n);
     });
+    refreshLocaleDigits(document.body);
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "ع";
   }
@@ -87,7 +177,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.12";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.14";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
