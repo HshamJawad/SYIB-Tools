@@ -1,4 +1,4 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.2.9";
+const CACHE_NAME = "siyb-workshop-shell-v0.3.0";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -20,7 +20,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
+  // Keep the current app active until the user chooses Update now.\n
 });
 
 self.addEventListener("activate", (event) => {
@@ -32,7 +32,7 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
-  self.clients.claim();
+  self.clients.claim();\n  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {\n    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.3.0" }));\n  });
 });
 
 self.addEventListener("fetch", (event) => {
@@ -67,4 +67,9 @@ self.addEventListener("fetch", (event) => {
       });
     }
   })());
+});
+
+// The update is activated only after an explicit user action in the app banner.
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();
 });
