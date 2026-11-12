@@ -44,7 +44,7 @@
     $("sidebarEmptyState").hidden = !!mode;
     $("sidebarContextTitle").textContent = mode === "business"
       ? "وضع إدارة الأعمال"
-      : mode === "training" ? "وضع التدريب" : "اختر وضع العمل";
+      : mode === "training" ? "وضع التدريب" : "اختر وضعاً من الشريط العلوي";
   }
 
   function setActiveNav(item) {
