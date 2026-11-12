@@ -296,3 +296,155 @@ html[dir="ltr"] .app-main{
   #costingModuleRoot main.costing-content{padding:0 10px 20px!important}
   #costingModuleRoot .layout{grid-template-columns:minmax(0,1fr)}
 }
+
+/* ============================================================
+   Responsive workspace behaviour — aligned with DACUM-Lite
+   Desktop: the application wrapper reserves the sidebar width.
+   Mini:    the wrapper follows the compact 78px rail.
+   Drawer:  the sidebar overlays a dimmed, locked mobile canvas.
+   ============================================================ */
+:root{
+  --sidebar-expanded-width:270px;
+  --sidebar-mini-width:78px;
+}
+body{--sidebar-width:var(--sidebar-expanded-width)}
+body.sidebar-collapsed{--sidebar-width:var(--sidebar-mini-width)}
+
+/* Desktop content is shifted exactly once, away from the fixed sidebar. */
+.app-main{
+  display:block;
+  box-sizing:border-box;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  overflow-x:clip;
+  transition:margin .28s cubic-bezier(.4,0,.2,1);
+}
+html[dir="rtl"] .app-main{
+  margin:0 var(--sidebar-width) 0 0!important;
+}
+html[dir="ltr"] .app-main{
+  margin:0 0 0 var(--sidebar-width)!important;
+}
+
+/* All workspace layers must be allowed to shrink and reflow. */
+.app-main #workspace,
+.app-main #workspaceContent,
+#workspaceContent #costingModuleRoot,
+#costingModuleRoot main.costing-content,
+#costingModuleRoot .toolbar,
+#costingModuleRoot #exampleNotice,
+#costingModuleRoot #slideExamples,
+#costingModuleRoot #mainCalculator{
+  width:100%;
+  min-width:0;
+  max-width:none!important;
+  box-sizing:border-box;
+}
+#costingModuleRoot main.costing-content{
+  margin:0!important;
+  padding:0 clamp(12px,1.8vw,26px) 28px!important;
+}
+#costingModuleRoot .layout{
+  width:100%;
+  min-width:0;
+  grid-template-columns:minmax(0,1fr);
+}
+#costingModuleRoot .layout>*,
+#costingModuleRoot .card,
+#costingModuleRoot .cardhead,
+#costingModuleRoot .body{
+  min-width:0;
+  max-width:100%;
+}
+#costingModuleRoot .cardhead h2,
+#costingModuleRoot .cardhead p,
+#costingModuleRoot .field label{
+  overflow-wrap:anywhere;
+}
+.workspace-page-heading,
+.workspace-page-heading>div,
+.welcome-screen{
+  min-width:0;
+  max-width:100%;
+}
+.welcome-screen>h1,
+.welcome-screen>p,
+.welcome-mode-hint{
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+/* A formerly mobile-looking 769–900px CSS viewport is still a desktop
+   workspace: retain the fixed sidebar and shift the content beside it. */
+@media (min-width:769px) and (max-width:900px){
+  .global-sidebar{
+    position:fixed!important;
+    top:var(--topbar-height)!important;
+    bottom:0!important;
+    width:var(--sidebar-width)!important;
+    transform:none!important;
+    box-shadow:none;
+  }
+  html[dir="rtl"] .global-sidebar{right:0!important;left:auto!important}
+  html[dir="ltr"] .global-sidebar{left:0!important;right:auto!important}
+  .sidebar-backdrop{display:none!important}
+  .sidebar-collapse-button{display:grid!important}
+  html[dir="rtl"] .app-main{margin:0 var(--sidebar-width) 0 0!important;padding:23px 12px 20px!important}
+  html[dir="ltr"] .app-main{margin:0 0 0 var(--sidebar-width)!important;padding:23px 12px 20px!important}
+}
+
+/* Mobile / short-landscape touch devices use a true drawer, like DACUM-Lite. */
+@media (max-width:768px),
+       (pointer:coarse) and (max-height:520px) and (max-width:1024px){
+  body.sidebar-locked{overflow:hidden}
+  .global-sidebar{
+    position:fixed!important;
+    top:var(--topbar-height)!important;
+    bottom:0!important;
+    width:280px!important;
+    max-width:min(86vw,320px);
+    transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s;
+    z-index:80;
+    box-shadow:none;
+  }
+  html[dir="rtl"] .global-sidebar{
+    right:0!important;left:auto!important;
+    transform:translateX(105%)!important;
+  }
+  html[dir="ltr"] .global-sidebar{
+    left:0!important;right:auto!important;
+    transform:translateX(-105%)!important;
+  }
+  html[dir="rtl"] body.sidebar-open .global-sidebar,
+  html[dir="ltr"] body.sidebar-open .global-sidebar{
+    transform:translateX(0)!important;
+    box-shadow:0 10px 35px rgba(8,30,44,.24);
+  }
+  .sidebar-collapse-button{display:none!important}
+  .sidebar-backdrop{
+    position:fixed!important;
+    inset:var(--topbar-height) 0 0!important;
+    z-index:75!important;
+  }
+  html[dir="rtl"] .app-main,
+  html[dir="ltr"] .app-main{
+    width:100%!important;
+    margin:0!important;
+    padding:23px 12px 20px!important;
+    overflow-x:clip;
+  }
+  #costingModuleRoot main.costing-content{
+    padding:0 8px 20px!important;
+  }
+  #costingModuleRoot .layout{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+
+/* Keep table scrolling local to its own wrapper, not the whole page. */
+#costingModuleRoot .tablewrap{
+  max-width:100%;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+}
