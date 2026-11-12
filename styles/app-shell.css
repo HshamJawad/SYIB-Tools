@@ -482,6 +482,10 @@ html[dir="ltr"] .app-main{
 .update-banner-copy small{font-size:12px;color:#d2e2e8}
 .update-banner-button{border:0;border-radius:9px;background:#35b7a5;color:#082e3a;padding:10px 20px;font:800 13px Cairo,Arial,sans-serif;cursor:pointer}
 .update-banner-button:hover{background:#60d0bd}
-.update-banner-dismiss{border:1px solid #ffffff55;border-radius:8px;width:32px;height:32px;background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.update-banner-dismiss{display:inline-flex;align-items:center;justify-content:center;flex:0 0 48px;width:48px;height:48px;min-width:48px;padding:0;margin:0;border:1px solid #ffffff55;border-radius:10px;background:transparent;color:#fff;font-family:Arial,sans-serif;font-size:25px;font-weight:400;line-height:1;text-align:center;cursor:pointer;box-sizing:border-box}
 @media(max-width:620px){.app-main{padding-bottom:95px!important}.update-banner{justify-content:space-between;gap:9px;padding:10px 12px}.update-banner-copy strong{font-size:12px}.update-banner-copy small{font-size:10px}.update-banner-button{padding:9px 12px;font-size:11px}}
 @media print{.update-banner{display:none!important}}
+
+/* Keep the update banner close glyph optically centered in its square control. */
+.update-banner-dismiss{align-self:center;vertical-align:middle;}
+.update-banner-dismiss:focus-visible{outline:2px solid #35b7a5;outline-offset:3px}
