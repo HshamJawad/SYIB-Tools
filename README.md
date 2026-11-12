@@ -1,25 +1,36 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.1.7 — Business Costing Studio UI refresh**
+**Prototype 0.2.0 — Global application shell and mode navigation**
 
-Arabic-first, offline-first SIYB workshop tools with a modular Business Costing Studio.
+A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
-## Interface updates
+## Application architecture
 
-- Removed the legacy V1.0 demonstration scenario.
-- Removed CSV export and its implementation.
-- Introduced a responsive, collapsible right-side navigation panel. The active module is **احتساب تكاليف**.
-- Added a compact application top bar, breadcrumb, module heading, and workspace actions.
-- Removed the repeated module card from the landing page. The home page remains the place to select Business Mode or Training Mode.
-- Sidebar supports an expanded desktop view, a compact icon-only desktop view, and an off-canvas mobile view.
+- A fixed global top bar contains the Business Mode and Training Mode selectors.
+- A persistent right-hand sidebar belongs to the entire application, not to an individual module.
+- Sidebar navigation changes according to the selected mode.
+- Desktop sidebar can collapse to an icon rail. On mobile it becomes an off-canvas drawer.
+- Individual tools load inside the shared workspace and do not create their own application sidebar or top bar.
+
+## Current navigation
+
+**Business Mode**
+- احتساب تكاليف
+
+**Training Mode**
+- تحميل التكاليف غير المباشرة
+- سجل الحسابات والمصروفات
+- حساب الإهلاك
+
+The three Training Mode entries select the corresponding editable exercises in Business Costing Studio.
 
 ## Business Costing Studio
 
-The module preserves the remaining original examples and calculations: Nadia Textile, Hair and Beauty Salon, Alibaba Chairs, Asfi Bookshop, ledger/general expenses, straight-line depreciation, and indirect-cost allocation using the ful medames 450 g tin and other sample products.
+The migrated tool preserves the remaining examples and calculations: Nadia Textile, Hair and Beauty Salon, Alibaba Chairs, Asfi Bookshop, ledger/general expenses, straight-line depreciation, and indirect-cost allocation using the ful medames 450 g tin and other sample products.
 
-The module retains editable inputs, browser print-to-PDF, and Excel workbook export. CSV export is no longer included.
+The legacy V1.0 scenario and CSV export have been removed. Excel workbook export and browser print-to-PDF remain available.
 
-## Structure
+## Repository structure
 
 ```text
 /
@@ -30,6 +41,9 @@ The module retains editable inputs, browser print-to-PDF, and Excel workbook exp
 ├── assets/
 ├── vendor/
 ├── styles/
+│   ├── main.css
+│   ├── app-shell.css
+│   └── business-costing.css
 └── src/
     ├── app.js
     ├── locales/translations.js
@@ -40,4 +54,6 @@ The module retains editable inputs, browser print-to-PDF, and Excel workbook exp
 
 ## Deployment
 
-Upload the contents of this directory to the repository root and publish the intended branch/folder through GitHub Pages. The Service Worker cache version is 0.1.5. For a local test, serve the repository with localhost (for example, `python -m http.server 8000`).
+Publish the repository root with GitHub Pages. The Service Worker cache is versioned `0.2.0`. For local testing, use localhost (for example, `python -m http.server 8000`).
+
+After publishing, reload with Ctrl+Shift+R. If an older service worker remains active, unregister it once from DevTools → Application → Service Workers and clear site data.
