@@ -214,7 +214,6 @@
   } else if (drawerMedia.addListener) {
     drawerMedia.addListener(handleResponsiveModeChange);
   }
-  $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
 
   $("globalPrintButton").addEventListener("click", () => {
     window.print();
