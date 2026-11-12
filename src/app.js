@@ -55,22 +55,30 @@
     });
   }
 
+  // Match DACUM-Lite's responsive breakpoint: use a fixed sidebar on
+  // layouts wider than 768 CSS px, and an off-canvas drawer on phones.
+  // The short-landscape touch condition also handles phones/tablets rotated
+  // horizontally without allowing CSS and JavaScript breakpoints to drift.
+  const DRAWER_MEDIA_QUERY =
+    "(max-width: 768px), (pointer: coarse) and (max-height: 520px) and (max-width: 1024px)";
+  const drawerMedia = window.matchMedia(DRAWER_MEDIA_QUERY);
+  function isDrawerMode() {
+    return drawerMedia.matches;
+  }
+
   function closeMobileSidebar() {
-    document.body.classList.remove("sidebar-open");
-    const toggle = $("sidebarToggle");
-    if (toggle) {
-      const mobile = window.matchMedia("(max-width: 900px)").matches;
-      const expanded = mobile ? false : !document.body.classList.contains("sidebar-collapsed");
-      toggle.setAttribute("aria-expanded", String(expanded));
-    }
+    document.body.classList.remove("sidebar-open", "sidebar-locked");
+    syncSidebarToggleState();
   }
 
   function toggleSidebar() {
-    if (window.matchMedia("(max-width: 900px)").matches) {
-      document.body.classList.toggle("sidebar-open");
+    if (isDrawerMode()) {
+      const isOpen = document.body.classList.toggle("sidebar-open");
+      document.body.classList.toggle("sidebar-locked", isOpen);
     } else {
       document.body.classList.toggle("sidebar-collapsed");
     }
+    syncSidebarToggleState();
   }
 
   async function ensureCostingScript() {
@@ -175,24 +183,37 @@
 
   function syncSidebarToggleState() {
     const toggle = $("sidebarToggle");
-    const mobile = window.matchMedia("(max-width: 900px)").matches;
-    const expanded = mobile ? document.body.classList.contains("sidebar-open") : !document.body.classList.contains("sidebar-collapsed");
+    if (!toggle) return;
+    const expanded = isDrawerMode()
+      ? document.body.classList.contains("sidebar-open")
+      : !document.body.classList.contains("sidebar-collapsed");
     toggle.setAttribute("aria-expanded", String(expanded));
   }
 
-  $("sidebarToggle").addEventListener("click", () => {
-    toggleSidebar();
+  function handleResponsiveModeChange() {
+    // A drawer must not remain open after crossing into the desktop layout.
+    if (!isDrawerMode()) {
+      document.body.classList.remove("sidebar-open", "sidebar-locked");
+    }
     syncSidebarToggleState();
-  });
+  }
+
+  $("sidebarToggle").addEventListener("click", toggleSidebar);
   $("sidebarCollapse").addEventListener("click", () => {
-    document.body.classList.toggle("sidebar-collapsed");
-    syncSidebarToggleState();
+    if (isDrawerMode()) {
+      closeMobileSidebar();
+    } else {
+      document.body.classList.toggle("sidebar-collapsed");
+      syncSidebarToggleState();
+    }
   });
-  $("globalSidebarBackdrop").addEventListener("click", () => {
-    closeMobileSidebar();
-    syncSidebarToggleState();
-  });
-  window.addEventListener("resize", syncSidebarToggleState);
+  $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
+  window.addEventListener("resize", handleResponsiveModeChange);
+  if (drawerMedia.addEventListener) {
+    drawerMedia.addEventListener("change", handleResponsiveModeChange);
+  } else if (drawerMedia.addListener) {
+    drawerMedia.addListener(handleResponsiveModeChange);
+  }
   $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
 
   $("globalPrintButton").addEventListener("click", () => {
