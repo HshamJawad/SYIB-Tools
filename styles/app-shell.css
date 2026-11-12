@@ -489,3 +489,21 @@ html[dir="ltr"] .app-main{
 /* Keep the update banner close glyph optically centered in its square control. */
 .update-banner-dismiss{align-self:center;vertical-align:middle;}
 .update-banner-dismiss:focus-visible{outline:2px solid #35b7a5;outline-offset:3px}
+
+
+/* Unified first-use guide: mode choice and sidebar navigation. */
+.welcome-guide{max-width:760px;margin-top:26px;padding:22px 24px;border:1px solid #dce7ed;border-radius:16px;background:linear-gradient(145deg,#fff 0%,#f7fafb 100%);box-shadow:0 8px 24px rgba(26,57,78,.045)}
+.welcome-guide-heading{display:flex;align-items:center;gap:10px;margin-bottom:19px}
+.welcome-guide-mark{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:#e4f2ef;color:#218d86;font-size:18px}
+.welcome-guide-heading h2{margin:0;color:#244b61;font-size:16px;font-weight:800}
+.welcome-guide-step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start}
+.welcome-guide-number{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#eaf2f6;color:#28627d;font:700 12px Inter,Arial,sans-serif}
+.welcome-guide-step-content{min-width:0}
+.welcome-guide-step-content h3{margin:2px 0 11px;color:#31566c;font-size:13px;font-weight:750}
+.welcome-guide-modes{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.welcome-guide-mode{padding:12px 14px;border:1px solid #e2eaee;border-radius:11px;background:#fff}
+.welcome-guide-mode strong{display:block;margin-bottom:4px;color:#28556d;font-size:12px}
+.welcome-guide-mode p,.welcome-guide-step-content>p{margin:0;color:#718493;font-size:11px;line-height:1.9}
+.welcome-guide-sidebar-step{margin-top:18px;padding-top:17px;border-top:1px solid #e8eef1}
+.welcome-guide-sidebar-step .welcome-guide-step-content h3{margin-bottom:5px}
+@media(max-width:620px){.welcome-guide{margin-top:20px;padding:17px 15px}.welcome-guide-modes{grid-template-columns:1fr;gap:8px}.welcome-guide-mode{padding:10px 12px}}
