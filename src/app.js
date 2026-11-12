@@ -57,6 +57,12 @@
 
   function closeMobileSidebar() {
     document.body.classList.remove("sidebar-open");
+    const toggle = $("sidebarToggle");
+    if (toggle) {
+      const mobile = window.matchMedia("(max-width: 900px)").matches;
+      const expanded = mobile ? false : !document.body.classList.contains("sidebar-collapsed");
+      toggle.setAttribute("aria-expanded", String(expanded));
+    }
   }
 
   function toggleSidebar() {
