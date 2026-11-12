@@ -46,7 +46,9 @@
   }
 
   function localizeTextNode(node) {
-    if (!node || node.nodeType !== Node.TEXT_NODE || !/[0-9٠-٩]/.test(node.nodeValue || "")) return;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+    translateUiNode(node);
+    if (!/[0-9٠-٩]/.test(node.nodeValue || "")) return;
     const parent = node.parentElement;
     if (!parent || parent.closest("script,style,noscript,code,pre,textarea,[contenteditable='true']")) return;
     const next = localizeDigits(node.nodeValue);
@@ -60,6 +62,7 @@
     while ((node = walker.nextNode())) localizeTextNode(node);
     if (root.nodeType === Node.ELEMENT_NODE && root.matches("input,textarea")) localizeNumericControl(root);
     root.querySelectorAll?.("input,textarea").forEach(localizeNumericControl);
+    translateUiTree(root);
   }
   window.SIYBRefreshLocaleDigits = refreshLocaleDigits;
 
@@ -108,6 +111,53 @@
     return (window.SIYB_TRANSLATIONS && window.SIYB_TRANSLATIONS[language] || {})[key] || key;
   }
 
+  const uiTextMap=window.SIYB_UI_TEXT||{};
+  const reverseUiTextMap=Object.fromEntries(Object.entries(uiTextMap).map(([ar,en])=>[en,ar]));
+  const textKeys=Object.keys(uiTextMap).sort((x,y)=>y.length-x.length);
+  const reverseTextKeys=Object.keys(reverseUiTextMap).sort((x,y)=>y.length-x.length);
+  function translateUiText(value){
+    let output=String(value??"");
+    const map=language==="en"?uiTextMap:reverseUiTextMap;
+    const keys=language==="en"?textKeys:reverseTextKeys;
+    const exact=map[output.trim()];
+    if(exact!==undefined){
+      const leading=output.match(/^\\s*/)?.[0]||"",trailing=output.match(/\\s*$/)?.[0]||"";
+      return leading+exact+trailing;
+    }
+    for(const key of keys)if(output.includes(key))output=output.split(key).join(map[key]);
+    return output;
+  }
+  function translateUiNode(node){
+    if(!node||node.nodeType!==Node.TEXT_NODE)return;
+    const parent=node.parentElement;
+    if(!parent||parent.closest("script,style,noscript,code,pre,[contenteditable='true']"))return;
+    const next=translateUiText(node.nodeValue);
+    if(next!==node.nodeValue)node.nodeValue=next;
+  }
+  function translateUiElement(element){
+    if(!element||element.nodeType!==Node.ELEMENT_NODE)return;
+    ["title","aria-label","placeholder","alt"].forEach(attr=>{
+      if(element.hasAttribute(attr)){
+        const oldValue=element.getAttribute(attr),next=translateUiText(oldValue);
+        if(next!==oldValue)element.setAttribute(attr,next);
+      }
+    });
+    if(element.matches("input:not([type='number']),textarea")&&element.value&&document.activeElement!==element){
+      const next=translateUiText(element.value);if(next!==element.value)element.value=next;
+    }
+  }
+  function translateUiTree(root=document.body){
+    if(!root)return;
+    if(root.nodeType===Node.TEXT_NODE)translateUiNode(root);
+    else if(root.nodeType===Node.ELEMENT_NODE){
+      translateUiElement(root);
+      const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
+      while((node=walker.nextNode()))translateUiNode(node);
+      root.querySelectorAll?.("*").forEach(translateUiElement);
+    }
+  }
+  window.SIYBTranslateText=translateUiText;
+
   function applyLanguage() {
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
@@ -115,9 +165,11 @@
     document.querySelectorAll("[data-i18n]").forEach((node) => {
       node.textContent = t(node.dataset.i18n);
     });
+    translateUiTree(document.body);
     refreshLocaleDigits(document.body);
     const toggle = $("languageToggle");
-    if (toggle) toggle.textContent = language === "ar" ? "EN" : "ع";
+    if (toggle) toggle.textContent = language === "ar" ? "EN" : "عربي";
+    document.title = language === "ar" ? "أدوات ورش SIYB الرقمية" : "SIYB Digital Workshop Tools";
   }
 
   function setActiveModeButton(mode) {
@@ -178,7 +230,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.15";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.16";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -211,6 +263,7 @@
       if (!response.ok) throw new Error("تعذر تحميل ملف HTML: " + response.status + " — " + htmlUrl);
 
       host.innerHTML = await response.text();
+      translateUiTree(host);
       await ensureCostingScript();
       window.initBusinessCostingStudio();
 
@@ -220,6 +273,8 @@
         select.value = targetExample;
         select.dispatchEvent(new Event("change", { bubbles: true }));
       }
+      translateUiTree(host);
+      refreshLocaleDigits(host);
       setGlobalExportActionsVisible(true);
     } catch (error) {
       setGlobalExportActionsVisible(false);
