@@ -1,19 +1,61 @@
-<div id="costingModuleRoot">
-<header><div class="head"><div><div class="eyebrow">SIYB COSTING METHODOLOGY · BUSINESS MANAGEMENT TOOLS</div><h1>Business Costing Studio</h1><p class="sub">استوديو احتساب تكاليف المنتجات — احسب تكلفة الوحدة ووزّع نفقات التصنيع غير المباشرة والنفقات العامة وفق منهجية الكتيب.</p></div><div class="version">Prototype 1.5 · SIYB Costing Module</div></div></header>
-<main>
-<div class="toolbar"><div class="toolbar-group"><span class="chip">حاسبة التكاليف</span>
-<label for="exampleSelect" style="font-size:12px;font-weight:750;color:#536984">اختر مثالاً تدريبياً:</label>
-<select id="exampleSelect" style="border:1px solid #dce3ed;border-radius:10px;padding:9px 12px;background:#fff;color:#1c2940;max-width:270px">
+<div id="costingModuleRoot" class="costing-app">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="costing-sidebar" id="costingSidebar" aria-label="التنقل بين الوحدات">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-mark">S</span>
+      <span class="sidebar-brand-copy"><strong>SIYB Tools</strong><small>Digital Workshop</small></span>
+      <button type="button" class="sidebar-collapse" id="sidebarCollapse" aria-label="طي الشريط الجانبي" title="طي الشريط الجانبي">‹</button>
+    </div>
+    <div class="sidebar-caption">مساحة العمل</div>
+    <nav class="sidebar-nav">
+      <button type="button" class="sidebar-nav-item active" id="costingNavItem" aria-current="page">
+        <span class="nav-symbol">▤</span>
+        <span class="nav-copy">احتساب تكاليف</span>
+        <span class="nav-active-mark"></span>
+      </button>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-footer">
+      <span class="sidebar-footer-mark">SIYB</span>
+      <span class="sidebar-footer-copy"><strong>أدوات إدارة الأعمال</strong><small>الوحدة 01</small></span>
+    </div>
+  </aside>
+
+  <div class="costing-main-shell">
+    <header class="costing-topbar">
+      <div class="topbar-leading">
+        <button type="button" class="hamburger-button" id="sidebarToggle" aria-label="فتح أو طي القائمة" title="القائمة">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-breadcrumb"><span>أدوات إدارة الأعمال</span><b>/</b><strong>احتساب تكاليف</strong></div>
+      </div>
+      <div class="topbar-trailing">
+        <span class="online-indicator"><i></i> أداة متاحة</span>
+        <button type="button" class="back-home-button" id="costingBackHome">العودة للرئيسية</button>
+      </div>
+    </header>
+
+    <section class="module-heading">
+      <div>
+        <div class="module-kicker">SIYB · BUSINESS MANAGEMENT</div>
+        <h1>احتساب تكاليف</h1>
+        <p>احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.</p>
+      </div>
+      <div class="module-heading-badge"><span>01</span><small>الوحدة الأولى</small></div>
+    </section>
+<main class="costing-content">
+<div class="toolbar"><div class="toolbar-group"><span class="chip">بيانات العمل</span>
+<label for="exampleSelect" class="example-select-label">الحالة / المثال التدريبي</label>
+<select id="exampleSelect" class="example-select">
 <option value="custom">بيانات جديدة / إدخال يدوي</option>
 <option value="ledger">مثال الشرائح: سجل الحسابات الأساسية والمصروفات العامة</option>
 <option value="depreciation">مثال الشرائح: حساب تكاليف الإهلاك والاندثار</option>
 <option value="overheadExercise">مثال الفول المدمس والمنتجات الأخرى – تحميل التكاليف غير المباشرة</option>
 <option value="textile">شركة نادية للنسيج – منتجان (ILO)</option>
-<option value="previous">المثال التجريبي للنسخة السابقة V1.0</option>
 <option value="salon">صالون الحلاقة والتجميل – 3 خدمات</option>
 <option value="chair">شركة كراسي علي بابا – منتج واحد</option>
 <option value="retail">مكتبة آسفي – تجارة تقسيط</option>
-</select></div><div class="toolbar-group"><button class="btn" onclick="loadExample()">استعادة مثال الكتيب</button><button class="btn" onclick="window.print()">طباعة / PDF</button><button class="btn" onclick="exportCSV()">تصدير CSV</button><button class="btn primary" onclick="exportXLSX()">تصدير Excel</button></div></div>
+</select></div><div class="toolbar-group"><button class="btn" onclick="loadExample()">استعادة مثال الكتيب</button><button class="btn" onclick="window.print()">طباعة / PDF</button><button class="btn primary" onclick="exportXLSX()">تصدير Excel</button></div></div>
 <div id="exampleNotice" class="callout" style="margin:0 0 15px;display:none"></div>
 <section id="slideExamples" style="display:none">
  <div class="card" id="ledgerPanel" style="display:none">
@@ -115,7 +157,8 @@
 <div class="note">النسخة الحالية مخصصة للتصنيع متعدد المنتجات. ستضاف لاحقاً وحدات مستقلة لتجارة الجملة والتجزئة والخدمات.</div>
 </aside>
 </div>
-<div class="footer">Business Costing Studio · مبني على أمثلة كتيب ILO: حسّن تسيير مقاولتك – احتساب التكاليف (2015) · Prototype 1.1</div>
+<div class="module-footnote">مبني على أمثلة كتيب منظمة العمل الدولية «حسّن تسيير مقاولتك – احتساب التكاليف» (2015).</div>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
 </div>
