@@ -195,3 +195,31 @@ html[dir="ltr"] .app-main{margin-right:0;margin-left:var(--sidebar-width);margin
 @media(max-width:620px){
  .app-top-actions{position:static;top:auto;left:auto;right:auto;inset:auto;display:flex;align-items:center;flex:0 0 auto;gap:5px}
 }
+
+/* Global export actions live in the persistent application top bar. */
+.topbar-export-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.topbar-tool-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #dce7ec;border-radius:9px;background:#fff;color:#315a6f;font:700 10px Cairo,Arial,sans-serif;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.topbar-tool-action:hover{background:#f3f8fa;border-color:#c8dce4;transform:translateY(-1px)}
+.topbar-tool-action.excel-action{border-color:#b9e2d7;background:#edf8f4;color:#18765f}
+.topbar-tool-action.excel-action:hover{background:#e3f3ed;border-color:#9dd6c7}
+.topbar-action-glyph{display:grid;place-items:center;min-width:29px;height:24px;padding:0 4px;border-radius:6px;background:#e9f1f5;color:#285b72;font:800 8px Inter,Arial,sans-serif;letter-spacing:.02em}
+.topbar-tool-action.excel-action .topbar-action-glyph{background:#d8eee5;color:#18765f}
+.topbar-action-label{font-size:10px}
+.app-top-actions{gap:9px}
+@media(max-width:1050px){
+ .topbar-tool-action{min-height:34px;padding:6px 8px;gap:5px}
+ .topbar-action-label{font-size:9px}
+ .topbar-export-actions{gap:5px}
+}
+@media(max-width:900px){
+ .topbar-export-actions{gap:5px}
+ .topbar-tool-action{padding:5px 7px;min-height:32px}
+ .topbar-action-glyph{min-width:25px;height:22px}
+}
+@media(max-width:620px){
+ .topbar-export-actions{gap:4px}
+ .topbar-tool-action{width:34px;min-width:34px;height:33px;min-height:33px;padding:3px;border-radius:8px}
+ .topbar-action-label{display:none}
+ .topbar-action-glyph{min-width:25px;height:21px;font-size:7px}
+ .app-top-actions{gap:4px}
+}
