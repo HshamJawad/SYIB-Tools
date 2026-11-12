@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123d56">
+  <meta name="description" content="SIYB Digital Workshop Tools — offline-first workshop application">
+  <title>SIYB Digital Workshop Tools</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/business-costing.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="SIYB Digital Workshop Tools home">
+      <span class="brand-mark">S</span>
+      <span><strong>SIYB</strong><small>Digital Workshop Tools</small></span>
+    </a>
+    <div class="top-actions">
+      <span id="connectionStatus" class="status"><i></i><span data-i18n="offlineReady">جاهز للعمل دون إنترنت</span></span>
+      <button id="languageToggle" class="icon-button" type="button" aria-label="Switch language">EN</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow" data-i18n="eyebrow">أدوات رقمية لتيسير ورش SIYB</span>
+        <h1 data-i18n="headline">من التدريب إلى التطبيق العملي</h1>
+        <p data-i18n="intro">أدوات بسيطة تساعد الميسر والمتدرب على تطبيق مفاهيم إدارة الأعمال الصغيرة، حتى دون اتصال بالإنترنت.</p>
+        <div class="hero-meta">
+          <span class="meta-pill"><span class="dot"></span><span data-i18n="offlineFirst">مصمم للعمل دون إنترنت</span></span>
+          <span class="meta-pill" data-i18n="bilingual">العربية · English</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-circle circle-one"></div><div class="art-circle circle-two"></div>
+        <div class="art-card"><span>SIYB</span><b>Learn</b><b>Apply</b><b>Improve</b></div>
+      </div>
+    </section>
+
+    <section class="mode-section">
+      <div class="section-heading">
+        <div><span class="eyebrow" data-i18n="startHere">ابدأ من هنا</span><h2 data-i18n="chooseMode">اختر طريقة الاستخدام</h2></div>
+        <p data-i18n="modeHint">يمكنك التبديل بين الوضعين في أي وقت.</p>
+      </div>
+      <div class="mode-grid">
+        <button class="mode-card business-card" data-mode="business" type="button">
+          <span class="mode-icon">▦</span><span class="mode-title" data-i18n="businessMode">وضع إدارة الأعمال</span>
+          <span class="mode-description" data-i18n="businessDesc">استخدم الأدوات لحساب تكاليف مشروعك واتخاذ قرارات عملية.</span>
+          <span class="mode-link" data-i18n="openTools">استعراض الأدوات <b>←</b></span>
+        </button>
+        <button class="mode-card training-card" data-mode="training" type="button">
+          <span class="mode-icon">✎</span><span class="mode-title" data-i18n="trainingMode">وضع التدريب</span>
+          <span class="mode-description" data-i18n="trainingDesc">نفّذ التمارين، أدخل إجاباتك، وتحقق من فهمك للخطوات.</span>
+          <span class="mode-link" data-i18n="openExercises">استعراض التمارين <b>←</b></span>
+        </button>
+      </div>
+    </section>
+
+    <section id="workspace" class="workspace" hidden>
+      <div class="workspace-head">
+        <div><span class="eyebrow" id="workspaceEyebrow">SIYB</span><h2 id="workspaceTitle"></h2></div>
+        <button id="backHome" class="text-button" type="button" data-i18n="backHome">العودة للرئيسية</button>
+      </div>
+      <div id="workspaceContent"></div>
+    </section>
+
+    <section class="module-section">
+      <div class="section-heading">
+        <div><span class="eyebrow" data-i18n="firstModule">الوحدة الأولى</span><h2 data-i18n="modulesTitle">أدوات SIYB</h2></div>
+        <span class="coming-soon" data-i18n="expandable">قابلة للتوسع تدريجياً</span>
+      </div>
+      <article class="module-card">
+        <div class="module-symbol">₳</div>
+        <div class="module-info"><span class="module-status" data-i18n="available">الوحدة الحالية</span><h3>Business Costing Studio</h3><p data-i18n="costingDesc">احتساب تكاليف المنتجات والخدمات، المصروفات العامة، والإهلاك.</p></div>
+        <span class="module-arrow">↙</span>
+      </article>
+      <p class="future-note" data-i18n="futureModules">ستضاف وحدات أخرى بعد مراجعة مواد SIYB وتحديد الأنشطة المناسبة للتحويل الرقمي.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>SIYB Digital Workshop Tools</span><span>Prototype 0.1.2 · Offline-first PWA</span>
+  </footer>
+  <script src="./vendor/jspdf/jspdf.umd.min.js"></script>
+  <script src="./vendor/exceljs/exceljs.min.js"></script>
+  <script src="./src/locales/translations.js"></script>
+  <script src="./src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<div id="costingModuleRoot">
+<header><div class="head"><div><div class="eyebrow">SIYB COSTING METHODOLOGY · BUSINESS MANAGEMENT TOOLS</div><h1>Business Costing Studio</h1><p class="sub">استوديو احتساب تكاليف المنتجات — احسب تكلفة الوحدة ووزّع نفقات التصنيع غير المباشرة والنفقات العامة وفق منهجية الكتيب.</p></div><div class="version">Prototype 1.5 · SIYB Costing Module</div></div></header>
+<main>
+<div class="toolbar"><div class="toolbar-group"><span class="chip">حاسبة التكاليف</span>
+<label for="exampleSelect" style="font-size:12px;font-weight:750;color:#536984">اختر مثالاً تدريبياً:</label>
+<select id="exampleSelect" style="border:1px solid #dce3ed;border-radius:10px;padding:9px 12px;background:#fff;color:#1c2940;max-width:270px">
+<option value="custom">بيانات جديدة / إدخال يدوي</option>
+<option value="ledger">مثال الشرائح: سجل الحسابات الأساسية والمصروفات العامة</option>
+<option value="depreciation">مثال الشرائح: حساب تكاليف الإهلاك والاندثار</option>
+<option value="overheadExercise">مثال الفول المدمس والمنتجات الأخرى – تحميل التكاليف غير المباشرة</option>
+<option value="textile">شركة نادية للنسيج – منتجان (ILO)</option>
+<option value="previous">المثال التجريبي للنسخة السابقة V1.0</option>
+<option value="salon">صالون الحلاقة والتجميل – 3 خدمات</option>
+<option value="chair">شركة كراسي علي بابا – منتج واحد</option>
+<option value="retail">مكتبة آسفي – تجارة تقسيط</option>
+</select></div><div class="toolbar-group"><button class="btn" onclick="loadExample()">استعادة مثال الكتيب</button><button class="btn" onclick="window.print()">طباعة / PDF</button><button class="btn" onclick="exportCSV()">تصدير CSV</button><button class="btn primary" onclick="exportXLSX()">تصدير Excel</button></div></div>
+<div id="exampleNotice" class="callout" style="margin:0 0 15px;display:none"></div>
+<section id="slideExamples" style="display:none">
+ <div class="card" id="ledgerPanel" style="display:none">
+  <div class="cardhead"><div><h2>مثال الشرائح | سجل الحسابات الأساسية</h2><p>تسجيل حركة الصندوق والبنك واستخراج المصروفات العامة من سجل العمليات.</p></div><span class="tag">SLIDE EXAMPLE · 52</span></div>
+  <div class="body">
+   <div class="fields">
+    <div class="field"><label>الشهر / السنة</label><input id="ledgerPeriod" value="تشرين الأول / أكتوبر 2017"></div>
+    <div class="field"><label>إجمالي المصروفات العامة كما يظهر في الشريحة</label><input id="ledgerPrintedTotal" type="number" value="2000" min="0" step=".01"></div>
+   </div>
+   <div class="tablewrap"><table class="resulttable"><thead><tr><th>التاريخ</th><th>التفاصيل</th><th>داخل الصندوق</th><th>خارج الصندوق</th><th>المصروفات العامة</th></tr></thead><tbody id="ledgerRows"></tbody></table></div>
+   <div class="kpis" style="margin-top:14px">
+    <div class="kpi"><small>المصروفات الظاهرة مفصلة</small><strong id="ledgerVisible">1,030</strong></div>
+    <div class="kpi"><small>الإجمالي المطبوع في الشريحة</small><strong id="ledgerTotal">2,000</strong></div>
+    <div class="kpi"><small>الفرق غير المفسر في الصورة</small><strong id="ledgerGap">970</strong></div>
+   </div>
+   <div class="callout" id="ledgerNote">تنبيه تدقيقي: مجموع البنود الظاهرة في صورة الشريحة هو 1,030، بينما يظهر في خانة الإجمالي 2,000. لا يمكن مطابقة الفرق من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.</div>
+   <p class="hint">يمكن تعديل المبالغ في الجدول. يتم تحديث مجموع المصروفات الظاهرة والفرق تلقائياً. معاملات المبيعات والتحويل بين الصندوق والبنك ليست مصروفات عامة.</p>
+  </div>
+ </div>
+ <div class="card" id="deprPanel" style="display:none">
+  <div class="cardhead"><div><h2>مثال الشرائح | حساب تكاليف الإهلاك أو الاندثار</h2><p>حساب الإهلاك السنوي والمتراكم والقيمة الدفترية في 31/12/2017.</p></div><span class="tag">SLIDE EXAMPLE · 53</span></div>
+  <div class="body">
+   <div class="callout">طريقة القسط الثابت وفق أرقام الشريحة: الإهلاك السنوي = قيمة الشراء ÷ العمر التشغيلي بالسنوات. الإهلاك المتراكم = الإهلاك السنوي × أشهر الاستخدام ÷ 12. القيمة الدفترية = قيمة الشراء − الإهلاك المتراكم.</div>
+   <div class="tablewrap"><table class="resulttable"><thead><tr><th>اسم العنصر</th><th>تاريخ الشراء</th><th>قيمة الشراء</th><th>العمر التشغيلي (سنة)</th><th>أشهر الاستخدام</th><th>الإهلاك السنوي</th><th>الإهلاك المتراكم</th><th>القيمة الدفترية</th></tr></thead><tbody id="deprRows"></tbody><tfoot><tr><th colspan="2">المجموع</th><th id="dPurchase">4,800</th><th>—</th><th>—</th><th id="dAnnual">630</th><th id="dAccum">1,707.5</th><th id="dBook">3,092.5</th></tr></tfoot></table></div>
+   <div class="kpis" style="margin-top:14px">
+    <div class="kpi"><small>إجمالي قيمة الأصول</small><strong id="dPurchaseK">4,800</strong></div>
+    <div class="kpi"><small>إجمالي الإهلاك السنوي</small><strong id="dAnnualK">630</strong></div>
+    <div class="kpi"><small>صافي القيمة الدفترية</small><strong id="dBookK">3,092.5</strong></div>
+   </div>
+   <p class="hint">يمكن تعديل تاريخ الشراء وقيمة الأصل والعمر التشغيلي وأشهر الاستخدام. الأرقام الافتراضية مطابقة لما يظهر في الشريحة المرفقة، مع تقريب النتائج إلى منزلة عشرية واحدة.</p>
+  </div>
+ </div>
+ <div class="card" id="overheadPanel" style="display:none">
+  <div class="cardhead"><div><h2>مثال الشرائح | تحميل التكاليف غير المباشرة على المنتجات</h2><p>احتساب نسبة التحميل ثم حساب تكلفة الوحدة لأربعة منتجات.</p></div><span class="tag">SLIDES 59–61</span></div>
+  <div class="body">
+   <div class="fields">
+    <div class="field"><label>التكاليف غير المباشرة الشهرية</label><input id="ohMonthly" type="number" min="0" step=".01" value="2053"></div>
+    <div class="field"><label>تكاليف المواد المباشرة الشهرية</label><input id="dmMonthly" type="number" min="0" step=".01" value="10500"></div>
+    <div class="field"><label>نسبة تحميل التكاليف غير المباشرة</label><input id="ohRate" value="19.55%" disabled></div>
+   </div>
+   <div class="callout">معادلة الشريحة: نسبة التحميل = (التكاليف غير المباشرة الشهرية ÷ تكاليف المواد المباشرة الشهرية) × 100. ثم: التكلفة غير المباشرة للمنتج = تكلفة المواد المباشرة للوحدة × نسبة التحميل.</div>
+   <div class="tablewrap" style="margin-top:14px"><table class="resulttable"><thead><tr><th>المنتج</th><th>تكلفة المواد المباشرة للوحدة (أ)</th><th>التكلفة غير المباشرة للوحدة (ب)</th><th>التكلفة الإجمالية للوحدة (أ + ب)</th></tr></thead><tbody id="ohProducts"></tbody></table></div>
+   <div class="kpis" style="margin-top:14px">
+    <div class="kpi"><small>نسبة التحميل المحسوبة</small><strong id="ohRateResult">19.55%</strong></div>
+    <div class="kpi"><small>التكلفة غير المباشرة لفول مدمس</small><strong id="ohFirstIndirect">0.15</strong></div>
+    <div class="kpi"><small>التكلفة الإجمالية لفول مدمس</small><strong id="ohFirstTotal">0.90</strong></div>
+   </div>
+   <p class="hint">الأرقام الأساسية من الشرائح: 2,053 ÷ 10,500 = 19.55% تقريباً. يعرض التطبيق النتائج إلى منزلتين عشريتين، بينما قد تظهر فروق طفيفة عند التقريب مقارنة بالحساب اليدوي في الشريحة.</p>
+  </div>
+ </div>
+</section>
+<div id="mainCalculator">
+<div class="layout">
+<section>
+<div class="card"><div class="cardhead"><div><h2>01 / بيانات المقاولة والفترة</h2><p>أدخل بيانات النشاط للفترة المحاسبية نفسها (مثلاً شهر واحد)</p></div><span class="tag">BUSINESS PROFILE</span></div><div class="body"><div class="fields">
+<div class="field"><label>اسم المقاولة</label><input id="business" value="شركة نادية للنسيج"></div>
+<div class="field"><label>الفترة المحاسبية</label><select id="period"><option>شهري</option><option>أسبوعي</option><option>سنوي</option></select></div>
+<div class="field"><label>العملة</label><select id="currency"><option value="MAD">MAD — درهم مغربي (مثال الكتيب)</option><option value="IQD">IQD — دينار عراقي</option><option value="USD">USD — دولار أمريكي</option><option value="EUR">EUR — يورو</option></select></div>
+</div></div></div>
+<div class="card"><div class="cardhead"><div><h2>02 / المنتجات والإنتاج خلال الفترة</h2><p>أدخل كل منتج على حدة. سجّل مجموع المواد والأجور المباشرة وعدد الوحدات المنتجة خلال الفترة.</p></div><span class="tag">PRODUCT INPUTS</span></div><div class="body">
+<div class="tablewrap"><table class="data"><thead><tr><th>اسم المنتج</th><th>عدد الوحدات المنتجة</th><th>المواد المباشرة الإجمالية</th><th>اليد العاملة المباشرة الإجمالية</th><th>سعر البيع للوحدة (اختياري)</th><th></th></tr></thead><tbody id="products"></tbody></table></div>
+<div class="footrow"><button class="btn" onclick="addProduct()">＋ إضافة منتج</button><span class="sum">إجمالي التكاليف المباشرة الشهرية: <b id="directTotal">—</b></span></div>
+<div class="hint">تنبيه: أدخل إجمالي تكاليف كل منتج للفترة المحددة، وليس تكلفة الوحدة. سعر البيع اختياري ويستخدم فقط لتحليل الربحية الإضافي.</div>
+</div></div>
+<div class="card"><div class="cardhead"><div><h2>03 / النفقات غير المباشرة للمقاولة</h2><p>تُوزّع النفقات على المنتجات باستخدام نسبتها إلى مجموع التكاليف المباشرة للفترة.</p></div><span class="tag">INDIRECT COSTS</span></div><div class="body"><div class="fields">
+<div class="field"><label>نفقات التصنيع غير المباشرة للفترة</label><input id="manufacturingOH" type="number" min="0" step=".01" value="8150"><div class="hint">مثل الطاقة والصيانة والإشراف المرتبط بالتصنيع وفق تصنيف المقاولة.</div></div>
+<div class="field"><label>النفقات العامة للفترة</label><input id="generalOH" type="number" min="0" step=".01" value="9470"><div class="hint">مثل الإدارة والإيجار والمصاريف العامة.</div></div>
+<div class="field"><label>أساس التوزيع</label><input value="مجموع المواد + اليد العاملة المباشرة" disabled></div>
+</div>
+<div class="callout"><b>منهجية الكتيب:</b> نسبة نفقات التصنيع غير المباشرة = مجموع نفقات التصنيع غير المباشرة للفترة ÷ مجموع التكاليف المباشرة للمقاولة للفترة. وتُطبّق النسبة على التكلفة المباشرة للوحدة. وتُحتسب النفقات العامة بالطريقة نفسها وبنسبة مستقلة.</div>
+</div></div>
+<div class="card"><div class="cardhead"><div><h2>04 / نتيجة احتساب تكلفة كل منتج</h2><p>تفصيل التكلفة الكاملة للوحدة بعد تحميلها حصتها من النفقات غير المباشرة والعامة.</p></div><span class="tag">UNIT COST RESULTS</span></div><div class="body"><div class="tablewrap"><table class="resulttable"><thead><tr><th>المنتج</th><th>مواد / وحدة</th><th>عمل / وحدة</th><th>تصنيع غير مباشر</th><th>نفقات عامة</th><th>التكلفة الكاملة</th><th>سعر البيع</th><th>ربح / وحدة</th></tr></thead><tbody id="results"></tbody></table></div><div class="hint">الربح وسعر البيع يظهران عند إدخال سعر بيع للوحدة. تحليل السعر والربحية إضافة تحليلية للأداة، وليس جزءاً من خطوات توزيع التكاليف الخمس حرفياً.</div></div></div>
+</section>
+<aside>
+<div class="card"><div class="cardhead"><div><h2>ملخص المقاولة</h2><p>المؤشرات الأساسية للفترة</p></div><span class="tag">LIVE SUMMARY</span></div><div class="body">
+<div class="metrics">
+<div class="metric blue"><div class="mlabel">إجمالي التكاليف المباشرة</div><div class="mvalue" id="mDirect">—</div></div>
+<div class="metric teal"><div class="mlabel">إجمالي النفقات غير المباشرة</div><div class="mvalue" id="mIndirect">—</div></div>
+<div class="metric orange"><div class="mlabel">إجمالي تكلفة المنتجات</div><div class="mvalue" id="mTotal">—</div></div>
+<div class="metric purple"><div class="mlabel">عدد الوحدات المنتجة</div><div class="mvalue" id="mUnits">—</div></div>
+</div><div class="divider"></div>
+<div class="rows">
+<div class="rowline"><span>نسبة نفقات التصنيع غير المباشرة</span><strong id="mMRate">—</strong></div>
+<div class="rowline"><span>نسبة النفقات العامة</span><strong id="mGRate">—</strong></div>
+<div class="rowline"><span>متوسط تكلفة الوحدة (مرجّح)</span><strong id="mAvg">—</strong></div>
+</div>
+<div class="divider"></div><div class="mlabel">توزيع إجمالي التكلفة</div><div class="rows">
+<div class="rowline"><span>التكاليف المباشرة</span><strong id="pDirect">—</strong></div><div class="bar"><span id="bDirect"></span></div>
+<div class="rowline"><span>نفقات التصنيع غير المباشرة</span><strong id="pMfg">—</strong></div><div class="bar"><span id="bMfg"></span></div>
+<div class="rowline"><span>النفقات العامة</span><strong id="pGeneral">—</strong></div><div class="bar"><span id="bGeneral"></span></div>
+</div></div></div>
+<div class="card"><div class="cardhead"><div><h2>منهجية الحساب</h2><p>الخطوات الخمس المعتمدة</p></div></div><div class="body"><div class="note">
+<b>1.</b> تكلفة المواد المباشرة للوحدة = إجمالي مواد المنتج ÷ عدد وحداته المنتجة.<br>
+<b>2.</b> تكلفة اليد العاملة المباشرة للوحدة = إجمالي أجور العمل المباشر للمنتج ÷ عدد وحداته.<br>
+<b>3.</b> نفقات التصنيع غير المباشرة للوحدة = التكلفة المباشرة للوحدة × نسبة نفقات التصنيع غير المباشرة.<br>
+<b>4.</b> النفقات العامة للوحدة = التكلفة المباشرة للوحدة × نسبة النفقات العامة.<br>
+<b>5.</b> التكلفة الكاملة للوحدة = مجموع الخطوات السابقة.
+</div><p class="hint" style="line-height:1.8">تعتمد هذه النسخة أساس التوزيع الوارد في مثال الكتيب: مجموع التكاليف المباشرة الشهرية للمنشأة. إذا كانت طبيعة نشاطك تتطلب أساس توزيع آخر، فينبغي تطويره كخيار مستقل لا تغييره بصمت.</p></div></div>
+<div class="note">النسخة الحالية مخصصة للتصنيع متعدد المنتجات. ستضاف لاحقاً وحدات مستقلة لتجارة الجملة والتجزئة والخدمات.</div>
+</aside>
+</div>
+<div class="footer">Business Costing Studio · مبني على أمثلة كتيب ILO: حسّن تسيير مقاولتك – احتساب التكاليف (2015) · Prototype 1.1</div>
+</main>
+</div>

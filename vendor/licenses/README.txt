@@ -1,0 +1,1 @@
+MIT-Guyon-Roche.txt was supplied separately by the project owner. No matching library file was included in this delivery, so this notice is retained for reference only and is not associated with an installed vendor library.

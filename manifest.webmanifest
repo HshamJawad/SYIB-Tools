@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "SIYB Digital Workshop Tools",
+  "short_name": "SIYB Tools",
+  "description": "Offline-first bilingual tools for SIYB workshops",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f8",
+  "theme_color": "#123d56",
+  "icons": [
+    {
+      "src": "./assets/icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
