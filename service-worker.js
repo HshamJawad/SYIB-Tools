@@ -1,9 +1,10 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.1.7";
+const CACHE_NAME = "siyb-workshop-shell-v0.2.0";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./styles/main.css",
+  "./styles/app-shell.css",
   "./styles/business-costing.css",
   "./src/locales/translations.js",
   "./src/app.js",
