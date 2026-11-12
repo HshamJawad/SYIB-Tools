@@ -35,6 +35,9 @@
 
     <div class="app-top-actions">
       <div id="globalExportActions" class="topbar-export-actions" hidden>
+        <button type="button" id="globalPDFButton" class="topbar-tool-action pdf-action" title="تصدير بيانات وجداول الأداة إلى PDF" aria-label="تصدير PDF">
+          <span class="topbar-action-glyph">PDF</span><span class="topbar-action-label">تصدير PDF</span>
+        </button>
         <button type="button" id="globalExcelButton" class="topbar-tool-action excel-action" title="تصدير بيانات وجداول التبويب الحالي إلى Excel" aria-label="تصدير البيانات">
           <span class="topbar-action-glyph">XLSX</span><span class="topbar-action-label">تصدير البيانات</span>
         </button>
@@ -118,7 +121,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.3.3 · © 2026 هشام جواد كاظم — مطور الأداة</span>
+        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.3.4 · © 2026 هشام جواد كاظم — مطور الأداة</span>
       </footer>
     </main>
   </div>
@@ -130,6 +133,7 @@
 </div>
 
 <script src="./vendor/jspdf/jspdf.umd.min.js"></script>
+<script src="./src/modules/arabic-pdf.js"></script>
 <script src="./vendor/exceljs/exceljs.min.js"></script>
 <script src="./src/locales/translations.js"></script>
 <script src="./src/app.js"></script>

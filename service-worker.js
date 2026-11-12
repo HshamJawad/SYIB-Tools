@@ -1,4 +1,4 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.3.3";
+const CACHE_NAME = "siyb-workshop-shell-v0.3.4";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -10,6 +10,8 @@ const APP_SHELL = [
   "./src/app.js",
   "./src/modules/business-costing.html",
   "./src/modules/business-costing.js",
+  "./src/modules/arabic-pdf.js",
+  "./font/Cairo-Regular.ttf",
   "./assets/icons/app-icon.svg",
   "./font/Cairo.woff2",
   "./vendor/jspdf/jspdf.umd.min.js",
@@ -35,7 +37,7 @@ self.addEventListener("activate", (event) => {
   );
   self.clients.claim();
   self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.3.3" }));
+    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.3.4" }));
   });
 });
 
@@ -73,7 +75,7 @@ self.addEventListener("fetch", (event) => {
   })());
 });
 
-// Release note: v0.3.3 update flow is ready for the Pages deployment.
+// Release note: v0.3.4 update flow is ready for the Pages deployment.
 // The update is activated only after an explicit user action in the app banner.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();

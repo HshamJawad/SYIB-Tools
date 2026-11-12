@@ -216,7 +216,15 @@
     drawerMedia.addListener(handleResponsiveModeChange);
   }
 
-$("globalExcelButton").addEventListener("click", () => {
+$("globalPDFButton").addEventListener("click", () => {
+    if (typeof window.exportPDF === "function") {
+      window.exportPDF();
+    } else {
+      console.warn("PDF export is not available until a costing module is loaded.");
+    }
+  });
+
+  $("globalExcelButton").addEventListener("click", () => {
     if (typeof window.exportXLSX === "function") {
       window.exportXLSX();
     } else {
