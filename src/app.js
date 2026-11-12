@@ -61,6 +61,7 @@
     if (root.nodeType === Node.ELEMENT_NODE && root.matches("input,textarea")) localizeNumericControl(root);
     root.querySelectorAll?.("input,textarea").forEach(localizeNumericControl);
   }
+  window.SIYBRefreshLocaleDigits = refreshLocaleDigits;
 
   document.addEventListener("focusin", (event) => {
     const control = event.target;
@@ -177,7 +178,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.14";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.15";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
