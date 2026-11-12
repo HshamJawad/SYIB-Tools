@@ -1,6 +1,6 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.2.1 — Global application shell and mode navigation**
+**Prototype 0.2.2 — Global application shell and mode navigation**
 
 A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
