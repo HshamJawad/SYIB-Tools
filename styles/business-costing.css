@@ -132,3 +132,30 @@
 /* Specificity overrides for inherited legacy header/main rules */
 #costingModuleRoot header.costing-topbar{background:#fff;color:#203345;padding:0 clamp(16px,2.5vw,34px);border-radius:0}
 #costingModuleRoot main.costing-content{max-width:none;margin:0;padding:0 clamp(14px,2.5vw,34px) 28px}
+
+
+/* ===== 0.3.0: larger, clearer costing interface typography ===== */
+#costingModuleRoot .module-heading h1{font-size:clamp(24px,2.5vw,31px)!important}
+#costingModuleRoot .module-heading p{font-size:14px!important}
+#costingModuleRoot .cardhead h2{font-size:16px!important}
+#costingModuleRoot .cardhead p{font-size:12px!important}
+#costingModuleRoot .field label{font-size:14px!important}
+#costingModuleRoot .field input,#costingModuleRoot .field select{font-size:14px!important}
+#costingModuleRoot .hint{font-size:12px!important;line-height:1.7}
+#costingModuleRoot .callout{font-size:13px!important;line-height:1.8}
+#costingModuleRoot .data,#costingModuleRoot .resulttable{font-size:14px!important}
+#costingModuleRoot .data th,#costingModuleRoot .resulttable th{font-size:13px!important}
+#costingModuleRoot .data input,#costingModuleRoot .resulttable input{font-size:14px!important}
+#costingModuleRoot .btn{font-size:13px!important}
+#costingModuleRoot .chip,#costingModuleRoot .example-select-label{font-size:13px!important}
+#costingModuleRoot .example-select{font-size:13px!important}
+#costingModuleRoot .tag{font-size:11px!important}
+#costingModuleRoot .mlabel{font-size:12px!important}
+#costingModuleRoot .mvalue{font-size:23px!important}
+#costingModuleRoot .rowline{font-size:14px!important}
+#costingModuleRoot .note{font-size:13px!important}
+#costingModuleRoot .module-footnote{font-size:10px!important}
+@media(max-width:560px){
+ #costingModuleRoot .data,#costingModuleRoot .resulttable{font-size:13px!important}
+ #costingModuleRoot .mvalue{font-size:20px!important}
+}
