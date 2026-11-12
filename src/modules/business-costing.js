@@ -305,177 +305,119 @@ async function exportXLSX(){
 
 async function exportPDF(){
  const JsPDF=window.jspdf&&window.jspdf.jsPDF||window.jsPDF;
- if(!JsPDF){toast('مكتبة PDF غير متاحة');return;}
+ const arabic=window.SIYBArabicPDF;
+ if(!JsPDF||!arabic){toast('تعذر تحميل مكتبة PDF أو دعم العربية');return;}
+ let restore=()=>{};
  try{
-  // Let the browser's native text engine shape Arabic and resolve BiDi.
-  // jsPDF only embeds the finished high-resolution page images.
-  const fontFace=new FontFace('SIYBArabicPDF','url(./font/Cairo-Regular.ttf)');
-  await fontFace.load();
-  document.fonts.add(fontFace);
-  await document.fonts.ready;
-
-  const W=2480,H=1754,MM_W=297,MM_H=210;
-  const margin=82,tableW=W-margin*2,bottom=76;
-  const pages=[];
-  let canvas,ctx,y;
-  const hasArabic=value=>/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(String(value??''));
-  const pageFont=(size,weight)=>weight+' '+size+'px SIYBArabicPDF, Cairo, Arial, sans-serif';
-  const setText=(size,weight,value)=>{
-   ctx.font=pageFont(size,weight||'400');
-   ctx.direction=hasArabic(value)?'rtl':'ltr';
-   ctx.textAlign=hasArabic(value)?'right':'left';
-   ctx.textBaseline='alphabetic';
-   ctx.fillStyle='#263944';
+  const pdf=new JsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+  restore=suspendJsPdfArabicParser(pdf,JsPDF);
+  const font=await arabic.loadArabicFont(pdf);
+  if(!font)throw new Error('Arabic Cairo font unavailable');
+  pdf.setFont(font,'normal');pdf.setR2L(false);
+  const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight();
+  const margin=11,usable=W-2*margin;
+  let y=35;
+  const opts=align=>({align,isInputVisual:true,isOutputVisual:true,isInputRtl:false,isOutputRtl:false});
+  const prep=value=>arabic.arabicVisual(String(value??'—'));
+  const wrap=(value,width)=>pdf.splitTextToSize(arabic.shapeArabic(String(value??'—')),Math.max(3,width)).map(line=>arabic.bidiVisual(line));
+  const text=(value,x,baseline,size=8,align='right',color=[38,57,68])=>{
+   pdf.setFont(font,'normal');pdf.setFontSize(size);pdf.setTextColor(...color);
+   pdf.text(prep(value),x,baseline,opts(align));
   };
-  const wrapText=(value,maxWidth,size,weight)=>{
-   const text=String(value==null?'—':value);
-   setText(size,weight,text);
-   const words=text.split(/\s+/).filter(Boolean);
-   if(!words.length)return [''];
-   const lines=[];let line='';
-   const pushLongWord=word=>{
-    const segmenter=typeof Intl!=='undefined'&&Intl.Segmenter?new Intl.Segmenter('ar',{granularity:'grapheme'}):null;
-    const units=segmenter?[...segmenter.segment(word)].map(x=>x.segment):Array.from(word);
-    let part='';
-    for(const unit of units){
-     if(part&&ctx.measureText(part+unit).width>maxWidth){lines.push(part);part=unit;}
-     else part+=unit;
-    }
-    return part;
-   };
-   for(const word of words){
-    const candidate=line?line+' '+word:word;
-    if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
-    if(line){lines.push(line);line='';}
-    if(ctx.measureText(word).width>maxWidth)line=pushLongWord(word);
-    else line=word;
-   }
-   if(line)lines.push(line);
-   return lines.length?lines:[''];
+  const line=(value,x,baseline,size=7.5,align='right',color=[38,57,68])=>{
+   pdf.setFont(font,'normal');pdf.setFontSize(size);pdf.setTextColor(...color);
+   pdf.text(value,x,baseline,opts(align));
   };
-  const drawText=(value,x,baseline,size,weight,color,align)=>{
-   const text=String(value??'');
-   setText(size,weight||'400',text);
-   ctx.fillStyle=color||'#263944';
-   if(align){ctx.textAlign=align;ctx.direction=align==='right'?'rtl':'ltr';}
-   ctx.fillText(text,x,baseline);
+  const header=(continuation=false)=>{
+   pdf.setFillColor(18,61,86);pdf.rect(0,0,W,24,'F');
+   text('SIYB | تقرير البيانات والجداول',W-margin,10,14,'right',[255,255,255]);
+   text(continuation?'متابعة التقرير':'أداة ورشة العمل الرقمية',W-margin,18,8,'right',[228,240,246]);
+   text('تاريخ التصدير: '+new Date().toLocaleDateString('ar-IQ'),W-margin,30,8);
+   y=39;
   };
-  const makePage=continuation=>{
-   canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-   ctx=canvas.getContext('2d',{alpha:false});
-   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
-   ctx.fillStyle='#123d56';ctx.fillRect(0,0,W,205);
-   drawText('SIYB | تقرير البيانات والجداول',W-margin,82,37,'700','#ffffff','right');
-   drawText(continuation?'متابعة التقرير':'أداة ورشة العمل الرقمية',W-margin,145,23,'400','#dce9ef','right');
-   drawText('تاريخ التصدير: '+new Date().toLocaleDateString('ar-IQ'),W-margin,260,21,'400','#526774','right');
-   y=325;pages.push(canvas);
-  };
-  const nextPage=()=>makePage(true);
-  const addTable=(title,headers,rows,widths)=>{
-   if(y>H-260)nextPage();
-   drawText(title,W-margin,y,29,'700','#123d56','right');y+=18;
-   const sum=widths.reduce((a,b)=>a+b,0),scaled=widths.map(w=>w*tableW/sum);
-   const headerLines=headers.map((h,i)=>wrapText(h,scaled[i]-28,20,'700'));
-   const headerH=Math.max(76,...headerLines.map(lines=>lines.length*27+24));
+  const next=()=>{pdf.addPage('a4','landscape');header(true);};
+  const fmt=v=>typeof v==='number'?Number(v.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2}):v;
+  const table=(title,heads,rows,widths)=>{
+   if(y>H-42)next();
+   text(title,W-margin,y,11,'right',[18,61,86]);y+=5;
+   const sum=widths.reduce((a,b)=>a+b,0),ww=widths.map(w=>w*usable/sum);
+   const headerLines=heads.map((h,i)=>{pdf.setFontSize(7.2);return wrap(h,ww[i]-3.4);});
+   const headerHeight=Math.max(9,...headerLines.map(lines=>lines.length*3.7+3));
    const paintHeader=()=>{
     let x=W-margin;
-    headers.forEach((h,i)=>{
-     const w=scaled[i];x-=w;
-     ctx.fillStyle='#245b75';ctx.fillRect(x,y,w,headerH);
-     ctx.strokeStyle='#d2dee5';ctx.lineWidth=2;ctx.strokeRect(x,y,w,headerH);
-     headerLines[i].forEach((line,k)=>drawText(line,x+w-14,y+31+k*27,20,'700','#ffffff','right'));
-    });
-    y+=headerH;
+    heads.forEach((h,i)=>{
+     const w=ww[i];x-=w;pdf.setFillColor(36,91,117);pdf.setDrawColor(210,222,229);
+     pdf.rect(x,y,w,headerHeight,'FD');
+     headerLines[i].forEach((v,k)=>line(v,x+w-1.7,y+3.5+k*3.7,7.2,'right',[255,255,255]));
+    });y+=headerHeight;
    };
    paintHeader();
-   rows.forEach((row,ri)=>{
-    const wrapped=row.map((v,i)=>wrapText(v==null?'—':v,Math.max(30,scaled[i]-28),21,'400'));
-    const lineCount=Math.max(1,...wrapped.map(a=>a.length));
-    const rowH=Math.max(62,lineCount*29+25);
-    if(y+rowH>H-bottom){
-     nextPage();
-     drawText(title+' (متابعة)',W-margin,y,27,'700','#123d56','right');y+=18;
-     paintHeader();
-    }
+   rows.forEach((row,index)=>{
+    pdf.setFontSize(7.2);
+    const wrapped=row.map((v,i)=>wrap(v,ww[i]-3.4));
+    const height=Math.max(8,...wrapped.map(a=>a.length*3.7+3));
+    if(y+height>H-14){next();text(title+' (متابعة)',W-margin,y,10,'right',[18,61,86]);y+=5;paintHeader();}
     let x=W-margin;
     row.forEach((v,i)=>{
-     const w=scaled[i];x-=w;
-     ctx.fillStyle=ri%2===0?'#f3f8fa':'#ffffff';ctx.fillRect(x,y,w,rowH);
-     ctx.strokeStyle='#d8e2e7';ctx.lineWidth=2;ctx.strokeRect(x,y,w,rowH);
-     wrapped[i].forEach((line,k)=>{
-      const direction=hasArabic(v)?'right':'left';
-      const tx=direction==='right'?x+w-14:x+14;
-      drawText(line,tx,y+34+k*29,21,'400','#263944',direction);
-     });
+     const w=ww[i];x-=w;
+     const fill=index%2===0?248:255;
+     pdf.setFillColor(fill,index%2===0?251:255,index%2===0?252:255);
+     pdf.setDrawColor(218,227,232);pdf.rect(x,y,w,height,'FD');
+     wrapped[i].forEach((v,k)=>line(v,x+w-1.7,y+3.6+k*3.7,7.2));
     });
-    y+=rowH;
+    y+=height;
    });
-   y+=32;
+   y+=7;
   };
-  const summaryRows=pairs=>pairs.map(([k,v])=>[k,v]);
-  const fmt=v=>typeof v==='number'?Number(v.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2}):v;
-  makePage(false);
-
-  const direct=products.reduce((sum,p)=>sum+p.materials+p.labor,0);
+  header();
+  const direct=products.reduce((a,p)=>a+p.materials+p.labor,0);
   const mfg=val('manufacturingOH'),gen=val('generalOH');
   let mr=direct?mfg/direct:0,gr=direct?gen/direct:0;
   if(activeExample==='textile'){mr=Math.round(mr*100)/100;gr=Math.round(gr*100)/100;}
-  const costRows=products.map(p=>{
-   const valid=p.units>0,mat=valid?p.materials/p.units:0,lab=valid?p.labor/p.units:0,base=mat+lab;
-   const full=base*(1+mr+gr);
-   return [p.name,p.units,fmt(p.materials),fmt(p.labor),fmt(mat),fmt(lab),fmt(base*mr),fmt(base*gr),fmt(full),p.price||'—',p.price>0?fmt(p.price-full):'—'];
-  });
-  addTable('01 | احتساب التكاليف والمنتجات',
+  table('01 | احتساب التكاليف والمنتجات',
    ['المنتج','الوحدات','المواد المباشرة','العمل المباشر','مواد/وحدة','عمل/وحدة','تصنيع غير مباشر/وحدة','نفقات عامة/وحدة','التكلفة الكاملة/وحدة','سعر البيع','ربح/وحدة'],
-   costRows,[34,12,25,25,18,18,24,22,24,16,15]);
-  addTable('ملخص التكاليف',['البيان','القيمة'],summaryRows([
+   products.map(p=>{
+    const mat=p.units>0?p.materials/p.units:0,lab=p.units>0?p.labor/p.units:0,base=mat+lab,full=base*(1+mr+gr);
+    return [p.name,p.units,fmt(p.materials),fmt(p.labor),fmt(mat),fmt(lab),fmt(base*mr),fmt(base*gr),fmt(full),p.price||'—',p.price>0?fmt(p.price-full):'—'];
+   }),[34,12,25,25,18,18,24,22,24,16,15]);
+  table('ملخص التكاليف',['البيان','القيمة'],[
    ['المقاولة',$('business').value],['الفترة المحاسبية',$('period').value],['العملة',$('currency').value],
    ['إجمالي التكاليف المباشرة',fmt(direct)],['نفقات التصنيع غير المباشرة',fmt(mfg)],['النفقات العامة',fmt(gen)],
    ['نسبة نفقات التصنيع غير المباشرة',(mr*100).toFixed(2)+'%'],['نسبة النفقات العامة',(gr*100).toFixed(2)+'%'],
    ['إجمالي تكلفة الإنتاج',fmt(direct+mfg+gen)]
-  ]),[150,90]);
-
-  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
-  addTable('02 | سجل الحسابات والحركات',
-   ['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة'],
+  ],[150,90]);
+  const expenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
+  table('02 | سجل الحسابات والحركات',['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة'],
    ledgerData.map(r=>[r.date,r.detail,fmt(r.inside),fmt(r.outside),fmt(r.general)]),[28,100,48,48,48]);
-  addTable('مطابقة سجل الحسابات',['البيان','القيمة'],summaryRows([
-   ['الفترة',$('ledgerPeriod').value],['إجمالي المصروفات الظاهرة',fmt(visibleExpenses)],
-   ['الإجمالي المطبوع في الشريحة',fmt(printed)],['الفرق غير المفسر',fmt(printed-visibleExpenses)]
-  ]),[150,90]);
-
-  const deprRows=depreciationData.map(r=>{
-   const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
-   return [r.name,r.date,fmt(r.purchase),r.life,r.months,fmt(annual),fmt(acc),fmt(r.purchase-acc)];
-  });
-  addTable('03 | سجل الإهلاك والقيمة الدفترية',
+  table('مطابقة سجل الحسابات',['البيان','القيمة'],[
+   ['الفترة',$('ledgerPeriod').value],['إجمالي المصروفات الظاهرة',fmt(expenses)],
+   ['الإجمالي المطبوع في الشريحة',fmt(printed)],['الفرق غير المفسر',fmt(printed-expenses)]
+  ],[150,90]);
+  table('03 | سجل الإهلاك والقيمة الدفترية',
    ['العنصر','تاريخ الشراء','قيمة الشراء','العمر التشغيلي (سنة)','أشهر الاستخدام','الإهلاك السنوي','الإهلاك المتراكم','القيمة الدفترية'],
-   deprRows,[42,28,32,35,28,32,35,35]);
-
+   depreciationData.map(r=>{
+    const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
+    return [r.name,r.date,fmt(r.purchase),r.life,r.months,fmt(annual),fmt(acc),fmt(r.purchase-acc)];
+   }),[42,28,32,35,28,32,35,35]);
   const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
-  addTable('04 | تحميل التكاليف غير المباشرة',
+  table('04 | تحميل التكاليف غير المباشرة',
    ['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية'],
    overheadProducts.map(p=>[p.name,fmt(p.direct),fmt(p.direct*rate),fmt(p.direct*(1+rate))]),[65,70,70,68]);
-  addTable('ملخص تحميل التكاليف',['البيان','القيمة'],summaryRows([
+  table('ملخص تحميل التكاليف',['البيان','القيمة'],[
    ['النفقات غير المباشرة الشهرية',fmt(oh)],['إجمالي المواد المباشرة الشهرية',fmt(dm)],['نسبة التحميل',(rate*100).toFixed(2)+'%']
-  ]),[150,90]);
-
-  const pdf=new JsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
-  pages.forEach((page,index)=>{
-   if(index)pdf.addPage('a4','landscape');
-   const pctx=page.getContext('2d');
-   pctx.fillStyle='#7b8b94';pctx.font=pageFont(17,'400');pctx.direction='rtl';pctx.textAlign='right';
-   pctx.fillText('صفحة '+(index+1)+' من '+pages.length,W-margin,H-35);
-   pctx.direction='ltr';pctx.textAlign='left';
-   pctx.fillText('SIYB Digital Workshop Tools',margin,H-35);
-   pdf.addImage(page.toDataURL('image/jpeg',0.94),'JPEG',0,0,MM_W,MM_H,undefined,'FAST');
-  });
+  ],[150,90]);
+  const count=pdf.getNumberOfPages();
+  for(let i=1;i<=count;i++){
+   pdf.setPage(i);
+   text('صفحة '+i+' من '+count,W-margin,H-5,7,'right',[105,125,135]);
+   text('SIYB Digital Workshop Tools',margin,H-5,7,'left',[105,125,135]);
+  }
   pdf.save('SIYB-data-report-'+new Date().toISOString().slice(0,10)+'.pdf');
-  toast('تم تصدير التقرير إلى PDF مع دعم العرض العربي');
+  toast('تم تصدير تقرير PDF النصي');
  }catch(error){
-  console.error('SIYB PDF canvas export failed:',error);
-  toast('تعذر إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
- }
+  console.error('SIYB selectable PDF export failed:',error);
+  toast('تعذر تصدير PDF؛ يرجى مراجعة الخط أو المحاولة مجدداً');
+ }finally{restore();}
 }
 
 function suspendJsPdfArabicParser(pdf,JsPDFClass){
