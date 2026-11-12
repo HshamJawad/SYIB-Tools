@@ -11,7 +11,7 @@
   let language = "ar";
   try { language = localStorage.getItem("siyb-language") === "en" ? "en" : "ar"; } catch (_) {}
   let activeMode = null;
-  let costingScriptPromise = null;
+  let costingScriptPromise = null;\n  let waitingWorker = null;
 
   function t(key) {
     return (window.SIYB_TRANSLATIONS && window.SIYB_TRANSLATIONS[language] || {})[key] || key;
@@ -237,7 +237,50 @@
   setSidebarGroup(null);
   syncSidebarToggleState();
 
-  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+
+  function showUpdateBanner() {
+    const banner = $("updateBanner");
+    if (banner) banner.hidden = false;
+  }
+
+  function setupServiceWorkerUpdates(registration) {
+    if (!registration) return;
+    if (registration.waiting && navigator.serviceWorker.controller) {
+      waitingWorker = registration.waiting;
+      showUpdateBanner();
+    }
+    registration.addEventListener("updatefound", () => {
+      const installing = registration.installing;
+      if (!installing) return;
+      installing.addEventListener("statechange", () => {
+        if (installing.state === "installed" && navigator.serviceWorker.controller) {
+          waitingWorker = installing;
+          showUpdateBanner();
+        }
+      });
+    });
+  }
+
+  const updateButton = $("applyUpdateButton");
+  if (updateButton) updateButton.addEventListener("click", () => {
+    if (waitingWorker) waitingWorker.postMessage({ type: "SIYB_SKIP_WAITING" });
+  });
+  const dismissUpdateButton = $("dismissUpdateButton");
+  if (dismissUpdateButton) dismissUpdateButton.addEventListener("click", () => {
+    const banner = $("updateBanner");
+    if (banner) banner.hidden = true;
+  });
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (window.__siybReloadingForUpdate) return;
+      window.__siybReloadingForUpdate = true;
+      window.location.reload();
+    });
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "SIYB_APP_UPDATED") showUpdateBanner();
+    });
+  }
+\n  if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register(assetUrl("service-worker.js"), { scope: APP_BASE.pathname })
         .catch((error) => console.error("Service worker registration failed:", error));
