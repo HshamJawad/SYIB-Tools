@@ -1,4 +1,4 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.1.2";
+const CACHE_NAME = "siyb-workshop-shell-v0.1.3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,7 +13,7 @@ const APP_SHELL = [
   "./font/Cairo.woff2",
   "./vendor/jspdf/jspdf.umd.min.js",
   "./vendor/exceljs/exceljs.min.js"
-];
+].map((path) => new URL(path, self.registration.scope).href);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -25,7 +25,10 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      Promise.all(
+        keys.filter((key) => key.startsWith("siyb-workshop-shell-") && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
     )
   );
   self.clients.claim();
@@ -33,18 +36,34 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  const requestUrl = new URL(request.url);
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
+  if (request.method !== "GET" || requestUrl.origin !== self.location.origin) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(request);
+
+    try {
+      const response = await fetch(request);
+      if (response && response.ok) {
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (error) {
       if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => caches.match("./index.html"));
-    })
-  );
+
+      // Only a navigation request may fall back to the cached app shell.
+      if (request.mode === "navigate") {
+        const appShell = await cache.match(new URL("./index.html", self.registration.scope).href);
+        if (appShell) return appShell;
+      }
+
+      // Never return index.html for a missing JavaScript, CSS, font, or module file.
+      return new Response("Offline asset unavailable: " + requestUrl.pathname, {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" }
+      });
+    }
+  })());
 });
