@@ -555,3 +555,22 @@ html[dir="ltr"] .app-main{
  .welcome-guide{padding:18px 15px!important}
  .welcome-guide-modes{grid-template-columns:1fr!important}
 }
+
+
+/* Complete LTR presentation when English is selected. */
+html[dir="ltr"] .global-sidebar{left:0!important;right:auto!important}
+html[dir="ltr"] .app-main{margin:0 0 0 var(--sidebar-width)!important;text-align:left;direction:ltr}
+html[dir="ltr"] .app-topbar,html[dir="ltr"] .app-top-actions,html[dir="ltr"] .mode-switch{direction:ltr}
+html[dir="ltr"] .app-brand,html[dir="ltr"] .app-brand-copy,html[dir="ltr"] .global-sidebar-brand,html[dir="ltr"] .global-sidebar-brand-copy{direction:ltr;text-align:left}
+html[dir="ltr"] .welcome-screen,html[dir="ltr"] .workspace-page-heading,html[dir="ltr"] .welcome-guide,html[dir="ltr"] .welcome-guide-step-content{text-align:left;direction:ltr}
+html[dir="ltr"] .welcome-guide-heading,html[dir="ltr"] .welcome-guide-step{direction:ltr}
+html[dir="ltr"] .global-sidebar-nav,html[dir="ltr"] .sidebar-nav-group,html[dir="ltr"] .global-nav-item,html[dir="ltr"] .global-sidebar-footer,html[dir="ltr"] .sidebar-context,html[dir="ltr"] .sidebar-empty-state{text-align:left;direction:ltr}
+html[dir="ltr"] .global-nav-item{flex-direction:row}
+html[dir="ltr"] #costingModuleRoot{direction:ltr;text-align:left}
+html[dir="ltr"] #costingModuleRoot .toolbar,html[dir="ltr"] #costingModuleRoot .toolbar-group,html[dir="ltr"] #costingModuleRoot .cardhead,html[dir="ltr"] #costingModuleRoot .footrow{direction:ltr}
+html[dir="ltr"] #costingModuleRoot .cardhead,html[dir="ltr"] #costingModuleRoot .field,html[dir="ltr"] #costingModuleRoot .hint,html[dir="ltr"] #costingModuleRoot .callout,html[dir="ltr"] #costingModuleRoot .rows,html[dir="ltr"] #costingModuleRoot .rowline{text-align:left;direction:ltr}
+html[dir="ltr"] #costingModuleRoot .data th{text-align:left}
+html[dir="ltr"] #costingModuleRoot input,html[dir="ltr"] #costingModuleRoot select,html[dir="ltr"] #costingModuleRoot textarea{direction:ltr;text-align:left}
+html[dir="ltr"] #costingModuleRoot .layout{direction:ltr}
+html[dir="ltr"] #costingModuleRoot .data td,html[dir="ltr"] #costingModuleRoot .resulttable td,html[dir="ltr"] #costingModuleRoot .resulttable th{text-align:left}
+@media(max-width:900px){html[dir="ltr"] .global-sidebar{left:0!important;right:auto!important;transform:translateX(-105%)!important}html[dir="ltr"] body.sidebar-open .global-sidebar{transform:translateX(0)!important}}
