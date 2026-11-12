@@ -9,72 +9,124 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/icons/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/app-shell.css">
   <link rel="stylesheet" href="./styles/business-costing.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="SIYB Digital Workshop Tools home">
-      <span class="brand-mark">S</span>
-      <span><strong>SIYB</strong><small>Digital Workshop Tools</small></span>
-    </a>
-    <div class="top-actions">
-      <span id="connectionStatus" class="status"><i></i><span data-i18n="offlineReady">جاهز للعمل دون إنترنت</span></span>
-      <button id="languageToggle" class="icon-button" type="button" aria-label="Switch language">EN</button>
+<div id="appShell">
+  <header class="app-topbar">
+    <div class="app-brand">
+      <span class="app-brand-mark">S</span>
+      <span class="app-brand-copy"><strong>SIYB</strong><small>Digital Workshop Tools</small></span>
+    </div>
+
+    <div class="mode-switch" role="group" aria-label="اختيار وضع العمل">
+      <button type="button" class="mode-switch-button" data-mode="business" aria-pressed="false">
+        <span class="mode-switch-icon">▦</span><span>وضع إدارة الأعمال</span>
+      </button>
+      <button type="button" class="mode-switch-button" data-mode="training" aria-pressed="false">
+        <span class="mode-switch-icon">✎</span><span>وضع التدريب</span>
+      </button>
+    </div>
+
+    <div class="app-top-actions">
+      <span class="app-connection"><i></i><span data-i18n="offlineReady">جاهز للعمل دون إنترنت</span></span>
+      <button id="languageToggle" class="app-language-button" type="button" aria-label="Switch language">EN</button>
     </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="hero-copy">
-        <span class="eyebrow" data-i18n="eyebrow">أدوات رقمية لتيسير ورش SIYB</span>
-        <h1 data-i18n="headline">من التدريب إلى التطبيق العملي</h1>
-        <p data-i18n="intro">أدوات بسيطة تساعد الميسر والمتدرب على تطبيق مفاهيم إدارة الأعمال الصغيرة، حتى دون اتصال بالإنترنت.</p>
-        <div class="hero-meta">
-          <span class="meta-pill"><span class="dot"></span><span data-i18n="offlineFirst">مصمم للعمل دون إنترنت</span></span>
-          <span class="meta-pill" data-i18n="bilingual">العربية · English</span>
+  <div class="app-body">
+    <div class="sidebar-backdrop" id="globalSidebarBackdrop"></div>
+    <aside class="global-sidebar" id="globalSidebar" aria-label="التنقل الرئيسي">
+      <div class="global-sidebar-head">
+        <div class="global-sidebar-brand">
+          <span class="global-sidebar-mark">S</span>
+          <span class="global-sidebar-brand-copy"><strong>SIYB Tools</strong><small>Digital Workshop</small></span>
         </div>
+        <button type="button" id="sidebarCollapse" class="sidebar-collapse-button" title="طي القائمة" aria-label="طي القائمة">‹</button>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-circle circle-one"></div><div class="art-circle circle-two"></div>
-        <div class="art-card"><span>SIYB</span><b>Learn</b><b>Apply</b><b>Improve</b></div>
-      </div>
-    </section>
 
-    <section class="mode-section">
-      <div class="section-heading">
-        <div><span class="eyebrow" data-i18n="startHere">ابدأ من هنا</span><h2 data-i18n="chooseMode">اختر طريقة الاستخدام</h2></div>
-        <p data-i18n="modeHint">يمكنك التبديل بين الوضعين في أي وقت.</p>
+      <div class="sidebar-context">
+        <span class="sidebar-context-label">مساحة العمل</span>
+        <strong id="sidebarContextTitle">اختر وضع العمل</strong>
       </div>
-      <div class="mode-grid">
-        <button class="mode-card business-card" data-mode="business" type="button">
-          <span class="mode-icon">▦</span><span class="mode-title" data-i18n="businessMode">وضع إدارة الأعمال</span>
-          <span class="mode-description" data-i18n="businessDesc">استخدم الأدوات لحساب تكاليف مشروعك واتخاذ قرارات عملية.</span>
-          <span class="mode-link" data-i18n="openTools">استعراض الأدوات <b>←</b></span>
-        </button>
-        <button class="mode-card training-card" data-mode="training" type="button">
-          <span class="mode-icon">✎</span><span class="mode-title" data-i18n="trainingMode">وضع التدريب</span>
-          <span class="mode-description" data-i18n="trainingDesc">نفّذ التمارين، أدخل إجاباتك، وتحقق من فهمك للخطوات.</span>
-          <span class="mode-link" data-i18n="openExercises">استعراض التمارين <b>←</b></span>
-        </button>
+
+      <nav class="global-sidebar-nav" id="globalSidebarNav">
+        <div class="sidebar-empty-state" id="sidebarEmptyState">
+          <span>☰</span>
+          <p>اختر وضع العمل من الشريط العلوي لعرض الوحدات المتاحة.</p>
+        </div>
+
+        <section class="sidebar-nav-group" data-nav-group="business" hidden>
+          <div class="sidebar-nav-caption">أدوات إدارة الأعمال</div>
+          <button type="button" class="global-nav-item" data-nav-item="business-costing">
+            <span class="global-nav-icon">▤</span><span class="global-nav-label">احتساب تكاليف</span><span class="global-nav-current"></span>
+          </button>
+        </section>
+
+        <section class="sidebar-nav-group" data-nav-group="training" hidden>
+          <div class="sidebar-nav-caption">تمارين وتطبيقات</div>
+          <button type="button" class="global-nav-item" data-example="overheadExercise" data-nav-item="training-overhead">
+            <span class="global-nav-icon">◈</span><span class="global-nav-label">تحميل التكاليف غير المباشرة</span><span class="global-nav-current"></span>
+          </button>
+          <button type="button" class="global-nav-item" data-example="ledger" data-nav-item="training-ledger">
+            <span class="global-nav-icon">▥</span><span class="global-nav-label">سجل الحسابات والمصروفات</span><span class="global-nav-current"></span>
+          </button>
+          <button type="button" class="global-nav-item" data-example="depreciation" data-nav-item="training-depreciation">
+            <span class="global-nav-icon">◷</span><span class="global-nav-label">حساب الإهلاك</span><span class="global-nav-current"></span>
+          </button>
+          <div class="sidebar-training-note">تتضمن التمارين أمثلة تطبيقية قابلة للتعديل والمراجعة.</div>
+        </section>
+      </nav>
+
+      <div class="global-sidebar-footer">
+        <span class="sidebar-footer-mark">SIYB</span>
+        <span class="sidebar-footer-copy"><strong>منهجية حسّن تسيير مقاولتك</strong><small>Digital Workshop Tools</small></span>
       </div>
-    </section>
+    </aside>
 
-    <section id="workspace" class="workspace" hidden>
-      <div class="workspace-head">
-        <div><span class="eyebrow" id="workspaceEyebrow">SIYB</span><h2 id="workspaceTitle"></h2></div>
-        <button id="backHome" class="text-button" type="button" data-i18n="backHome">العودة للرئيسية</button>
-      </div>
-      <div id="workspaceContent"></div>
-    </section>
+    <main class="app-main" id="appMain">
+      <section id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-eyebrow">SIYB · DIGITAL WORKSHOP TOOLS</div>
+        <h1>من التدريب إلى التطبيق العملي</h1>
+        <p>اختر وضع العمل من الشريط العلوي للبدء. ستظهر الأدوات والوحدات الخاصة بكل وضع في قائمة التنقل الجانبية.</p>
+        <div class="welcome-cards">
+          <article class="welcome-card">
+            <span class="welcome-card-icon business-icon">▦</span>
+            <h2>وضع إدارة الأعمال</h2>
+            <p>أدوات عملية تساعد أصحاب المشاريع على احتساب التكاليف وتحليل بيانات النشاط.</p>
+          </article>
+          <article class="welcome-card">
+            <span class="welcome-card-icon training-icon">✎</span>
+            <h2>وضع التدريب</h2>
+            <p>تمارين تطبيقية للميسّرين والمتدربين مع إمكانية إدخال البيانات ومراجعة النتائج.</p>
+          </article>
+        </div>
+        <div class="welcome-hint"><span>↗</span> يمكنك التبديل بين الوضعين في أي وقت من الشريط العلوي.</div>
+      </section>
 
-  </main>
+      <section id="workspace" class="workspace" hidden>
+        <div class="workspace-page-heading">
+          <div>
+            <div class="workspace-kicker" id="workspaceEyebrow">BUSINESS TOOLS</div>
+            <h1 id="workspaceTitle">احتساب تكاليف</h1>
+            <p id="workspaceDescription">احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.</p>
+          </div>
+          <div class="workspace-page-badge"><span id="workspaceBadgeNumber">01</span><small id="workspaceBadgeLabel">الوحدة الأولى</small></div>
+        </div>
+        <div id="workspaceContent"></div>
+      </section>
 
-  <footer class="footer">
-    <span>SIYB Digital Workshop Tools</span><span>Prototype 0.1.7 · Offline-first PWA</span>
-  </footer>
-  <script src="./vendor/jspdf/jspdf.umd.min.js"></script>
-  <script src="./vendor/exceljs/exceljs.min.js"></script>
-  <script src="./src/locales/translations.js"></script>
-  <script src="./src/app.js"></script>
+      <footer class="app-footer">
+        <span>SIYB Digital Workshop Tools</span><span>Prototype 0.2.0 · Offline-first PWA</span>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script src="./vendor/jspdf/jspdf.umd.min.js"></script>
+<script src="./vendor/exceljs/exceljs.min.js"></script>
+<script src="./src/locales/translations.js"></script>
+<script src="./src/app.js"></script>
 </body>
 </html>
