@@ -73,7 +73,7 @@ function loadScenario(key){
   ];
   $('business').value='شركة نادية للنسيج';$('period').value='شهري';$('currency').value='MAD';
   $('manufacturingOH').value=8150;$('generalOH').value=9770;
-  notice='مثال شركة نادية للنسيج من كتيب ILO، الجزء الثاني، الصفحات المطبوعة 28–45. أُدخلت بيانات المنتجين من سجل التكاليف، واستُخدمت النفقات الشهرية 8,150 درهم للتصنيع غير المباشر و9,770 درهم للنفقات العامة. يعتمد الكتيب نسباً مقربة (0.14 و0.17) في المثال التوضيحي؛ لذلك قد تختلف النتائج عند استخدام النسب الدقيقة.';
+  // Keep the scenario data available without showing handbook commentary in the user interface.
  }else if(key==='salon'){
   // SIYB exercise: Hair & Beauty Salon, service categories, printed pages 84–86.
   // From ledger: direct materials face 3,200; feet 1,200; body 7,200.
@@ -115,7 +115,7 @@ function loadScenario(key){
  }
  $('exampleSelect').value=key;
  $('exampleNotice').textContent=notice;
- $('exampleNotice').style.display='block';
+ $('exampleNotice').style.display=notice?'block':'none';
  renderProducts();calculate();
  toast(key==='custom'?'تم فتح نموذج الإدخال اليدوي':'تم تحميل المثال التدريبي');
 }
