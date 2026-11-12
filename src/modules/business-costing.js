@@ -304,91 +304,117 @@ async function exportXLSX(){
 async function exportPDF(){
  const JsPDF=window.jspdf&&window.jspdf.jsPDF||window.jsPDF;
  if(!JsPDF){toast('مكتبة PDF غير متاحة');return;}
- const arabic=window.SIYBArabicPDF;
- if(!arabic){toast('تعذر تحميل دعم اللغة العربية لملف PDF');return;}
- let restoreArabicParser=null;
  try{
-  const pdf=new JsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
-  // Match DACUM Lite: shape Arabic + reorder visually, while suspending
-  // jsPDF's built-in Arabic shaping and Bidi processing to prevent double reversal.
-  restoreArabicParser=suspendJsPdfArabicParser(pdf,JsPDF);
-  const fontName=await arabic.loadArabicFont(pdf);
-  if(!fontName){toast('تعذر تحميل الخط العربي لتصدير PDF');return;}
-  pdf.setFont(fontName,'normal');
-  pdf.setR2L(false);
-  const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight();
-  const margin=11,tableW=pageW-margin*2,bottom=14;
-  let y=37;
-  const shaped=(v)=>arabic.shapeArabic(String(v==null?'':v));
-  const visual=(v)=>arabic.bidiVisual(shaped(v));
-  const textOptions=(align='right')=>({
-   align,isInputVisual:true,isOutputVisual:true,isInputRtl:false,isOutputRtl:false
-  });
-  const drawVisual=(value,x,yy,size=8,align='right')=>{
-   pdf.setFont(fontName,'normal');pdf.setFontSize(size);
-   pdf.text(value,x,yy,textOptions(align));
+  // Let the browser's native text engine shape Arabic and resolve BiDi.
+  // jsPDF only embeds the finished high-resolution page images.
+  const fontFace=new FontFace('SIYBArabicPDF','url(./font/Cairo-Regular.ttf)');
+  await fontFace.load();
+  document.fonts.add(fontFace);
+  await document.fonts.ready;
+
+  const W=2480,H=1754,MM_W=297,MM_H=210;
+  const margin=82,tableW=W-margin*2,bottom=76;
+  const pages=[];
+  let canvas,ctx,y;
+  const hasArabic=value=>/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(String(value??''));
+  const pageFont=(size,weight)=>weight+' '+size+'px SIYBArabicPDF, Cairo, Arial, sans-serif';
+  const setText=(size,weight,value)=>{
+   ctx.font=pageFont(size,weight||'400');
+   ctx.direction=hasArabic(value)?'rtl':'ltr';
+   ctx.textAlign=hasArabic(value)?'right':'left';
+   ctx.textBaseline='alphabetic';
+   ctx.fillStyle='#263944';
   };
-  const drawText=(value,x,yy,size=8,align='right')=>drawVisual(visual(value),x,yy,size,align);
-  const wrap=(value,width)=>{
-   const lines=pdf.splitTextToSize(shaped(value),width);
-   return lines.map(line=>arabic.bidiVisual(line));
+  const wrapText=(value,maxWidth,size,weight)=>{
+   const text=String(value==null?'—':value);
+   setText(size,weight,text);
+   const words=text.split(/\s+/).filter(Boolean);
+   if(!words.length)return [''];
+   const lines=[];let line='';
+   const pushLongWord=word=>{
+    const segmenter=typeof Intl!=='undefined'&&Intl.Segmenter?new Intl.Segmenter('ar',{granularity:'grapheme'}):null;
+    const units=segmenter?[...segmenter.segment(word)].map(x=>x.segment):Array.from(word);
+    let part='';
+    for(const unit of units){
+     if(part&&ctx.measureText(part+unit).width>maxWidth){lines.push(part);part=unit;}
+     else part+=unit;
+    }
+    return part;
+   };
+   for(const word of words){
+    const candidate=line?line+' '+word:word;
+    if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
+    if(line){lines.push(line);line='';}
+    if(ctx.measureText(word).width>maxWidth)line=pushLongWord(word);
+    else line=word;
+   }
+   if(line)lines.push(line);
+   return lines.length?lines:[''];
   };
-  const pageHeader=(continuation=false)=>{
-   pdf.setFillColor(18,61,86);pdf.rect(0,0,pageW,25,'F');
-   pdf.setTextColor(255,255,255);
-   drawText('SIYB | تقرير البيانات والجداول',pageW-margin,10,15);
-   drawText(continuation?'متابعة التقرير':'أداة ورشة العمل الرقمية',pageW-margin,18,8);
-   pdf.setTextColor(40,55,65);
-   drawText('تاريخ التصدير: '+new Date().toLocaleDateString('ar-IQ'),pageW-margin,31,8);
-   y=40;
+  const drawText=(value,x,baseline,size,weight,color,align)=>{
+   const text=String(value??'');
+   setText(size,weight||'400',text);
+   ctx.fillStyle=color||'#263944';
+   if(align){ctx.textAlign=align;ctx.direction=align==='right'?'rtl':'ltr';}
+   ctx.fillText(text,x,baseline);
   };
-  const newPage=()=>{
-   pdf.addPage('a4','landscape');
-   pageHeader(true);
+  const makePage=continuation=>{
+   canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+   ctx=canvas.getContext('2d',{alpha:false});
+   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+   ctx.fillStyle='#123d56';ctx.fillRect(0,0,W,205);
+   drawText('SIYB | تقرير البيانات والجداول',W-margin,82,37,'700','#ffffff','right');
+   drawText(continuation?'متابعة التقرير':'أداة ورشة العمل الرقمية',W-margin,145,23,'400','#dce9ef','right');
+   drawText('تاريخ التصدير: '+new Date().toLocaleDateString('ar-IQ'),W-margin,260,21,'400','#526774','right');
+   y=325;pages.push(canvas);
   };
+  const nextPage=()=>makePage(true);
   const addTable=(title,headers,rows,widths)=>{
-   if(y>pageH-48)newPage();
-   pdf.setTextColor(18,61,86);
-   drawText(title,pageW-margin,y,11);
-   y+=5;
+   if(y>H-260)nextPage();
+   drawText(title,W-margin,y,29,'700','#123d56','right');y+=18;
    const sum=widths.reduce((a,b)=>a+b,0),scaled=widths.map(w=>w*tableW/sum);
-   const headerH=10;
+   const headerLines=headers.map((h,i)=>wrapText(h,scaled[i]-28,20,'700'));
+   const headerH=Math.max(76,...headerLines.map(lines=>lines.length*27+24));
    const paintHeader=()=>{
-    let x=pageW-margin;
+    let x=W-margin;
     headers.forEach((h,i)=>{
      const w=scaled[i];x-=w;
-     pdf.setFillColor(36,91,117);pdf.setDrawColor(210,222,229);pdf.rect(x,y,w,headerH,'FD');
-     const lines=wrap(h,w-4).slice(0,2);
-     lines.forEach((line,k)=>drawVisual(line,x+w-2,y+3.8+k*3.5,7.2));
+     ctx.fillStyle='#245b75';ctx.fillRect(x,y,w,headerH);
+     ctx.strokeStyle='#d2dee5';ctx.lineWidth=2;ctx.strokeRect(x,y,w,headerH);
+     headerLines[i].forEach((line,k)=>drawText(line,x+w-14,y+31+k*27,20,'700','#ffffff','right'));
     });
     y+=headerH;
    };
-   paintHeader();pdf.setTextColor(40,55,65);
+   paintHeader();
    rows.forEach((row,ri)=>{
-    const wrapped=row.map((v,i)=>wrap(v==null?'—':v,Math.max(8,scaled[i]-4)));
+    const wrapped=row.map((v,i)=>wrapText(v==null?'—':v,Math.max(30,scaled[i]-28),21,'400'));
     const lineCount=Math.max(1,...wrapped.map(a=>a.length));
-    const rowH=Math.max(8,lineCount*3.8+3);
-    if(y+rowH>pageH-bottom){
-     newPage();
-     pdf.setTextColor(18,61,86);drawText(title+' (متابعة)',pageW-margin,y,10);y+=5;
-     paintHeader();pdf.setTextColor(40,55,65);
+    const rowH=Math.max(62,lineCount*29+25);
+    if(y+rowH>H-bottom){
+     nextPage();
+     drawText(title+' (متابعة)',W-margin,y,27,'700','#123d56','right');y+=18;
+     paintHeader();
     }
-    let x=pageW-margin;
+    let x=W-margin;
     row.forEach((v,i)=>{
      const w=scaled[i];x-=w;
-     pdf.setFillColor(ri%2===0?248:255,ri%2===0?251:255,ri%2===0?252:255);
-     pdf.setDrawColor(218,227,232);pdf.rect(x,y,w,rowH,'FD');
-     wrapped[i].forEach((line,k)=>drawVisual(line,x+w-2.2,y+4+k*3.8,7.2));
+     ctx.fillStyle=ri%2===0?'#f3f8fa':'#ffffff';ctx.fillRect(x,y,w,rowH);
+     ctx.strokeStyle='#d8e2e7';ctx.lineWidth=2;ctx.strokeRect(x,y,w,rowH);
+     wrapped[i].forEach((line,k)=>{
+      const direction=hasArabic(v)?'right':'left';
+      const tx=direction==='right'?x+w-14:x+14;
+      drawText(line,tx,y+34+k*29,21,'400','#263944',direction);
+     });
     });
     y+=rowH;
    });
-   y+=8;
+   y+=32;
   };
-  const summaryRows=(pairs)=>pairs.map(([k,v])=>[k,v]);
-  const fmt=(v)=>typeof v==='number'?Number(v.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2}):v;
-  pageHeader(false);
+  const summaryRows=pairs=>pairs.map(([k,v])=>[k,v]);
+  const fmt=v=>typeof v==='number'?Number(v.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2}):v;
+  makePage(false);
 
-  const direct=products.reduce((s,p)=>s+p.materials+p.labor,0);
+  const direct=products.reduce((sum,p)=>sum+p.materials+p.labor,0);
   const mfg=val('manufacturingOH'),gen=val('generalOH');
   let mr=direct?mfg/direct:0,gr=direct?gen/direct:0;
   if(activeExample==='textile'){mr=Math.round(mr*100)/100;gr=Math.round(gr*100)/100;}
@@ -407,12 +433,10 @@ async function exportPDF(){
    ['إجمالي تكلفة الإنتاج',fmt(direct+mfg+gen)]
   ]),[150,90]);
 
-  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0);
-  const printed=Number($('ledgerPrintedTotal').value)||0;
-  const ledgerRows=ledgerData.map(r=>[r.date,r.detail,fmt(r.inside),fmt(r.outside),fmt(r.general)]);
+  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
   addTable('02 | سجل الحسابات والحركات',
    ['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة'],
-   ledgerRows,[28,100,48,48,48]);
+   ledgerData.map(r=>[r.date,r.detail,fmt(r.inside),fmt(r.outside),fmt(r.general)]),[28,100,48,48,48]);
   addTable('مطابقة سجل الحسابات',['البيان','القيمة'],summaryRows([
    ['الفترة',$('ledgerPeriod').value],['إجمالي المصروفات الظاهرة',fmt(visibleExpenses)],
    ['الإجمالي المطبوع في الشريحة',fmt(printed)],['الفرق غير المفسر',fmt(printed-visibleExpenses)]
@@ -427,33 +451,31 @@ async function exportPDF(){
    deprRows,[42,28,32,35,28,32,35,35]);
 
   const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
-  const ohRows=overheadProducts.map(p=>[p.name,fmt(p.direct),fmt(p.direct*rate),fmt(p.direct*(1+rate))]);
   addTable('04 | تحميل التكاليف غير المباشرة',
    ['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية'],
-   ohRows,[65,70,70,68]);
+   overheadProducts.map(p=>[p.name,fmt(p.direct),fmt(p.direct*rate),fmt(p.direct*(1+rate))]),[65,70,70,68]);
   addTable('ملخص تحميل التكاليف',['البيان','القيمة'],summaryRows([
    ['النفقات غير المباشرة الشهرية',fmt(oh)],['إجمالي المواد المباشرة الشهرية',fmt(dm)],['نسبة التحميل',(rate*100).toFixed(2)+'%']
   ]),[150,90]);
 
-  const pages=pdf.getNumberOfPages();
-  for(let i=1;i<=pages;i++){
-   pdf.setPage(i);pdf.setTextColor(110,125,135);
-   drawText('صفحة '+i+' من '+pages,margin,pageH-6,7,'left');
-   drawText('SIYB Digital Workshop Tools',pageW-margin,pageH-6,7,'right');
-  }
+  const pdf=new JsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+  pages.forEach((page,index)=>{
+   if(index)pdf.addPage('a4','landscape');
+   const pctx=page.getContext('2d');
+   pctx.fillStyle='#7b8b94';pctx.font=pageFont(17,'400');pctx.direction='rtl';pctx.textAlign='right';
+   pctx.fillText('صفحة '+(index+1)+' من '+pages.length,W-margin,H-35);
+   pctx.direction='ltr';pctx.textAlign='left';
+   pctx.fillText('SIYB Digital Workshop Tools',margin,H-35);
+   pdf.addImage(page.toDataURL('image/jpeg',0.94),'JPEG',0,0,MM_W,MM_H,undefined,'FAST');
+  });
   pdf.save('SIYB-data-report-'+new Date().toISOString().slice(0,10)+'.pdf');
-  toast('تم تصدير بيانات وجداول الأداة إلى PDF');
+  toast('تم تصدير التقرير إلى PDF مع دعم العرض العربي');
  }catch(error){
-  console.error('SIYB PDF export failed:',error);
+  console.error('SIYB PDF canvas export failed:',error);
   toast('تعذر إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
- }finally{
-  if(restoreArabicParser)restoreArabicParser();
  }
 }
 
-// jsPDF's own Arabic parser and Bidi engine must not reshape already
-// visually ordered Arabic strings. This is the same isolation strategy
-// used by DACUM Lite's production PDF exporter.
 function suspendJsPdfArabicParser(pdf,JsPDFClass){
  const restores=[];
  try{
