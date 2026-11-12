@@ -1,10 +1,12 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.2.7 — Full-width responsive workspace**
+**Prototype 0.2.8 — Adaptive sidebar and workspace layout**
 
 A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
 ## Application architecture
+
+The workspace follows the adaptive layout model used in DACUM-Lite: desktop content reserves the expanded sidebar width (270px) or mini rail width (78px), and smoothly reflows as the sidebar changes state. Drawer mode is used at 768 CSS px and below, with an additional short-landscape touch breakpoint; the drawer overlays a dimmed, scroll-locked canvas.
 
 The workspace occupies the full width remaining beside the persistent sidebar. Desktop margins reserve the sidebar width once only, both when expanded and when collapsed; mobile layout uses the full viewport width.
 
