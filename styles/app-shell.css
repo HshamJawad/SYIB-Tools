@@ -180,3 +180,18 @@ html[dir="rtl"] .global-nav-item.active{box-shadow:inset -3px 0 0 var(--app-teal
  .global-sidebar-toggle{width:34px;height:34px;flex-basis:34px}
  .app-top-actions{flex:0 0 auto;gap:5px}
 }
+
+/* Final physical anchoring follows interface direction, not remembered body classes. */
+html[dir="rtl"] .global-sidebar{right:0;left:auto}
+html[dir="ltr"] .global-sidebar{left:0;right:auto}
+html[dir="rtl"] .app-main{margin-left:0;margin-right:var(--sidebar-width);margin-inline-end:var(--sidebar-width)}
+html[dir="ltr"] .app-main{margin-right:0;margin-left:var(--sidebar-width);margin-inline-end:var(--sidebar-width)}
+@media(max-width:900px){
+ html[dir="rtl"] .global-sidebar{right:0;left:auto;transform:translateX(105%)}
+ html[dir="ltr"] .global-sidebar{left:0;right:auto;transform:translateX(-105%)}
+ html[dir="rtl"] body.sidebar-open .global-sidebar,html[dir="ltr"] body.sidebar-open .global-sidebar{transform:translateX(0)}
+ html[dir="rtl"] .app-main,html[dir="ltr"] .app-main{margin:0}
+}
+@media(max-width:620px){
+ .app-top-actions{position:static;top:auto;left:auto;right:auto;inset:auto;display:flex;align-items:center;flex:0 0 auto;gap:5px}
+}
