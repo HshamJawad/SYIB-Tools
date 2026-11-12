@@ -11,7 +11,8 @@
   let language = "ar";
   try { language = localStorage.getItem("siyb-language") === "en" ? "en" : "ar"; } catch (_) {}
   let activeMode = null;
-  let costingScriptPromise = null;\n  let waitingWorker = null;
+  let costingScriptPromise = null;
+  let waitingWorker = null;
 
   function t(key) {
     return (window.SIYB_TRANSLATIONS && window.SIYB_TRANSLATIONS[language] || {})[key] || key;
@@ -280,9 +281,14 @@
       if (event.data && event.data.type === "SIYB_APP_UPDATED") showUpdateBanner();
     });
   }
-\n  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register(assetUrl("service-worker.js"), { scope: APP_BASE.pathname })
+        .then((registration) => {
+          setupServiceWorkerUpdates(registration);
+          registration.update().catch(() => {});
+        })
         .catch((error) => console.error("Service worker registration failed:", error));
     });
   }
