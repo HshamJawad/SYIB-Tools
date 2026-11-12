@@ -20,7 +20,8 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  // Keep the current app active until the user chooses Update now.\n
+  // Keep the current app active until the user chooses Update now.
+
 });
 
 self.addEventListener("activate", (event) => {
@@ -32,7 +33,10 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
-  self.clients.claim();\n  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {\n    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.3.0" }));\n  });
+  self.clients.claim();
+  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.3.0" }));
+  });
 });
 
 self.addEventListener("fetch", (event) => {
@@ -69,7 +73,8 @@ self.addEventListener("fetch", (event) => {
   })());
 });
 
-// Release note: v0.3.0 update flow is ready for the Pages deployment.\n// The update is activated only after an explicit user action in the app banner.
+// Release note: v0.3.0 update flow is ready for the Pages deployment.
+// The update is activated only after an explicit user action in the app banner.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();
 });
