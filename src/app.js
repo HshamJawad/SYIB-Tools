@@ -44,6 +44,10 @@
       if (!response.ok) throw new Error("تعذر تحميل ملف HTML: " + response.status + " — " + htmlUrl);
 
       host.innerHTML = await response.text();
+      const workspace = $("workspace");
+      workspace.classList.add("workspace-fullscreen");
+      const workspaceHead = workspace.querySelector(".workspace-head");
+      if (workspaceHead) workspaceHead.hidden = true;
 
       if (!costingScriptPromise) {
         costingScriptPromise = new Promise((resolve, reject) => {
@@ -98,6 +102,9 @@
     activeMode = null;
     $("workspace").hidden = true;
     $("workspaceContent").innerHTML = "";
+    $("workspace").classList.remove("workspace-fullscreen");
+    const workspaceHead = $("workspace").querySelector(".workspace-head");
+    if (workspaceHead) workspaceHead.hidden = false;
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
