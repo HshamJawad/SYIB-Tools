@@ -93,7 +93,13 @@
     }
   }
 
+  function setGlobalExportActionsVisible(visible) {
+    const actions = $("globalExportActions");
+    if (actions) actions.hidden = !visible;
+  }
+
   async function loadCostingModule(mode, exampleKey) {
+    setGlobalExportActionsVisible(false);
     const host = $("workspaceContent");
     $("welcomeScreen").hidden = true;
     $("workspace").hidden = false;
@@ -114,7 +120,9 @@
         select.value = targetExample;
         select.dispatchEvent(new Event("change", { bubbles: true }));
       }
+      setGlobalExportActionsVisible(true);
     } catch (error) {
+      setGlobalExportActionsVisible(false);
       console.error("Business Costing Studio loading failed:", error);
       const message = String(error && error.message || error);
       host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل الأداة</strong><p dir="ltr">' +
@@ -186,6 +194,18 @@
   });
   window.addEventListener("resize", syncSidebarToggleState);
   $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
+
+  $("globalPrintButton").addEventListener("click", () => {
+    window.print();
+  });
+
+  $("globalExcelButton").addEventListener("click", () => {
+    if (typeof window.exportXLSX === "function") {
+      window.exportXLSX();
+    } else {
+      console.warn("Excel export is not available until a costing module is loaded.");
+    }
+  });
 
   $("languageToggle").addEventListener("click", () => {
     language = language === "ar" ? "en" : "ar";
