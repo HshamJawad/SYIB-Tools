@@ -1,6 +1,6 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.1.3 — GitHub Pages path and module-loading fix**
+**Prototype 0.1.4 — module initialization and cache refresh fix**
 
 An offline-first, Arabic-first PWA shell with a modular Business Costing Studio.
 
