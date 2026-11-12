@@ -159,11 +159,26 @@
     closeMobileSidebar();
   });
 
-  $("sidebarToggle").addEventListener("click", toggleSidebar);
-  $("sidebarCollapse").addEventListener("click", () => {
-    if (window.matchMedia("(max-width: 900px)").matches) closeMobileSidebar();
-    else document.body.classList.toggle("sidebar-collapsed");
+  function syncSidebarToggleState() {
+    const toggle = $("sidebarToggle");
+    const mobile = window.matchMedia("(max-width: 900px)").matches;
+    const expanded = mobile ? document.body.classList.contains("sidebar-open") : !document.body.classList.contains("sidebar-collapsed");
+    toggle.setAttribute("aria-expanded", String(expanded));
+  }
+
+  $("sidebarToggle").addEventListener("click", () => {
+    toggleSidebar();
+    syncSidebarToggleState();
   });
+  $("sidebarCollapse").addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-collapsed");
+    syncSidebarToggleState();
+  });
+  $("globalSidebarBackdrop").addEventListener("click", () => {
+    closeMobileSidebar();
+    syncSidebarToggleState();
+  });
+  window.addEventListener("resize", syncSidebarToggleState);
   $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
 
   $("languageToggle").addEventListener("click", () => {
@@ -174,6 +189,7 @@
 
   applyLanguage();
   setSidebarGroup(null);
+  syncSidebarToggleState();
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", () => {
