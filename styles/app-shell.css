@@ -127,3 +127,11 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
 .global-sidebar-toggle{display:grid;align-content:center;justify-items:center;gap:4px;width:36px;height:36px;border:1px solid #e0e8ed;border-radius:9px;background:#fff;cursor:pointer}
 .global-sidebar-toggle span{display:block;width:16px;height:2px;border-radius:2px;background:#2a5368}
 .global-sidebar-toggle:hover{background:#f3f8fa;border-color:#cbdde5}
+
+@media(max-width:620px){
+ .app-topbar{display:flex;justify-content:space-between;gap:7px;padding:0 8px}
+ .mode-switch{flex:1;width:auto;min-width:0;max-width:none;justify-self:auto}
+ .app-top-actions{position:static;display:flex;flex:0 0 auto;gap:5px}
+ .app-language-button{min-width:31px;padding:0 5px}
+ .global-sidebar-toggle{width:33px;height:34px;flex:0 0 33px}
+}
