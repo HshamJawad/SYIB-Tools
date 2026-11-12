@@ -135,3 +135,12 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
  .app-language-button{min-width:31px;padding:0 5px}
  .global-sidebar-toggle{width:33px;height:34px;flex:0 0 33px}
 }
+
+.welcome-mode-hint{display:flex;align-items:center;gap:12px;max-width:680px;margin-top:26px;padding:15px 17px;border:1px solid #dceae9;border-radius:12px;background:#edf6f5;color:#4c7477;font-size:11px;line-height:1.9}
+.welcome-mode-hint-icon{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:9px;background:#dcefeb;color:#218d86;font-size:17px}
+@media print{
+ .app-topbar,.global-sidebar,.sidebar-backdrop,.app-footer,.workspace-page-heading{display:none!important}
+ .app-body{padding-top:0!important}
+ .app-main{margin:0!important;padding:0!important;min-height:0!important}
+ #costingModuleRoot main.costing-content{max-width:none!important;margin:0!important;padding:0!important}
+}
