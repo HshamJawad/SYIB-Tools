@@ -1,6 +1,6 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.2.8 — Adaptive sidebar and workspace layout**
+**Prototype 0.2.9 — Adaptive sidebar and workspace layout**
 
 A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
