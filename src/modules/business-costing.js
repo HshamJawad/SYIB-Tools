@@ -1,9 +1,11 @@
 window.initBusinessCostingStudio = function(){
+if(window.SIYBRefreshLocaleDigits)window.SIYBRefreshLocaleDigits(document.getElementById('costingModuleRoot')||document);
 
 let products=[];
 const $=id=>document.getElementById(id);
-const val=id=>Math.max(0,Number($(id).value)||0);
-const money=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(Number.isFinite(n)?n:0)+' '+$('currency').value;
+const parseNumber=value=>window.SIYBParseNumber?window.SIYBParseNumber(value):(Number(value)||0);
+const val=id=>Math.max(0,parseNumber($(id).value));
+const money=n=>new Intl.NumberFormat(document.documentElement.lang==='ar'?'ar-IQ':'en-US',{maximumFractionDigits:2}).format(Number.isFinite(n)?n:0)+' '+$('currency').value;
 function fmt(n){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(Number.isFinite(n)?n:0)}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderProducts(){
@@ -20,7 +22,7 @@ function renderProducts(){
  });
  $('products').querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{
   const i=+e.target.dataset.i,k=e.target.dataset.k;
-  products[i][k]=k==='name'?e.target.value:Math.max(0,Number(e.target.value)||0);
+  products[i][k]=k==='name'?e.target.value:Math.max(0,parseNumber(e.target.value));
   calculate();
  }));
 }
@@ -162,13 +164,13 @@ function renderLedger(){
   body.appendChild(tr);
  });
  body.querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{
-  const r=ledgerData[+e.target.dataset.ledger],k=e.target.dataset.key;r[k]=Math.max(0,Number(e.target.value)||0);calcLedger();
+  const r=ledgerData[+e.target.dataset.ledger],k=e.target.dataset.key;r[k]=Math.max(0,parseNumber(e.target.value));calcLedger();
  }));
  $('ledgerPrintedTotal').oninput=calcLedger;
  calcLedger();
 }
 function calcLedger(){
- const visible=ledgerData.reduce((s,r)=>s+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0,gap=printed-visible;
+ const visible=ledgerData.reduce((s,r)=>s+r.general,0),printed=parseNumber($('ledgerPrintedTotal').value),gap=printed-visible;
  $('ledgerVisible').textContent=fmt(visible);$('ledgerTotal').textContent=fmt(printed);$('ledgerGap').textContent=fmt(gap);
  $('ledgerNote').textContent=Math.abs(gap)<0.001?'تطابق الإجمالي المطبوع مع مجموع البنود الظاهرة.':'تنبيه تدقيقي: مجموع البنود الظاهرة في الصورة هو '+fmt(visible)+'، بينما يظهر في خانة الإجمالي '+fmt(printed)+'. الفرق '+fmt(gap)+' لا يمكن تفسيره من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.';
 }
@@ -185,7 +187,7 @@ function renderDepreciation(){
   body.appendChild(tr);
  });
  body.querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{
-  const r=depreciationData[+e.target.dataset.depr],k=e.target.dataset.key;r[k]=Math.max(0,Number(e.target.value)||0);renderDepreciation();
+  const r=depreciationData[+e.target.dataset.depr],k=e.target.dataset.key;r[k]=Math.max(0,parseNumber(e.target.value));renderDepreciation();
  }));
  const totals=depreciationData.reduce((a,r)=>{
   const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
@@ -210,15 +212,16 @@ function renderOverheadExercise(){
   $('ohProducts').appendChild(tr);
  });
  $('ohProducts').querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{
-  overheadProducts[+e.target.dataset.ohIndex].direct=Math.max(0,Number(e.target.value)||0);calculateOverheadExercise();
+  overheadProducts[+e.target.dataset.ohIndex].direct=Math.max(0,parseNumber(e.target.value));calculateOverheadExercise();
  }));
  $('ohMonthly').oninput=calculateOverheadExercise;$('dmMonthly').oninput=calculateOverheadExercise;
  calculateOverheadExercise();
 }
 function calculateOverheadExercise(){
- const oh=Math.max(0,Number($('ohMonthly').value)||0),dm=Math.max(0,Number($('dmMonthly').value)||0),rate=dm>0?oh/dm:0;
+ const oh=Math.max(0,parseNumber($('ohMonthly').value)),dm=Math.max(0,parseNumber($('dmMonthly').value)),rate=dm>0?oh/dm:0;
  $('ohRate').value=dm>0?(rate*100).toFixed(2)+'%':'غير قابل للحساب';
  $('ohRateResult').textContent=dm>0?(rate*100).toFixed(2)+'%':'—';
+ if(window.SIYBRefreshLocaleDigits)window.SIYBRefreshLocaleDigits($('overheadPanel'));
  overheadProducts.forEach((p,i)=>{const indirect=p.direct*rate,total=p.direct+indirect;$('ohIndirect'+i).textContent=dm>0?indirect.toFixed(2):'—';$('ohTotal'+i).textContent=dm>0?total.toFixed(2):'—';});
  const first=overheadProducts[0].direct;$('ohFirstIndirect').textContent=dm>0?(first*rate).toFixed(2):'—';$('ohFirstTotal').textContent=dm>0?(first*(1+rate)).toFixed(2):'—';
 }
@@ -262,7 +265,7 @@ async function exportXLSX(){
   const ledger=makeSheet('سجل الحسابات',['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة']);
   ledger.addRow(['الفترة',$('ledgerPeriod').value]);
   ledgerData.forEach(r=>ledger.addRow([r.date,r.detail,r.inside,r.outside,r.general]));
-  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
+  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=parseNumber($('ledgerPrintedTotal').value);
   ledger.addRow([]);ledger.addRow(['إجمالي المصروفات الظاهرة',visibleExpenses]);ledger.addRow(['الإجمالي المطبوع في الشريحة',printed]);ledger.addRow(['الفرق غير المفسر',printed-visibleExpenses]);
   ledger.columns=[{width:18},{width:34},{width:20},{width:20},{width:22}];
 
@@ -281,7 +284,7 @@ async function exportXLSX(){
 
   // Sheet 4: overhead allocation exercise.
   const ohSheet=makeSheet('تحميل التكاليف',['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية']);
-  const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
+  const oh=parseNumber($('ohMonthly').value),dm=parseNumber($('dmMonthly').value),rate=dm?oh/dm:0;
   overheadProducts.forEach(p=>ohSheet.addRow([p.name,p.direct,p.direct*rate,p.direct*(1+rate)]));
   ohSheet.addRow([]);ohSheet.addRow(['النفقات غير المباشرة الشهرية',oh]);ohSheet.addRow(['إجمالي المواد المباشرة الشهرية',dm]);ohSheet.addRow(['نسبة التحميل',rate]);
   ohSheet.columns=[{width:48},{width:24},{width:24},{width:22}];
@@ -386,7 +389,7 @@ async function exportPDF(){
    ['نسبة نفقات التصنيع غير المباشرة',(mr*100).toFixed(2)+'%'],['نسبة النفقات العامة',(gr*100).toFixed(2)+'%'],
    ['إجمالي تكلفة الإنتاج',fmt(direct+mfg+gen)]
   ],[150,90]);
-  const expenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
+  const expenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=parseNumber($('ledgerPrintedTotal').value);
   table('02 | سجل الحسابات والحركات',['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة'],
    ledgerData.map(r=>[r.date,r.detail,fmt(r.inside),fmt(r.outside),fmt(r.general)]),[28,100,48,48,48]);
   table('مطابقة سجل الحسابات',['البيان','القيمة'],[
@@ -399,7 +402,7 @@ async function exportPDF(){
     const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
     return [r.name,r.date,fmt(r.purchase),r.life,r.months,fmt(annual),fmt(acc),fmt(r.purchase-acc)];
    }),[42,28,32,35,28,32,35,35]);
-  const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
+  const oh=parseNumber($('ohMonthly').value),dm=parseNumber($('dmMonthly').value),rate=dm?oh/dm:0;
   table('04 | تحميل التكاليف غير المباشرة',
    ['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية'],
    overheadProducts.map(p=>[p.name,fmt(p.direct),fmt(p.direct*rate),fmt(p.direct*(1+rate))]),[65,70,70,68]);
