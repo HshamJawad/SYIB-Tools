@@ -249,25 +249,6 @@ function toast(s){
  t._hideTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-const appRoot=$('costingModuleRoot');
-const isCompactViewport=()=>window.matchMedia('(max-width: 900px)').matches;
-function closeMobileSidebar(){appRoot.classList.remove('sidebar-open');}
-function toggleSidebar(){
- if(isCompactViewport()){
-  appRoot.classList.toggle('sidebar-open');
- }else{
-  appRoot.classList.toggle('sidebar-collapsed');
- }
-}
-$('sidebarToggle').addEventListener('click',toggleSidebar);
-$('sidebarCollapse').addEventListener('click',()=>{
- if(isCompactViewport()) closeMobileSidebar();
- else appRoot.classList.toggle('sidebar-collapsed');
-});
-$('sidebarBackdrop').addEventListener('click',closeMobileSidebar);
-$('costingBackHome').addEventListener('click',()=>{const back=$('backHome');if(back)back.click();});
-$('costingNavItem').addEventListener('click',closeMobileSidebar);
-
 ['manufacturingOH','generalOH','currency','business','period'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='manufacturingOH'||id==='generalOH')activeExample='custom';calculate()}));
 $('exampleSelect').addEventListener('change',e=>{
  const k=e.target.value;
