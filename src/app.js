@@ -9,10 +9,7 @@
   const assetUrl = (path) => new URL(path.replace(/^\.\//, ""), APP_BASE).href;
 
   let language = "ar";
-  try {
-    language = localStorage.getItem("siyb-language") === "en" ? "en" : "ar";
-  } catch (_) {}
-
+  try { language = localStorage.getItem("siyb-language") === "en" ? "en" : "ar"; } catch (_) {}
   let activeMode = null;
   let costingScriptPromise = null;
 
@@ -29,14 +26,72 @@
     });
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "ع";
-    if (activeMode && $("workspaceTitle")) {
-      $("workspaceTitle").textContent = t(activeMode === "business" ? "businessTitle" : "trainingTitle");
+  }
+
+  function setActiveModeButton(mode) {
+    document.querySelectorAll("[data-mode]").forEach((button) => {
+      const active = button.dataset.mode === mode;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  function setSidebarGroup(mode) {
+    document.querySelectorAll("[data-nav-group]").forEach((group) => {
+      group.hidden = group.dataset.navGroup !== mode;
+    });
+    $("sidebarEmptyState").hidden = !!mode;
+    $("sidebarContextTitle").textContent = mode === "business"
+      ? "وضع إدارة الأعمال"
+      : mode === "training" ? "وضع التدريب" : "اختر وضع العمل";
+  }
+
+  function setActiveNav(item) {
+    document.querySelectorAll("[data-nav-item]").forEach((button) => {
+      const active = button.dataset.navItem === item;
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+  }
+
+  function closeMobileSidebar() {
+    document.body.classList.remove("sidebar-open");
+  }
+
+  function toggleSidebar() {
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      document.body.classList.toggle("sidebar-open");
+    } else {
+      document.body.classList.toggle("sidebar-collapsed");
     }
   }
 
-  async function loadCostingModule(mode) {
+  async function ensureCostingScript() {
+    if (typeof window.initBusinessCostingStudio === "function") return;
+    if (!costingScriptPromise) {
+      costingScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = assetUrl("src/modules/business-costing.js");
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
+        document.body.appendChild(script);
+      }).catch((error) => {
+        costingScriptPromise = null;
+        throw error;
+      });
+    }
+    await costingScriptPromise;
+    if (typeof window.initBusinessCostingStudio !== "function") {
+      throw new Error("تم تحميل ملف JavaScript لكن دالة تهيئة أداة التكاليف غير موجودة.");
+    }
+  }
+
+  async function loadCostingModule(mode, exampleKey) {
     const host = $("workspaceContent");
-    host.innerHTML = '<div class="workspace-placeholder"><strong>جارٍ تحميل Business Costing Studio...</strong><p>يتم تحميل ملفات الوحدة.</p></div>';
+    $("welcomeScreen").hidden = true;
+    $("workspace").hidden = false;
+    host.innerHTML = '<div class="workspace-loading"><span class="loading-spinner"></span><strong>جارٍ تحميل أداة احتساب التكاليف...</strong></div>';
 
     try {
       const htmlUrl = assetUrl("src/modules/business-costing.html");
@@ -44,69 +99,72 @@
       if (!response.ok) throw new Error("تعذر تحميل ملف HTML: " + response.status + " — " + htmlUrl);
 
       host.innerHTML = await response.text();
-      const workspace = $("workspace");
-      workspace.classList.add("workspace-fullscreen");
-      const workspaceHead = workspace.querySelector(".workspace-head");
-      if (workspaceHead) workspaceHead.hidden = true;
-
-      if (!costingScriptPromise) {
-        costingScriptPromise = new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = assetUrl("src/modules/business-costing.js");
-          script.onload = resolve;
-          script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
-          document.body.appendChild(script);
-        }).catch((error) => {
-          costingScriptPromise = null;
-          throw error;
-        });
-      }
-
-      await costingScriptPromise;
-      if (typeof window.initBusinessCostingStudio !== "function") {
-        throw new Error("تم تحميل ملف JavaScript لكن الدالة initBusinessCostingStudio غير موجودة.");
-      }
-
+      await ensureCostingScript();
       window.initBusinessCostingStudio();
 
-      if (mode === "training") {
-        const select = $("exampleSelect");
-        if (select) {
-          select.value = "overheadExercise";
-          select.dispatchEvent(new Event("change"));
-        }
+      const select = $("exampleSelect");
+      const targetExample = exampleKey || (mode === "training" ? "overheadExercise" : "textile");
+      if (select && select.value !== targetExample) {
+        select.value = targetExample;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
       }
     } catch (error) {
       console.error("Business Costing Studio loading failed:", error);
-      const details = String(error && error.message || error);
-      host.innerHTML = '<div class="workspace-placeholder"><strong>تعذر تحميل الأداة</strong><p dir="ltr" style="text-align:left;overflow-wrap:anywhere">' +
-        details.replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])) +
-        '</p><p>افتح أدوات المطور (F12) للاطلاع على تفاصيل إضافية.</p></div>';
+      const message = String(error && error.message || error);
+      host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل الأداة</strong><p dir="ltr">' +
+        message.replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])) +
+        '</p></div>';
     }
   }
 
-  function renderWorkspace(mode) {
+  async function activateMode(mode) {
+    if (mode !== "business" && mode !== "training") return;
     activeMode = mode;
-    $("workspace").hidden = false;
-    $("workspaceEyebrow").textContent = mode === "business" ? "BUSINESS TOOLS" : "TRAINING";
-    $("workspaceTitle").textContent = t(mode === "business" ? "businessTitle" : "trainingTitle");
-    $("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
-    loadCostingModule(mode);
+    setActiveModeButton(mode);
+    setSidebarGroup(mode);
+    closeMobileSidebar();
+
+    if (mode === "business") {
+      $("workspaceEyebrow").textContent = "BUSINESS TOOLS";
+      $("workspaceTitle").textContent = "احتساب تكاليف";
+      $("workspaceDescription").textContent = "احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.";
+      $("workspaceBadgeNumber").textContent = "01";
+      $("workspaceBadgeLabel").textContent = "الوحدة الأولى";
+      setActiveNav("business-costing");
+      await loadCostingModule(mode, "textile");
+    } else {
+      $("workspaceEyebrow").textContent = "TRAINING MODE";
+      $("workspaceTitle").textContent = "تمارين احتساب التكاليف";
+      $("workspaceDescription").textContent = "تدرب على تسجيل المصروفات، تحميل التكاليف غير المباشرة، واحتساب الإهلاك.";
+      $("workspaceBadgeNumber").textContent = "T";
+      $("workspaceBadgeLabel").textContent = "التدريب العملي";
+      setActiveNav("training-overhead");
+      await loadCostingModule(mode, "overheadExercise");
+    }
   }
 
   document.querySelectorAll("[data-mode]").forEach((button) => {
-    button.addEventListener("click", () => renderWorkspace(button.dataset.mode));
+    button.addEventListener("click", () => activateMode(button.dataset.mode));
   });
 
-  $("backHome").addEventListener("click", () => {
-    activeMode = null;
-    $("workspace").hidden = true;
-    $("workspaceContent").innerHTML = "";
-    $("workspace").classList.remove("workspace-fullscreen");
-    const workspaceHead = $("workspace").querySelector(".workspace-head");
-    if (workspaceHead) workspaceHead.hidden = false;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  $("globalSidebarNav").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-nav-item]");
+    if (!button || !activeMode) return;
+    setActiveNav(button.dataset.navItem);
+    if (activeMode === "business") {
+      loadCostingModule("business", "textile");
+    } else {
+      loadCostingModule("training", button.dataset.example || "overheadExercise");
+    }
+    closeMobileSidebar();
   });
+
+  $("sidebarToggle").addEventListener("click", toggleSidebar);
+  $("sidebarCollapse").addEventListener("click", () => {
+    if (window.matchMedia("(max-width: 900px)").matches) closeMobileSidebar();
+    else document.body.classList.toggle("sidebar-collapsed");
+  });
+  $("globalSidebarBackdrop").addEventListener("click", closeMobileSidebar);
 
   $("languageToggle").addEventListener("click", () => {
     language = language === "ar" ? "en" : "ar";
@@ -115,6 +173,7 @@
   });
 
   applyLanguage();
+  setSidebarGroup(null);
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", () => {
