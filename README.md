@@ -1,6 +1,6 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.2.4 — Direction-aware navigation controls**
+**Prototype 0.2.5 — Direction-aware navigation controls**
 
 A responsive, Arabic-first, offline-first SIYB digital workshop application.
 
