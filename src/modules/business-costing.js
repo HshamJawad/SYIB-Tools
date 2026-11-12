@@ -144,10 +144,12 @@ function showSlideExample(which){
  $('ledgerPanel').style.display=which==='ledger'?'block':'none';
  $('deprPanel').style.display=which==='depreciation'?'block':'none';
  $('overheadPanel').style.display=which==='overheadExercise'?'block':'none';
- if(which==='overheadExercise'){renderOverheadExercise();$('exampleNotice').textContent='تمرين تحميل التكاليف غير المباشرة على المنتجات من الشرائح 59–61 المرفقة.';$('exampleNotice').style.display='block';}
+ // Clear any previous example note whenever the training example changes.
+ $('exampleNotice').textContent='';
+ $('exampleNotice').style.display='none';
+ if(which==='overheadExercise'){renderOverheadExercise();}
  if(which==='ledger'){renderLedger();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 52 المرفقة: سجل الحسابات الأساسية لشهر تشرين الأول/أكتوبر 2017.';$('exampleNotice').style.display='block';}
  if(which==='depreciation'){renderDepreciation();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 53 المرفقة: سجل الإهلاك/الاندثار بتاريخ 31/12/2017.';$('exampleNotice').style.display='block';}
- if(!on && which==='custom'){$('exampleNotice').style.display='block';}
 }
 function renderLedger(){
  const body=$('ledgerRows');body.innerHTML='';
