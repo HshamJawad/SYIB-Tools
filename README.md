@@ -1,6 +1,6 @@
 # SIYB Digital Workshop Tools
 
-**Prototype 0.1.5 — Business Costing Studio UI refresh**
+**Prototype 0.1.6 — Business Costing Studio UI refresh**
 
 Arabic-first, offline-first SIYB workshop tools with a modular Business Costing Studio.
 
