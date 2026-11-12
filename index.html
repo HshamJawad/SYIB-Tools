@@ -100,12 +100,35 @@
       <section id="welcomeScreen" class="welcome-screen">
         <div class="welcome-eyebrow">SIYB · DIGITAL WORKSHOP TOOLS</div>
         <h1>من التدريب إلى التطبيق العملي</h1>
-        <p>اختر وضع العمل من الشريط العلوي للبدء. ستظهر الأدوات والوحدات الخاصة بكل وضع في قائمة التنقل الجانبية.</p>
-        <div class="welcome-mode-hint">
-          <span class="welcome-mode-hint-icon">↗</span>
-          <span>اختر «وضع إدارة الأعمال» أو «وضع التدريب» من الأزرار الثابتة في الشريط العلوي لعرض قائمة الوحدات المناسبة.</span>
-        </div>
-        <div class="welcome-hint"><span>↗</span> يمكنك التبديل بين الوضعين في أي وقت من الشريط العلوي.</div>
+        <section class="welcome-guide" aria-labelledby="welcomeGuideTitle">
+          <div class="welcome-guide-heading">
+            <span class="welcome-guide-mark" aria-hidden="true">↗</span>
+            <h2 id="welcomeGuideTitle">كيف تبدأ؟</h2>
+          </div>
+          <div class="welcome-guide-step">
+            <span class="welcome-guide-number">1</span>
+            <div class="welcome-guide-step-content">
+              <h3>اختر أحد الوضعين من الشريط العلوي</h3>
+              <div class="welcome-guide-modes">
+                <div class="welcome-guide-mode">
+                  <strong>وضع إدارة الأعمال</strong>
+                  <p>استخدم الأدوات العملية لاحتساب تكاليف مشروعك ومراجعة بياناته.</p>
+                </div>
+                <div class="welcome-guide-mode">
+                  <strong>وضع التدريب</strong>
+                  <p>نفّذ التمارين التطبيقية وتدرّب على خطوات احتساب التكاليف.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="welcome-guide-step welcome-guide-sidebar-step">
+            <span class="welcome-guide-number">2</span>
+            <div class="welcome-guide-step-content">
+              <h3>انتقل بين الوحدات من القائمة الجانبية</h3>
+              <p>بعد اختيار الوضع، تعرض القائمة الجانبية الأدوات أو التمارين المتاحة فيه. اختر الوحدة التي تريد فتحها، ويمكنك العودة إلى الشريط العلوي للتبديل بين الوضعين في أي وقت.</p>
+            </div>
+          </div>
+        </section>
       </section>
 
       <section id="workspace" class="workspace" hidden>
@@ -121,7 +144,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.3.10 · © 2026 هشام جواد كاظم — مطور الأداة</span>
+        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.3.11 · © 2026 هشام جواد كاظم — مطور الأداة</span>
       </footer>
     </main>
   </div>
@@ -136,6 +159,6 @@
 <script src="./src/modules/arabic-pdf.js"></script>
 <script src="./vendor/exceljs/exceljs.min.js"></script>
 <script src="./src/locales/translations.js"></script>
-<script src="./src/app.js?v=0.3.10"></script>
+<script src="./src/app.js?v=0.3.11"></script>
 </body>
 </html>
