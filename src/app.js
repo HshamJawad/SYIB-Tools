@@ -216,11 +216,7 @@
     drawerMedia.addListener(handleResponsiveModeChange);
   }
 
-  $("globalPrintButton").addEventListener("click", () => {
-    window.print();
-  });
-
-  $("globalExcelButton").addEventListener("click", () => {
+$("globalExcelButton").addEventListener("click", () => {
     if (typeof window.exportXLSX === "function") {
       window.exportXLSX();
     } else {
