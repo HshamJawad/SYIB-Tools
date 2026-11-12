@@ -123,3 +123,7 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
 .ltr .app-main{margin-right:0;margin-left:var(--sidebar-width)}
 .ltr.sidebar-collapsed .app-main{margin-left:78px}
 @media(max-width:900px){.ltr .global-sidebar{left:0;right:auto;transform:translateX(-105%)}.ltr.sidebar-open .global-sidebar{transform:translateX(0)}.ltr .app-main{margin-left:0}}
+
+.global-sidebar-toggle{display:grid;align-content:center;justify-items:center;gap:4px;width:36px;height:36px;border:1px solid #e0e8ed;border-radius:9px;background:#fff;cursor:pointer}
+.global-sidebar-toggle span{display:block;width:16px;height:2px;border-radius:2px;background:#2a5368}
+.global-sidebar-toggle:hover{background:#f3f8fa;border-color:#cbdde5}
