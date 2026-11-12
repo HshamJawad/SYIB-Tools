@@ -223,3 +223,76 @@ html[dir="ltr"] .app-main{margin-right:0;margin-left:var(--sidebar-width);margin
  .topbar-action-glyph{min-width:25px;height:21px;font-size:7px}
  .app-top-actions{gap:4px}
 }
+
+/* ===== Full-width workspace: reserve exactly one sidebar width ===== */
+html[dir="rtl"] .app-main{
+  width:auto!important;
+  min-width:0!important;
+  margin-left:0!important;
+  margin-right:var(--sidebar-width)!important;
+  margin-inline-start:0!important;
+  margin-inline-end:0!important;
+  transition:margin-right .22s ease,margin-left .22s ease;
+}
+html[dir="ltr"] .app-main{
+  width:auto!important;
+  min-width:0!important;
+  margin-left:var(--sidebar-width)!important;
+  margin-right:0!important;
+  margin-inline-start:0!important;
+  margin-inline-end:0!important;
+  transition:margin-right .22s ease,margin-left .22s ease;
+}
+
+/* Let every workspace layer use the full area left beside the fixed sidebar. */
+.app-main #workspace,
+.app-main #workspaceContent,
+#workspaceContent #costingModuleRoot,
+#costingModuleRoot main.costing-content,
+#costingModuleRoot .toolbar,
+#costingModuleRoot #exampleNotice,
+#costingModuleRoot #slideExamples,
+#costingModuleRoot #mainCalculator,
+#costingModuleRoot .layout{
+  display: block;
+  width:100%;
+  max-width:none!important;
+  min-width:0;
+  box-sizing:border-box;
+}
+#costingModuleRoot .layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(260px,.78fr);
+  gap:16px;
+  align-items:start;
+}
+#costingModuleRoot main.costing-content{
+  margin:0!important;
+  padding:0 clamp(14px,2vw,30px) 28px!important;
+}
+@media(max-width:1100px){
+  #costingModuleRoot .layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:900px){
+  html[dir="rtl"] .app-main,
+  html[dir="ltr"] .app-main{
+    width:auto!important;
+    margin:0!important;
+    padding:23px 16px!important;
+  }
+  .app-main #workspace,
+  .app-main #workspaceContent,
+  #workspaceContent #costingModuleRoot,
+  #costingModuleRoot main.costing-content{
+    width:100%;
+    max-width:none!important;
+  }
+}
+@media(max-width:620px){
+  html[dir="rtl"] .app-main,
+  html[dir="ltr"] .app-main{
+    padding:19px 10px!important;
+  }
+  #costingModuleRoot main.costing-content{padding:0 10px 20px!important}
+  #costingModuleRoot .layout{grid-template-columns:minmax(0,1fr)}
+}
