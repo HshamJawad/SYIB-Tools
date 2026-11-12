@@ -226,10 +226,10 @@ async function exportXLSX(){
  try{
   const wb=new ExcelJS.Workbook();
   wb.creator='SIYB Digital Workshop Tools';
-  wb.subject='SIYB – بيانات وجداول التبويب الحالي';
+  wb.subject='بيانات وجداول أدوات SIYB';
   wb.title='SIYB Data Export';
   const makeSheet=(name,headers)=>{
-   const sh=wb.addWorksheet(name.slice(0,31));
+   const sh=wb.addWorksheet(name);
    sh.views=[{rightToLeft:true,state:'frozen',ySplit:4}];
    sh.addRow(['SIYB DIGITAL WORKSHOP TOOLS']);
    sh.addRow(['تاريخ التصدير',new Date().toLocaleString('ar-IQ')]);
@@ -240,55 +240,50 @@ async function exportXLSX(){
    sh.getRow(4).font={bold:true,color:{argb:'FFFFFFFF'}};
    sh.getRow(4).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF245B75'}};
    sh.getRow(4).alignment={vertical:'middle',horizontal:'center',wrapText:true};
-   sh.autoFilter={from:{row:4,column:1},to:{row:4,column:headers.length}};
    return sh;
   };
-  let fileName='SIYB-export';
-  if(activeExample==='ledger'){
-   const sh=makeSheet('سجل الحسابات',['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة']);
-   sh.addRow(['الفترة',$('ledgerPeriod').value]);
-   ledgerData.forEach(r=>sh.addRow([r.date,r.detail,r.inside,r.outside,r.general]));
-   sh.addRow([]);
-   sh.addRow(['إجمالي المصروفات الظاهرة',ledgerData.reduce((a,r)=>a+r.general,0)]);
-   sh.addRow(['الإجمالي المطبوع في الشريحة',Number($('ledgerPrintedTotal').value)||0]);
-   sh.addRow(['الفرق غير المفسر',Number($('ledgerPrintedTotal').value||0)-ledgerData.reduce((a,r)=>a+r.general,0)]);
-   sh.columns=[{width:18},{width:34},{width:20},{width:20},{width:22}];
-   fileName='SIYB-ledger';
-  }else if(activeExample==='depreciation'){
-   const sh=makeSheet('سجل الإهلاك',['العنصر','تاريخ الشراء','قيمة الشراء','العمر التشغيلي (سنة)','أشهر الاستخدام','الإهلاك السنوي','الإهلاك المتراكم','القيمة الدفترية']);
-   depreciationData.forEach(r=>{
-    const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
-    sh.addRow([r.name,r.date,r.purchase,r.life,r.months,annual,acc,r.purchase-acc]);
-   });
-   const totals=depreciationData.reduce((a,r)=>{
-    const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
-    a.purchase+=r.purchase;a.annual+=annual;a.acc+=acc;a.book+=r.purchase-acc;return a;
-   },{purchase:0,annual:0,acc:0,book:0});
-   sh.addRow([]);sh.addRow(['الإجمالي','',totals.purchase,'','',totals.annual,totals.acc,totals.book]);
-   sh.columns=[{width:34},{width:18},{width:18},{width:22},{width:18},{width:18},{width:20},{width:20}];
-   fileName='SIYB-depreciation';
-  }else if(activeExample==='overheadExercise'){
-   const sh=makeSheet('تحميل التكاليف',['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية']);
-   const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
-   overheadProducts.forEach(p=>sh.addRow([p.name,p.direct,p.direct*rate,p.direct*(1+rate)]));
-   sh.addRow([]);sh.addRow(['النفقات غير المباشرة الشهرية',oh]);sh.addRow(['إجمالي المواد المباشرة الشهرية',dm]);sh.addRow(['نسبة التحميل',rate]);
-   sh.columns=[{width:48},{width:24},{width:24},{width:22}];
-   fileName='SIYB-overhead-costing';
-  }else{
-   const sh=makeSheet('احتساب التكاليف',['المنتج','الوحدات','المواد المباشرة الإجمالية','العمل المباشر الإجمالي','مواد/وحدة','عمل/وحدة','تصنيع غير مباشر/وحدة','نفقات عامة/وحدة','التكلفة الكاملة/وحدة','سعر البيع','ربح/وحدة']);
-   sh.addRow(['المقاولة',$('business').value,'الفترة',$('period').value,'العملة',$('currency').value]);
-   const direct=products.reduce((s,p)=>s+p.materials+p.labor,0),mfg=val('manufacturingOH'),gen=val('generalOH');
-   let mr=direct?mfg/direct:0,gr=direct?gen/direct:0;
-   if(activeExample==='textile'){mr=Math.round(mr*100)/100;gr=Math.round(gr*100)/100;}
-   products.forEach(p=>{
-    const valid=p.units>0,mat=valid?p.materials/p.units:0,lab=valid?p.labor/p.units:0,base=mat+lab;
-    const full=base*(1+mr+gr),profit=p.price>0?p.price-full:null;
-    sh.addRow([p.name,p.units,p.materials,p.labor,mat,lab,base*mr,base*gr,full,p.price||null,profit]);
-   });
-   sh.addRow([]);sh.addRow(['ملخص التكاليف']);sh.addRow(['إجمالي التكاليف المباشرة',direct]);sh.addRow(['نفقات التصنيع غير المباشرة',mfg]);sh.addRow(['النفقات العامة',gen]);sh.addRow(['نسبة نفقات التصنيع غير المباشرة',mr]);sh.addRow(['نسبة النفقات العامة',gr]);sh.addRow(['إجمالي تكلفة الإنتاج',direct+mfg+gen]);
-   sh.columns=[{width:34},{width:14},{width:22},{width:22},{width:15},{width:15},{width:22},{width:20},{width:22},{width:14},{width:14}];
-   fileName='SIYB-business-costing';
-  }
+  // Sheet 1: the live business costing inputs and calculated unit costs.
+  const cost=makeSheet('احتساب التكاليف',['المنتج','الوحدات','المواد المباشرة الإجمالية','العمل المباشر الإجمالي','مواد/وحدة','عمل/وحدة','تصنيع غير مباشر/وحدة','نفقات عامة/وحدة','التكلفة الكاملة/وحدة','سعر البيع','ربح/وحدة']);
+  cost.addRow(['المقاولة',$('business').value,'الفترة',$('period').value,'العملة',$('currency').value]);
+  const direct=products.reduce((s,p)=>s+p.materials+p.labor,0),mfg=val('manufacturingOH'),gen=val('generalOH');
+  let mr=direct?mfg/direct:0,gr=direct?gen/direct:0;
+  if(activeExample==='textile'){mr=Math.round(mr*100)/100;gr=Math.round(gr*100)/100;}
+  products.forEach(p=>{
+   const valid=p.units>0,mat=valid?p.materials/p.units:0,lab=valid?p.labor/p.units:0,base=mat+lab;
+   const full=base*(1+mr+gr),profit=p.price>0?p.price-full:null;
+   cost.addRow([p.name,p.units,p.materials,p.labor,mat,lab,base*mr,base*gr,full,p.price||null,profit]);
+  });
+  cost.addRow([]);cost.addRow(['ملخص التكاليف']);cost.addRow(['إجمالي التكاليف المباشرة',direct]);cost.addRow(['نفقات التصنيع غير المباشرة',mfg]);cost.addRow(['النفقات العامة',gen]);cost.addRow(['نسبة نفقات التصنيع غير المباشرة',mr]);cost.addRow(['نسبة النفقات العامة',gr]);cost.addRow(['إجمالي تكلفة الإنتاج',direct+mfg+gen]);
+  cost.columns=[{width:34},{width:14},{width:22},{width:22},{width:15},{width:15},{width:22},{width:20},{width:22},{width:14},{width:14}];
+
+  // Sheet 2: editable ledger values and reconciliation.
+  const ledger=makeSheet('سجل الحسابات',['التاريخ','التفاصيل','داخل الصندوق','خارج الصندوق','المصروفات العامة']);
+  ledger.addRow(['الفترة',$('ledgerPeriod').value]);
+  ledgerData.forEach(r=>ledger.addRow([r.date,r.detail,r.inside,r.outside,r.general]));
+  const visibleExpenses=ledgerData.reduce((a,r)=>a+r.general,0),printed=Number($('ledgerPrintedTotal').value)||0;
+  ledger.addRow([]);ledger.addRow(['إجمالي المصروفات الظاهرة',visibleExpenses]);ledger.addRow(['الإجمالي المطبوع في الشريحة',printed]);ledger.addRow(['الفرق غير المفسر',printed-visibleExpenses]);
+  ledger.columns=[{width:18},{width:34},{width:20},{width:20},{width:22}];
+
+  // Sheet 3: depreciation inputs and calculated values.
+  const depr=makeSheet('سجل الإهلاك',['العنصر','تاريخ الشراء','قيمة الشراء','العمر التشغيلي (سنة)','أشهر الاستخدام','الإهلاك السنوي','الإهلاك المتراكم','القيمة الدفترية']);
+  depreciationData.forEach(r=>{
+   const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
+   depr.addRow([r.name,r.date,r.purchase,r.life,r.months,annual,acc,r.purchase-acc]);
+  });
+  const dt=depreciationData.reduce((a,r)=>{
+   const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
+   a.purchase+=r.purchase;a.annual+=annual;a.acc+=acc;a.book+=r.purchase-acc;return a;
+  },{purchase:0,annual:0,acc:0,book:0});
+  depr.addRow([]);depr.addRow(['الإجمالي','',dt.purchase,'','',dt.annual,dt.acc,dt.book]);
+  depr.columns=[{width:34},{width:18},{width:18},{width:22},{width:18},{width:18},{width:20},{width:20}];
+
+  // Sheet 4: overhead allocation exercise.
+  const ohSheet=makeSheet('تحميل التكاليف',['المنتج','التكلفة المباشرة للوحدة','التكلفة غير المباشرة','التكلفة الكلية']);
+  const oh=Number($('ohMonthly').value)||0,dm=Number($('dmMonthly').value)||0,rate=dm?oh/dm:0;
+  overheadProducts.forEach(p=>ohSheet.addRow([p.name,p.direct,p.direct*rate,p.direct*(1+rate)]));
+  ohSheet.addRow([]);ohSheet.addRow(['النفقات غير المباشرة الشهرية',oh]);ohSheet.addRow(['إجمالي المواد المباشرة الشهرية',dm]);ohSheet.addRow(['نسبة التحميل',rate]);
+  ohSheet.columns=[{width:48},{width:24},{width:24},{width:22}];
+
   wb.eachSheet(sh=>sh.eachRow(row=>row.eachCell(cell=>{
    cell.alignment={vertical:'middle',wrapText:true};
    if(typeof cell.value==='number')cell.numFmt='#,##0.00;[Red]-#,##0.00';
@@ -296,10 +291,10 @@ async function exportXLSX(){
   const buffer=await wb.xlsx.writeBuffer();
   const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=fileName+'-'+new Date().toISOString().slice(0,10)+'.xlsx';
+  a.href=url;a.download='SIYB-all-workflows-'+new Date().toISOString().slice(0,10)+'.xlsx';
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
-  toast('تم تصدير بيانات وجداول التبويب الحالي إلى Excel');
+  toast('تم تصدير جميع بيانات وجداول الأداة إلى ملف Excel واحد');
  }catch(error){
   console.error('SIYB Excel export failed:',error);
   toast('تعذر تصدير البيانات. يرجى المحاولة مرة أخرى.');
