@@ -159,3 +159,22 @@
  #costingModuleRoot .data,#costingModuleRoot .resulttable{font-size:13px!important}
  #costingModuleRoot .mvalue{font-size:20px!important}
 }
+
+/* Business summary card: brand palette (blue #24A8E0, orange #F48D01, green #A4CF06) with black text */
+#costingModuleRoot .summary-card{--brand-blue:#24A8E0;--brand-orange:#F48D01;--brand-green:#A4CF06;--brand-ink:#111;border-top:4px solid var(--brand-blue)}
+#costingModuleRoot .summary-card .cardhead h2,
+#costingModuleRoot .summary-card .mvalue,
+#costingModuleRoot .summary-card .rowline strong{color:var(--brand-ink)!important}
+#costingModuleRoot .summary-card .cardhead p,
+#costingModuleRoot .summary-card .mlabel,
+#costingModuleRoot .summary-card .rowline span{color:#111}
+#costingModuleRoot .summary-card .tag{color:var(--brand-ink);background:#24A8E01f;border:1px solid #24A8E066;border-radius:99px;padding:3px 10px}
+#costingModuleRoot .summary-card .metric{border-width:1px 1px 1px 1px;border-inline-start:5px solid var(--line)}
+#costingModuleRoot .summary-card .metric.blue{background:#24A8E01a;border-color:#24A8E04d;border-inline-start-color:var(--brand-blue)}
+#costingModuleRoot .summary-card .metric.orange{background:#F48D011a;border-color:#F48D014d;border-inline-start-color:var(--brand-orange)}
+#costingModuleRoot .summary-card .metric.green{background:#A4CF061f;border-color:#A4CF0666;border-inline-start-color:var(--brand-green)}
+#costingModuleRoot .summary-card .metric.neutral{background:#fff;border-color:var(--line);border-inline-start-color:#111}
+#costingModuleRoot .summary-card .bar{background:#eef2f5}
+#costingModuleRoot .summary-card #bDirect{background:var(--brand-blue)}
+#costingModuleRoot .summary-card #bMfg{background:var(--brand-orange)}
+#costingModuleRoot .summary-card #bGeneral{background:var(--brand-green)}
