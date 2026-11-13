@@ -14,7 +14,8 @@
 </select></div></div>
 <div id="exampleNotice" class="callout" style="margin:0 0 15px;display:none"></div>
 <section id="slideExamples" style="display:none">
- <div class="card" id="ledgerPanel" style="display:none">
+ <div id="ledgerPanel" style="display:none"><div class="layout"><section>
+ <div class="card">
   <div class="cardhead"><div><h2>مثال الشرائح | سجل الحسابات الأساسية</h2><p>تسجيل حركة الصندوق والبنك واستخراج المصروفات العامة من سجل العمليات.</p></div><span class="tag">SLIDE EXAMPLE · 52</span></div>
   <div class="body">
    <div class="fields">
@@ -22,29 +23,57 @@
     <div class="field"><label>إجمالي المصروفات العامة كما يظهر في الشريحة</label><input id="ledgerPrintedTotal" type="number" value="2000" min="0" step=".01"></div>
    </div>
    <div class="tablewrap"><table class="resulttable"><thead><tr><th>التاريخ</th><th>التفاصيل</th><th>داخل الصندوق</th><th>خارج الصندوق</th><th>المصروفات العامة</th></tr></thead><tbody id="ledgerRows"></tbody></table></div>
-   <div class="kpis" style="margin-top:14px">
-    <div class="kpi"><small>المصروفات الظاهرة مفصلة</small><strong id="ledgerVisible">1,030</strong></div>
-    <div class="kpi"><small>الإجمالي المطبوع في الشريحة</small><strong id="ledgerTotal">2,000</strong></div>
-    <div class="kpi"><small>الفرق غير المفسر في الصورة</small><strong id="ledgerGap">970</strong></div>
-   </div>
    <div class="callout" id="ledgerNote">تنبيه تدقيقي: مجموع البنود الظاهرة في صورة الشريحة هو 1,030، بينما يظهر في خانة الإجمالي 2,000. لا يمكن مطابقة الفرق من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.</div>
    <p class="hint">يمكن تعديل المبالغ في الجدول. يتم تحديث مجموع المصروفات الظاهرة والفرق تلقائياً. معاملات المبيعات والتحويل بين الصندوق والبنك ليست مصروفات عامة.</p>
   </div>
  </div>
- <div class="card" id="deprPanel" style="display:none">
+</section>
+<aside>
+<div class="card summary-card"><div class="cardhead"><div><h2>ملخص المقاولة</h2><p>المؤشرات الأساسية للفترة</p></div><span class="tag">LIVE SUMMARY</span></div><div class="body">
+<div class="metrics">
+<div class="metric blue"><div class="mlabel">المصروفات الظاهرة مفصلة</div><div class="mvalue" id="ledgerVisible">—</div></div>
+<div class="metric green"><div class="mlabel">الإجمالي المطبوع في الشريحة</div><div class="mvalue" id="ledgerTotal">—</div></div>
+<div class="metric orange"><div class="mlabel">الفرق غير المفسر في الصورة</div><div class="mvalue" id="ledgerGap">—</div></div>
+<div class="metric neutral"><div class="mlabel">عدد بنود المصروفات العامة</div><div class="mvalue" id="ledgerCount">—</div></div>
+</div><div class="divider"></div>
+<div class="rows">
+<div class="rowline"><span>إجمالي داخل الصندوق</span><strong id="ledgerInside">—</strong></div>
+<div class="rowline"><span>إجمالي خارج الصندوق</span><strong id="ledgerOutside">—</strong></div>
+</div>
+<div class="divider"></div><div class="mlabel">تغطية الإجمالي المطبوع</div><div class="rows">
+<div class="rowline"><span>نسبة المصروفات الظاهرة من الإجمالي</span><strong id="ledgerCover">—</strong></div><div class="bar"><span class="blue" id="ledgerCoverBar"></span></div>
+</div></div></div>
+</aside>
+</div></div>
+<div id="deprPanel" style="display:none"><div class="layout"><section>
+ <div class="card">
   <div class="cardhead"><div><h2>مثال الشرائح | حساب تكاليف الإهلاك أو الاندثار</h2><p>حساب الإهلاك السنوي والمتراكم والقيمة الدفترية للأصول.</p></div><span class="tag">SLIDE EXAMPLE · 53</span></div>
   <div class="body">
    <div class="callout">طريقة القسط الثابت وفق أرقام الشريحة: الإهلاك السنوي = قيمة الشراء ÷ العمر التشغيلي بالسنوات. الإهلاك المتراكم = الإهلاك السنوي × أشهر الاستخدام ÷ 12. القيمة الدفترية = قيمة الشراء − الإهلاك المتراكم.</div>
    <div class="tablewrap"><table class="resulttable"><thead><tr><th>اسم العنصر</th><th>تاريخ الشراء</th><th>قيمة الشراء</th><th>العمر التشغيلي (سنة)</th><th>أشهر الاستخدام</th><th>الإهلاك السنوي</th><th>الإهلاك المتراكم</th><th>القيمة الدفترية</th></tr></thead><tbody id="deprRows"></tbody><tfoot><tr><th colspan="2">المجموع</th><th id="dPurchase">4,800</th><th>—</th><th>—</th><th id="dAnnual">630</th><th id="dAccum">1,707.5</th><th id="dBook">3,092.5</th></tr></tfoot></table></div>
-   <div class="kpis" style="margin-top:14px">
-    <div class="kpi"><small>إجمالي قيمة الأصول</small><strong id="dPurchaseK">4,800</strong></div>
-    <div class="kpi"><small>إجمالي الإهلاك السنوي</small><strong id="dAnnualK">630</strong></div>
-    <div class="kpi"><small>صافي القيمة الدفترية</small><strong id="dBookK">3,092.5</strong></div>
-   </div>
    <p class="hint">يمكن تعديل تاريخ الشراء وقيمة الأصل والعمر التشغيلي وأشهر الاستخدام. الأرقام الافتراضية مطابقة لما يظهر في الشريحة المرفقة، مع تقريب النتائج إلى منزلة عشرية واحدة.</p>
   </div>
  </div>
- <div class="card" id="overheadPanel" style="display:none">
+</section>
+<aside>
+<div class="card summary-card"><div class="cardhead"><div><h2>ملخص المقاولة</h2><p>المؤشرات الأساسية للفترة</p></div><span class="tag">LIVE SUMMARY</span></div><div class="body">
+<div class="metrics">
+<div class="metric blue"><div class="mlabel">إجمالي قيمة الأصول</div><div class="mvalue" id="dPurchaseK">—</div></div>
+<div class="metric orange"><div class="mlabel">إجمالي الإهلاك السنوي</div><div class="mvalue" id="dAnnualK">—</div></div>
+<div class="metric green"><div class="mlabel">صافي القيمة الدفترية</div><div class="mvalue" id="dBookK">—</div></div>
+<div class="metric neutral"><div class="mlabel">عدد الأصول</div><div class="mvalue" id="dCount">—</div></div>
+</div><div class="divider"></div>
+<div class="rows">
+<div class="rowline"><span>الإهلاك المتراكم</span><strong id="dAccumK">—</strong></div>
+</div>
+<div class="divider"></div><div class="mlabel">توزيع قيمة الأصول</div><div class="rows">
+<div class="rowline"><span>نسبة الإهلاك المتراكم</span><strong id="dPctAccum">—</strong></div><div class="bar"><span class="orange" id="dBarAccum"></span></div>
+<div class="rowline"><span>نسبة القيمة الدفترية</span><strong id="dPctBook">—</strong></div><div class="bar"><span class="green" id="dBarBook"></span></div>
+</div></div></div>
+</aside>
+</div></div>
+<div id="overheadPanel" style="display:none"><div class="layout"><section>
+ <div class="card">
   <div class="cardhead"><div><h2>مثال الشرائح | تحميل التكاليف غير المباشرة على المنتجات</h2><p>احتساب نسبة التحميل ثم حساب تكلفة الوحدة لأربعة منتجات.</p></div><span class="tag">SLIDES 59–61</span></div>
   <div class="body">
    <div class="fields">
@@ -54,14 +83,28 @@
    </div>
    <div class="callout">معادلة الشريحة: نسبة التحميل = (التكاليف غير المباشرة الشهرية ÷ تكاليف المواد المباشرة الشهرية) × 100. ثم: التكلفة غير المباشرة للمنتج = تكلفة المواد المباشرة للوحدة × نسبة التحميل.</div>
    <div class="tablewrap" style="margin-top:14px"><table class="resulttable"><thead><tr><th>المنتج</th><th>تكلفة المواد المباشرة للوحدة (أ)</th><th>التكلفة غير المباشرة للوحدة (ب)</th><th>التكلفة الإجمالية للوحدة (أ + ب)</th></tr></thead><tbody id="ohProducts"></tbody></table></div>
-   <div class="kpis" style="margin-top:14px">
-    <div class="kpi"><small>نسبة التحميل المحسوبة</small><strong id="ohRateResult">19.55%</strong></div>
-    <div class="kpi"><small>التكلفة غير المباشرة لفول مدمس</small><strong id="ohFirstIndirect">0.15</strong></div>
-    <div class="kpi"><small>التكلفة الإجمالية لفول مدمس</small><strong id="ohFirstTotal">0.90</strong></div>
-   </div>
    <p class="hint">الأرقام الأساسية من الشرائح: 2,053 ÷ 10,500 = 19.55% تقريباً. يعرض التطبيق النتائج إلى منزلتين عشريتين، بينما قد تظهر فروق طفيفة عند التقريب مقارنة بالحساب اليدوي في الشريحة.</p>
   </div>
  </div>
+</section>
+<aside>
+<div class="card summary-card"><div class="cardhead"><div><h2>ملخص المقاولة</h2><p>المؤشرات الأساسية للفترة</p></div><span class="tag">LIVE SUMMARY</span></div><div class="body">
+<div class="metrics">
+<div class="metric neutral"><div class="mlabel">نسبة التحميل المحسوبة</div><div class="mvalue" id="ohRateResult">—</div></div>
+<div class="metric blue"><div class="mlabel">التكلفة المباشرة لفول مدمس</div><div class="mvalue" id="ohFirstDirect">—</div></div>
+<div class="metric orange"><div class="mlabel">التكلفة غير المباشرة لفول مدمس</div><div class="mvalue" id="ohFirstIndirect">—</div></div>
+<div class="metric green"><div class="mlabel">التكلفة الإجمالية لفول مدمس</div><div class="mvalue" id="ohFirstTotal">—</div></div>
+</div><div class="divider"></div>
+<div class="rows">
+<div class="rowline"><span>التكاليف غير المباشرة الشهرية</span><strong id="ohMonthlyK">—</strong></div>
+<div class="rowline"><span>تكاليف المواد المباشرة الشهرية</span><strong id="dmMonthlyK">—</strong></div>
+</div>
+<div class="divider"></div><div class="mlabel">توزيع تكلفة فول مدمس</div><div class="rows">
+<div class="rowline"><span>المواد المباشرة</span><strong id="ohPctDirect">—</strong></div><div class="bar"><span class="blue" id="ohBarDirect"></span></div>
+<div class="rowline"><span>التكاليف غير المباشرة</span><strong id="ohPctIndirect">—</strong></div><div class="bar"><span class="orange" id="ohBarIndirect"></span></div>
+</div></div></div>
+</aside>
+</div></div>
 </section>
 <div id="mainCalculator">
 <div class="layout">
