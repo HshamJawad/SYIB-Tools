@@ -275,5 +275,17 @@ window.SIYB_UI_TEXT = {
   "تنبيه تدقيقي: مجموع البنود الظاهرة في الصورة هو ": "Audit note: The visible items in the image total ",
   "، بينما يظهر في خانة الإجمالي ": "; the total field shows ",
   ". الفرق ": " . The difference is ",
-  " لا يمكن تفسيره من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.": " cannot be explained from the visible portion, so no transactions absent from the image have been added."
+  " لا يمكن تفسيره من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.": " cannot be explained from the visible portion, so no transactions absent from the image have been added.",
+  "عدد بنود المصروفات العامة": "General Expense Items",
+  "إجمالي داخل الصندوق": "Total Cash In",
+  "إجمالي خارج الصندوق": "Total Cash Out",
+  "تغطية الإجمالي المطبوع": "Printed Total Coverage",
+  "نسبة المصروفات الظاهرة من الإجمالي": "Visible Expenses as % of Total",
+  "عدد الأصول": "Number of Assets",
+  "توزيع قيمة الأصول": "Asset Value Breakdown",
+  "نسبة الإهلاك المتراكم": "Accumulated Depreciation %",
+  "نسبة القيمة الدفترية": "Book Value %",
+  "التكلفة المباشرة لفول مدمس": "Fava Bean Product Direct Cost",
+  "توزيع تكلفة فول مدمس": "Fava Bean Product Cost Breakdown",
+  "التكاليف غير المباشرة": "Indirect Costs",
 };

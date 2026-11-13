@@ -178,3 +178,8 @@
 #costingModuleRoot .summary-card #bDirect{background:var(--brand-blue)}
 #costingModuleRoot .summary-card #bMfg{background:var(--brand-orange)}
 #costingModuleRoot .summary-card #bGeneral{background:var(--brand-green)}
+#costingModuleRoot .summary-card .bar span.blue{background:var(--brand-blue)}
+#costingModuleRoot .summary-card .bar span.orange{background:var(--brand-orange)}
+#costingModuleRoot .summary-card .bar span.green{background:var(--brand-green)}
+#costingModuleRoot #slideExamples .layout>aside .summary-card{position:sticky;top:12px}
+@media(max-width:900px){#costingModuleRoot #slideExamples .layout>aside .summary-card{position:static}}

@@ -153,6 +153,8 @@ function showSlideExample(which){
  if(which==='ledger'){renderLedger();}
  if(which==='depreciation'){renderDepreciation();}
 }
+function setBar(id,v){const el=$(id);if(el)el.style.width=Math.max(0,Math.min(100,Number.isFinite(v)?v:0))+'%';}
+function pctText(v){return Number.isFinite(v)?v.toFixed(1)+'%':'—';}
 function renderLedger(){
  const body=$('ledgerRows');body.innerHTML='';
  ledgerData.forEach((r,i)=>{
@@ -172,6 +174,10 @@ function renderLedger(){
 function calcLedger(){
  const visible=ledgerData.reduce((s,r)=>s+r.general,0),printed=parseNumber($('ledgerPrintedTotal').value),gap=printed-visible;
  $('ledgerVisible').textContent=fmt(visible);$('ledgerTotal').textContent=fmt(printed);$('ledgerGap').textContent=fmt(gap);
+ const cover=printed>0?visible/printed*100:0;
+ $('ledgerCount').textContent=fmt(ledgerData.filter(r=>r.general>0).length);
+ $('ledgerInside').textContent=fmt(ledgerData.reduce((s,r)=>s+r.inside,0));$('ledgerOutside').textContent=fmt(ledgerData.reduce((s,r)=>s+r.outside,0));
+ $('ledgerCover').textContent=printed>0?pctText(cover):'—';setBar('ledgerCoverBar',cover);
  $('ledgerNote').textContent=Math.abs(gap)<0.001?'تطابق الإجمالي المطبوع مع مجموع البنود الظاهرة.':'تنبيه تدقيقي: مجموع البنود الظاهرة في الصورة هو '+fmt(visible)+'، بينما يظهر في خانة الإجمالي '+fmt(printed)+'. الفرق '+fmt(gap)+' لا يمكن تفسيره من الجزء الظاهر؛ لذلك لم أضف معاملات غير موجودة في الصورة.';
 }
 function renderDepreciation(){
@@ -195,6 +201,9 @@ function renderDepreciation(){
  },{purchase:0,annual:0,acc:0,book:0});
  $('dPurchase').textContent=fmt(totals.purchase);$('dAnnual').textContent=fmt(totals.annual);$('dAccum').textContent=fmt(totals.acc);$('dBook').textContent=fmt(totals.book);
  $('dPurchaseK').textContent=fmt(totals.purchase);$('dAnnualK').textContent=fmt(totals.annual);$('dBookK').textContent=fmt(totals.book);
+ $('dAccumK').textContent=fmt(totals.acc);$('dCount').textContent=fmt(depreciationData.length);
+ const pa=totals.purchase>0?totals.acc/totals.purchase*100:0,pb=totals.purchase>0?totals.book/totals.purchase*100:0;
+ $('dPctAccum').textContent=totals.purchase>0?pctText(pa):'—';$('dPctBook').textContent=totals.purchase>0?pctText(pb):'—';setBar('dBarAccum',pa);setBar('dBarBook',pb);
 }
 
 
@@ -224,6 +233,9 @@ function calculateOverheadExercise(){
  if(window.SIYBRefreshLocaleDigits)window.SIYBRefreshLocaleDigits($('overheadPanel'));
  overheadProducts.forEach((p,i)=>{const indirect=p.direct*rate,total=p.direct+indirect;$('ohIndirect'+i).textContent=dm>0?indirect.toFixed(2):'—';$('ohTotal'+i).textContent=dm>0?total.toFixed(2):'—';});
  const first=overheadProducts[0].direct;$('ohFirstIndirect').textContent=dm>0?(first*rate).toFixed(2):'—';$('ohFirstTotal').textContent=dm>0?(first*(1+rate)).toFixed(2):'—';
+ $('ohFirstDirect').textContent=first.toFixed(2);$('ohMonthlyK').textContent=fmt(oh);$('dmMonthlyK').textContent=fmt(dm);
+ const share=dm>0?rate/(1+rate)*100:0;
+ $('ohPctDirect').textContent=dm>0?pctText(100-share):'—';$('ohPctIndirect').textContent=dm>0?pctText(share):'—';setBar('ohBarDirect',dm>0?100-share:0);setBar('ohBarIndirect',share);
 }
 
 async function exportXLSX(){
