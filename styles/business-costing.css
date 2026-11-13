@@ -183,3 +183,35 @@
 #costingModuleRoot .summary-card .bar span.green{background:var(--brand-green)}
 #costingModuleRoot #slideExamples .layout>aside .summary-card{position:sticky;top:12px}
 @media(max-width:900px){#costingModuleRoot #slideExamples .layout>aside .summary-card{position:static}}
+
+/* Training Mode: interactive exercises (brand palette: blue #24A8E0, orange #F48D01, green #A4CF06) */
+#costingModuleRoot .training-banner{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 16px;border-radius:12px;background:#24A8E014;border:1px solid #24A8E055;border-inline-start:6px solid #24A8E0;color:#111;font-size:14px}
+#costingModuleRoot .training-banner .tb-icon{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:10px;background:#24A8E0;color:#fff;font-size:18px}
+#costingModuleRoot .training-card{border-top:4px solid #F48D01}
+#costingModuleRoot .training-card .cardhead h2{color:#111}
+#costingModuleRoot .training-card .tag{color:#111;background:#F48D0126;border:1px solid #F48D0166;border-radius:99px;padding:3px 10px}
+#costingModuleRoot .training-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+#costingModuleRoot .tsep{flex:1 1 12px}
+#costingModuleRoot .tbtn{border:1px solid #cfd9e0;background:#fff;color:#111;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+#costingModuleRoot .tbtn:hover:not(:disabled){background:#f3f8fa}
+#costingModuleRoot .tbtn:disabled{opacity:.45;cursor:not-allowed}
+#costingModuleRoot .tbtn.primary{background:#24A8E0;border-color:#24A8E0;color:#fff}
+#costingModuleRoot .tbtn.primary:hover{background:#1c92c4}
+#costingModuleRoot .tbtn.active{background:#F48D01;border-color:#F48D01;color:#fff}
+#costingModuleRoot .tseed{display:flex;align-items:center;gap:6px;font-size:13px;color:#111}
+#costingModuleRoot .tseed-input{width:96px;padding:8px;border:1px solid #cfd9e0;border-radius:8px;text-align:center}
+#costingModuleRoot .tset{margin:0 0 12px;font-size:13px;font-weight:700;color:#111}
+#costingModuleRoot .tcell{min-width:96px}
+#costingModuleRoot .tin{width:100%;min-width:84px;padding:8px;border:2px solid #cfd9e0;border-radius:8px;background:#fff;color:#111;text-align:center;direction:ltr}
+#costingModuleRoot .tin:focus{outline:none;border-color:#24A8E0;box-shadow:0 0 0 3px #24A8E033}
+#costingModuleRoot .tin.ok{border-color:#A4CF06;background:#A4CF0626}
+#costingModuleRoot .tin.bad,#costingModuleRoot .tin.empty{border-color:#F48D01;background:#F48D011a}
+#costingModuleRoot .tin.sol{border-color:#24A8E0;background:#24A8E01a;font-weight:800}
+#costingModuleRoot .tfb{margin-top:4px;font-size:12px;color:#111}
+#costingModuleRoot .tfb-ok{font-weight:800}
+#costingModuleRoot .tfb-bad{display:block;font-weight:800}
+#costingModuleRoot .tsteps{margin-top:4px;padding:6px 8px;border-radius:8px;background:#fff;border:1px dashed #24A8E088;line-height:1.5}
+#costingModuleRoot .tnum{font-weight:700}
+#costingModuleRoot .tstatus{margin-top:14px;color:#111}
+body.mode-training .global-sidebar .sidebar-training-note{border-inline-start:3px solid #F48D01}
+@media(max-width:700px){#costingModuleRoot .tcell{min-width:80px}#costingModuleRoot .tbtn{flex:1 1 40%}}
