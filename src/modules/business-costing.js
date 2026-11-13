@@ -150,8 +150,8 @@ function showSlideExample(which){
  $('exampleNotice').textContent='';
  $('exampleNotice').style.display='none';
  if(which==='overheadExercise'){renderOverheadExercise();}
- if(which==='ledger'){renderLedger();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 52 المرفقة: سجل الحسابات الأساسية لشهر تشرين الأول/أكتوبر 2017.';$('exampleNotice').style.display='block';}
- if(which==='depreciation'){renderDepreciation();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 53 المرفقة: سجل الإهلاك/الاندثار بتاريخ 31/12/2017.';$('exampleNotice').style.display='block';}
+ if(which==='ledger'){renderLedger();}
+ if(which==='depreciation'){renderDepreciation();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 53 المرفقة: سجل الإهلاك/الاندثار.';$('exampleNotice').style.display='block';}
 }
 function renderLedger(){
  const body=$('ledgerRows');body.innerHTML='';
