@@ -72,6 +72,8 @@ window.SIYB_UI_TEXT = {
   "بيانات العمل": "Business Data",
   "الحالة / المثال التدريبي": "Scenario / Training Example",
   "بيانات جديدة / إدخال يدوي": "New Data / Manual Entry",
+  "سجل الحسابات الأساسية": "Basic Accounts Ledger",
+  "حساب تكاليف الإهلاك": "Depreciation Cost Calculation",
   "مثال الشرائح: سجل الحسابات الأساسية والمصروفات العامة": "Slide Example: Basic Accounts and General Expenses Ledger",
   "مثال الشرائح: حساب تكاليف الإهلاك والاندثار": "Slide Example: Depreciation Calculation",
   "مثال الفول المدمس والمنتجات الأخرى – تحميل التكاليف غير المباشرة": "Fava Beans and Other Products – Overhead Allocation Exercise",
