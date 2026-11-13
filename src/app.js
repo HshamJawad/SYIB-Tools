@@ -230,7 +230,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.17";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.18";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -321,7 +321,7 @@
     if (!button || !activeMode) return;
     setActiveNav(button.dataset.navItem);
     if (activeMode === "business") {
-      loadCostingModule("business", "textile");
+      loadCostingModule("business", button.dataset.example || "textile");
     } else {
       loadCostingModule("training", button.dataset.example || "overheadExercise");
     }
