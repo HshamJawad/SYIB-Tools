@@ -93,7 +93,7 @@ window.SIYB_UI_TEXT = {
   "الفرق غير المفسر في الصورة": "Unexplained Difference in the Image",
   "يمكن تعديل المبالغ في الجدول. يتم تحديث مجموع المصروفات الظاهرة والفرق تلقائياً. معاملات المبيعات والتحويل بين الصندوق والبنك ليست مصروفات عامة.": "You can edit amounts in the table. Visible expense totals and differences update automatically. Sales and cash-bank transfers are not general expenses.",
   "مثال الشرائح | حساب تكاليف الإهلاك أو الاندثار": "Slide Example | Depreciation Calculation",
-  "حساب الإهلاك السنوي والمتراكم والقيمة الدفترية في 31/12/2017.": "Calculate annual and accumulated depreciation and book value as of 31/12/2017.",
+  "حساب الإهلاك السنوي والمتراكم والقيمة الدفترية للأصول.": "Calculate annual and accumulated depreciation and book value of assets.",
   "طريقة القسط الثابت وفق أرقام الشريحة: الإهلاك السنوي = قيمة الشراء ÷ العمر التشغيلي بالسنوات. الإهلاك المتراكم = الإهلاك السنوي × أشهر الاستخدام ÷ 12. القيمة الدفترية = قيمة الشراء − الإهلاك المتراكم.": "Straight-line method: Annual depreciation = purchase value ÷ useful life in years. Accumulated depreciation = annual depreciation × months used ÷ 12. Book value = purchase value − accumulated depreciation.",
   "اسم العنصر": "Asset Item",
   "تاريخ الشراء": "Purchase Date",
