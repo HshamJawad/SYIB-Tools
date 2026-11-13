@@ -236,7 +236,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.23";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.4.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -251,6 +251,24 @@
     }
   }
 
+  let trainingScriptPromise = null;
+  async function ensureTrainingScript() {
+    if (window.SIYBTraining) return;
+    if (!trainingScriptPromise) {
+      trainingScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = assetUrl("src/modules/training.js") + "?v=0.4.0";
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
+        document.body.appendChild(script);
+      }).catch((error) => {
+        trainingScriptPromise = null;
+        throw error;
+      });
+    }
+    await trainingScriptPromise;
+  }
+
   function setGlobalExportActionsVisible(visible) {
     const actions = $("globalExportActions");
     if (actions) actions.hidden = !visible;
@@ -262,6 +280,24 @@
     $("welcomeScreen").hidden = true;
     $("workspace").hidden = false;
     host.innerHTML = '<div class="workspace-loading"><span class="loading-spinner"></span><strong>جارٍ تحميل أداة احتساب التكاليف...</strong></div>';
+
+    document.body.classList.toggle("mode-training", mode === "training");
+
+    if (mode === "training") {
+      try {
+        await ensureTrainingScript();
+        const key = window.SIYBTraining.exercises.includes(exampleKey) ? exampleKey : "overheadExercise";
+        host.innerHTML = '<div id="costingModuleRoot" class="costing-tool training-root"><main class="costing-content"><div id="trainingMount"></div></main></div>';
+        window.SIYBTraining.mount($("trainingMount"), key);
+        translateUiTree(host);
+        refreshLocaleDigits(host);
+      } catch (error) {
+        console.error("Training Mode loading failed:", error);
+        host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل التمرين</strong><p dir="ltr">' +
+          String(error && error.message || error).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])) + '</p></div>';
+      }
+      return;
+    }
 
     try {
       const htmlUrl = assetUrl("src/modules/business-costing.html");
@@ -295,6 +331,7 @@
   async function activateMode(mode) {
     if (mode !== "business" && mode !== "training") return;
     activeMode = mode;
+    document.body.classList.toggle("mode-training", mode === "training");
     setActiveModeButton(mode);
     setSidebarGroup(mode);
     closeMobileSidebar();
@@ -310,7 +347,7 @@
     } else {
       $("workspaceEyebrow").textContent = language === "ar" ? "وضع التدريب" : "TRAINING MODE";
       $("workspaceTitle").textContent = "تمارين احتساب التكاليف";
-      $("workspaceDescription").textContent = "تدرب على تسجيل المصروفات، تحميل التكاليف غير المباشرة، واحتساب الإهلاك.";
+      $("workspaceDescription").textContent = "أدخل حساباتك بنفسك، تحقق من إجاباتك، وراجع خطوات الحل الصحيحة. يمكن للمدرب عرض الحل النموذجي وتوليد أرقام جديدة لكل مجموعة.";
       $("workspaceBadgeNumber").textContent = "T";
       $("workspaceBadgeLabel").textContent = "التدريب العملي";
       setActiveNav("training-overhead");
