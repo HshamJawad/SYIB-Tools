@@ -169,6 +169,12 @@
     refreshLocaleDigits(document.body);
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "عربي";
+    const eyebrow = $("workspaceEyebrow");
+    if (eyebrow && activeMode) {
+      eyebrow.textContent = language === "ar"
+        ? (activeMode === "training" ? "وضع التدريب" : "وضع إدارة الأعمال")
+        : (activeMode === "training" ? "TRAINING MODE" : "BUSINESS TOOLS");
+    }
     document.title = language === "ar" ? "أدوات ورش SIYB الرقمية" : "SIYB Digital Workshop Tools";
   }
 
@@ -230,7 +236,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.18";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.3.19";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -294,7 +300,7 @@
     closeMobileSidebar();
 
     if (mode === "business") {
-      $("workspaceEyebrow").textContent = "BUSINESS TOOLS";
+      $("workspaceEyebrow").textContent = language === "ar" ? "وضع إدارة الأعمال" : "BUSINESS TOOLS";
       $("workspaceTitle").textContent = "احتساب تكاليف";
       $("workspaceDescription").textContent = "احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.";
       $("workspaceBadgeNumber").textContent = "01";
@@ -302,7 +308,7 @@
       setActiveNav("business-textile");
       await loadCostingModule(mode, "textile");
     } else {
-      $("workspaceEyebrow").textContent = "TRAINING MODE";
+      $("workspaceEyebrow").textContent = language === "ar" ? "وضع التدريب" : "TRAINING MODE";
       $("workspaceTitle").textContent = "تمارين احتساب التكاليف";
       $("workspaceDescription").textContent = "تدرب على تسجيل المصروفات، تحميل التكاليف غير المباشرة، واحتساب الإهلاك.";
       $("workspaceBadgeNumber").textContent = "T";
