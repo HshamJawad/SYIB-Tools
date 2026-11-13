@@ -299,7 +299,7 @@
       $("workspaceDescription").textContent = "احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.";
       $("workspaceBadgeNumber").textContent = "01";
       $("workspaceBadgeLabel").textContent = "الوحدة الأولى";
-      setActiveNav("business-costing");
+      setActiveNav("business-textile");
       await loadCostingModule(mode, "textile");
     } else {
       $("workspaceEyebrow").textContent = "TRAINING MODE";
