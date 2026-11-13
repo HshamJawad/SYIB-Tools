@@ -151,7 +151,7 @@ function showSlideExample(which){
  $('exampleNotice').style.display='none';
  if(which==='overheadExercise'){renderOverheadExercise();}
  if(which==='ledger'){renderLedger();}
- if(which==='depreciation'){renderDepreciation();}
+ if(which==='depreciation'){renderDepreciation();$('exampleNotice').textContent='مثال مأخوذ من الشريحة 53 المرفقة: سجل الإهلاك/الاندثار.';$('exampleNotice').style.display='block';}
 }
 function renderLedger(){
  const body=$('ledgerRows');body.innerHTML='';
