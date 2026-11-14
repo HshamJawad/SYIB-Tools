@@ -234,7 +234,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.3";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.4";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -255,7 +255,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.5.3";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.5.4";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -510,8 +510,8 @@ $("globalPDFButton").addEventListener("click", () => {
       btn.addEventListener("click", (event) => event.preventDefault());
       return btn;
     };
-    wrap.appendChild(make("num-step-up", "▲", 1));
-    wrap.appendChild(make("num-step-down", "▼", -1));
+    wrap.appendChild(make("num-step-up", "", 1));
+    wrap.appendChild(make("num-step-down", "", -1));
     input.addEventListener("keydown", (event) => {
       if (event.key === "ArrowUp") { event.preventDefault(); stepInput(input, 1); }
       else if (event.key === "ArrowDown") { event.preventDefault(); stepInput(input, -1); }
