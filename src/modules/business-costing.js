@@ -88,7 +88,7 @@ function loadScenario(key){
   ];
   $('business').value='صالون الحلاقة والتجميل';$('period').value='شهري';$('currency').value='MAD';
   $('manufacturingOH').value=11500;$('generalOH').value=28000;
-  notice='تمرين صالون الحلاقة والتجميل من كتيب ILO، الصفحات المطبوعة 84–86. الأعداد الشهرية: 200 تدليك وجه، 100 تدليك قدمين، 150 تدليك جسم. القيم مدخلة من سجل التكاليف: مواد مباشرة 3,200 / 1,200 / 7,200 درهم، وأجور مباشرة 5,000 / 10,000 / 30,000 درهم. النفقات غير المباشرة 11,500 درهم والعامة 28,000 درهم. سعر الخدمة في الجدول مستند إلى بيانات المبيعات بالتمرين.';
+  notice='';
  }else if(key==='chair'){
   // SIYB single-product case: Alibaba Chairs, printed pages 50–59.
   products=[{name:'كرسي',units:120,materials:9580,labor:19000,price:400}];
