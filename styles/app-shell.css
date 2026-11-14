@@ -638,3 +638,11 @@ html[dir="ltr"] .global-nav-item.active{box-shadow:inset 5px 0 0 #F48D01,0 3px 1
 .num-step-down{bottom:4px}
 @media (pointer:coarse){.num-step{width:28px;font-size:8px}.num-stepper>input{padding-inline-end:36px!important}}
 @media print{.num-step{display:none!important}}
+
+/* Stepper arrows are drawn with CSS (not text glyphs) so they are exactly centered in their rounded buttons */
+.num-step{font-size:0;line-height:0;overflow:hidden}
+.num-step::before{content:"";display:block;width:10px;height:6px;background:currentColor}
+.num-step-up::before{clip-path:polygon(50% 0,0 100%,100% 100%)}
+.num-step-down::before{clip-path:polygon(0 0,100% 0,50% 100%)}
+@media (hover:none){.num-step:hover{background:#24A8E01f;color:#1c8ab8}.num-step:active{background:#24A8E0;color:#fff}}
+@media (pointer:coarse){.num-step::before{width:12px;height:7px}}
