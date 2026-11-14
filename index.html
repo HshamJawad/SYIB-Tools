@@ -21,7 +21,7 @@
 
     <div class="app-brand">
       <span class="app-brand-mark">S</span>
-      <span class="app-brand-copy"><strong>SIYB</strong><small>Digital Workshop Tools</small></span>
+      <span class="app-brand-copy"><strong>SIYB</strong></span>
     </div>
 
     <div class="mode-switch" role="group" aria-label="اختيار وضع العمل">
@@ -42,7 +42,6 @@
           <span class="topbar-action-glyph">XLSX</span><span class="topbar-action-label">تصدير البيانات</span>
         </button>
       </div>
-      <span class="app-connection"><i></i><span data-i18n="offlineReady">جاهز للعمل دون إنترنت</span></span>
       <button id="languageToggle" class="app-language-button" type="button" aria-label="Switch language">EN</button>
     </div>
   </header>
@@ -70,6 +69,9 @@
 
         <section class="sidebar-nav-group" data-nav-group="business" hidden>
           <div class="sidebar-nav-caption">أدوات إدارة الأعمال</div>
+          <button type="button" class="global-nav-item" data-example="custom" data-nav-item="business-custom">
+            <span class="global-nav-icon">＋</span><span class="global-nav-label">بيانات جديدة / إدخال يدوي</span><span class="global-nav-current"></span>
+          </button>
           <button type="button" class="global-nav-item" data-example="textile" data-nav-item="business-textile">
             <span class="global-nav-icon">▤</span><span class="global-nav-label">شركة نادية للنسيج</span><span class="global-nav-current"></span>
           </button>
@@ -81,9 +83,6 @@
           </button>
           <button type="button" class="global-nav-item" data-example="retail" data-nav-item="business-retail">
             <span class="global-nav-icon">▥</span><span class="global-nav-label">مكتبة آسفي</span><span class="global-nav-current"></span>
-          </button>
-          <button type="button" class="global-nav-item" data-example="custom" data-nav-item="business-custom">
-            <span class="global-nav-icon">＋</span><span class="global-nav-label">بيانات جديدة / إدخال يدوي</span><span class="global-nav-current"></span>
           </button>
           <button type="button" class="global-nav-item" data-example="ledger" data-nav-item="business-ledger">
             <span class="global-nav-icon">▥</span><span class="global-nav-label">سجل الحسابات الأساسية</span><span class="global-nav-current"></span>
@@ -113,7 +112,7 @@
 
       <div class="global-sidebar-footer">
         <span class="sidebar-footer-mark">SIYB</span>
-        <span class="sidebar-footer-copy"><strong>منهجية حسّن تسيير مقاولتك</strong><small>Digital Workshop Tools</small></span>
+        <span class="sidebar-footer-copy"><strong>منهجية حسّن تسيير مقاولتك</strong></span>
       </div>
     </aside>
 
@@ -154,7 +153,6 @@
       <section id="workspace" class="workspace" hidden>
         <div class="workspace-page-heading">
           <div>
-            <div class="workspace-kicker" id="workspaceEyebrow">BUSINESS TOOLS</div>
             <h1 id="workspaceTitle">احتساب تكاليف</h1>
             <p id="workspaceDescription">احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.</p>
           </div>
@@ -164,7 +162,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.4.5 · © 2026 هشام جواد كاظم — مطور الأداة</span>
+        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.5.0 · © 2026 هشام جواد كاظم — مطور الأداة</span>
       </footer>
     </main>
   </div>
@@ -179,6 +177,6 @@
 <script src="./src/modules/arabic-pdf.js"></script>
 <script src="./vendor/exceljs/exceljs.min.js"></script>
 <script src="./src/locales/translations.js"></script>
-<script src="./src/app.js?v=0.4.5"></script>
+<script src="./src/app.js?v=0.5.0"></script>
 </body>
 </html>

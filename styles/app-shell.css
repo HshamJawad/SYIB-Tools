@@ -627,3 +627,14 @@ html[dir="ltr"] .global-nav-item.active{box-shadow:inset 5px 0 0 #F48D01,0 3px 1
 @media (max-width:768px){
   html[dir="ltr"] .app-main,html[dir="rtl"] .app-main{margin-left:0!important;margin-right:0!important;margin-inline-end:0!important}
 }
+
+/* Number steppers (small up/down arrows inside numeric fields) */
+.num-stepper{position:relative;display:block;width:100%}
+.num-stepper>input{width:100%!important;padding-inline-end:30px!important;box-sizing:border-box}
+.num-step{position:absolute;inset-inline-end:4px;width:22px;height:calc(50% - 5px);display:grid;place-items:center;padding:0;border:0;border-radius:5px;background:#24A8E01f;color:#1c8ab8;font-size:8px;line-height:1;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.num-step:hover{background:#24A8E0;color:#fff}
+.num-step:active{background:#1c92c4;color:#fff}
+.num-step-up{top:4px}
+.num-step-down{bottom:4px}
+@media (pointer:coarse){.num-step{width:28px;font-size:8px}.num-stepper>input{padding-inline-end:36px!important}}
+@media print{.num-step{display:none!important}}
