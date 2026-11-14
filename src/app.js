@@ -169,12 +169,6 @@
     refreshLocaleDigits(document.body);
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "عربي";
-    const eyebrow = $("workspaceEyebrow");
-    if (eyebrow && activeMode) {
-      eyebrow.textContent = language === "ar"
-        ? (activeMode === "training" ? "وضع التدريب" : "وضع إدارة الأعمال")
-        : (activeMode === "training" ? "TRAINING MODE" : "BUSINESS TOOLS");
-    }
     document.title = language === "ar" ? "أدوات ورش SIYB الرقمية" : "SIYB Digital Workshop Tools";
   }
 
@@ -236,7 +230,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.4.5";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -257,7 +251,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.4.5";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.5.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -337,7 +331,6 @@
     closeMobileSidebar();
 
     if (mode === "business") {
-      $("workspaceEyebrow").textContent = language === "ar" ? "وضع إدارة الأعمال" : "BUSINESS TOOLS";
       $("workspaceTitle").textContent = "احتساب تكاليف";
       $("workspaceDescription").textContent = "احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.";
       $("workspaceBadgeNumber").textContent = "01";
@@ -345,7 +338,6 @@
       setActiveNav("business-textile");
       await loadCostingModule(mode, "textile");
     } else {
-      $("workspaceEyebrow").textContent = language === "ar" ? "وضع التدريب" : "TRAINING MODE";
       $("workspaceTitle").textContent = "تمارين احتساب التكاليف";
       $("workspaceDescription").textContent = "أدخل حساباتك بنفسك، تحقق من إجاباتك، وراجع خطوات الحل الصحيحة. يمكن للمدرب عرض الحل النموذجي وتوليد أرقام جديدة لكل مجموعة.";
       $("workspaceBadgeNumber").textContent = "T";
@@ -464,6 +456,76 @@ $("globalPDFButton").addEventListener("click", () => {
     const banner = $("updateBanner");
     if (banner) banner.hidden = true;
   });
+
+  /* Number steppers: small up/down arrows for numeric inputs (works with Arabic digits) */
+  const STEPPER_SELECTOR = 'input[data-siyb-numeric="true"]:not([disabled]):not([readonly]):not(.tin):not(.tseed-input):not([data-no-stepper])';
+
+  function decimalsOf(value) {
+    const text = toWesternDigits(value).replace(/[٬,]/g, "").replace(/[٫]/g, ".").trim();
+    const dot = text.indexOf(".");
+    return dot < 0 ? 0 : Math.min(2, text.length - dot - 1);
+  }
+
+  function stepInput(input, direction) {
+    const raw = input.value;
+    const current = window.SIYBParseNumber(raw);
+    const decimals = input.dataset.step ? decimalsOf(input.dataset.step) : decimalsOf(raw);
+    const step = input.dataset.step ? Number(input.dataset.step) || 1 : (decimals > 0 ? Math.pow(10, -decimals) : 1);
+    const min = input.dataset.min !== undefined ? Number(input.dataset.min) : 0;
+    let next = Math.round((current + direction * step) / step) * step;
+    if (Number.isFinite(min) && next < min) next = min;
+    input.value = next.toFixed(decimals);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    localizeNumericControl(input);
+  }
+
+  function attachStepper(input) {
+    if (input.dataset.stepperReady || !input.parentNode) return;
+    input.dataset.stepperReady = "1";
+    const wrap = document.createElement("span");
+    wrap.className = "num-stepper";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const make = (cls, glyph, direction) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.tabIndex = -1;
+      btn.className = "num-step " + cls;
+      btn.textContent = glyph;
+      btn.setAttribute("aria-label", direction > 0 ? (language === "ar" ? "زيادة" : "Increase") : (language === "ar" ? "إنقاص" : "Decrease"));
+      let timer = null, repeat = null;
+      const stop = () => { clearTimeout(timer); clearInterval(repeat); };
+      btn.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        stepInput(input, direction);
+        timer = setTimeout(() => { repeat = setInterval(() => stepInput(input, direction), 90); }, 450);
+      });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((name) => btn.addEventListener(name, stop));
+      btn.addEventListener("click", (event) => event.preventDefault());
+      return btn;
+    };
+    wrap.appendChild(make("num-step-up", "▲", 1));
+    wrap.appendChild(make("num-step-down", "▼", -1));
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp") { event.preventDefault(); stepInput(input, 1); }
+      else if (event.key === "ArrowDown") { event.preventDefault(); stepInput(input, -1); }
+    });
+  }
+
+  let stepperScheduled = false;
+  function scanSteppers() {
+    stepperScheduled = false;
+    document.querySelectorAll(STEPPER_SELECTOR).forEach(attachStepper);
+  }
+  function scheduleStepperScan() {
+    if (stepperScheduled) return;
+    stepperScheduled = true;
+    requestAnimationFrame(scanSteppers);
+  }
+  new MutationObserver(scheduleStepperScan).observe(document.body, { childList: true, subtree: true });
+  scheduleStepperScan();
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (window.__siybReloadingForUpdate) return;
