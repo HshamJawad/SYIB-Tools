@@ -66,25 +66,26 @@
   }
   window.SIYBRefreshLocaleDigits = refreshLocaleDigits;
 
-  document.addEventListener("focusin", (event) => {
-    const control = event.target;
-    if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) {
-      if (control.dataset.siybNumeric === "true" || /[٠-٩]/.test(control.value || "")) {
-        control.value = toWesternDigits(control.value);
-      }
+  // Numeric fields keep the digits of the active language while focused and while typing
+  // (Arabic-Indic digits in Arabic mode). Parsing accepts both digit sets (SIYBParseNumber),
+  // and the replacement is 1:1 so the caret position is preserved.
+  const isNumericControl = (control) => control instanceof HTMLInputElement && control.dataset.siybNumeric === "true";
+  function relocalizeActiveControl(control) {
+    const before = control.value;
+    const next = localizeDigits(before);
+    if (next === before) return;
+    let start = null, end = null;
+    try { start = control.selectionStart; end = control.selectionEnd; } catch (_) {}
+    control.value = next;
+    if (start !== null && control === document.activeElement) {
+      try { control.setSelectionRange(start, end); } catch (_) {}
     }
+  }
+  document.addEventListener("focusin", (event) => {
+    if (isNumericControl(event.target)) relocalizeActiveControl(event.target);
   });
   document.addEventListener("input", (event) => {
-    const control = event.target;
-    if (control instanceof HTMLInputElement && (control.dataset.siybNumeric === "true" || /[٠-٩]/.test(control.value || ""))) {
-      const start = control.selectionStart;
-      const before = control.value;
-      control.value = toWesternDigits(before);
-      if (start !== null && control === document.activeElement) {
-        const delta = before.length - control.value.length;
-        try { control.setSelectionRange(Math.max(0, start - delta), Math.max(0, start - delta)); } catch (_) {}
-      }
-    }
+    if (isNumericControl(event.target)) relocalizeActiveControl(event.target);
   }, true);
   document.addEventListener("focusout", (event) => {
     const control = event.target;
@@ -233,7 +234,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.2";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.3";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -254,7 +255,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.5.2";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.5.3";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -480,6 +481,7 @@ $("globalPDFButton").addEventListener("click", () => {
     input.value = next.toFixed(decimals);
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
+    relocalizeActiveControl(input);
     localizeNumericControl(input);
   }
 

@@ -236,3 +236,10 @@ body.mode-training .global-sidebar .sidebar-training-note{border-inline-start:3p
 #costingModuleRoot .resulttable tfoot td,#costingModuleRoot .resulttable tfoot th:not(:first-child){text-align:center}
 #costingModuleRoot .resulttable td input{text-align:center}
 #costingModuleRoot .metric .mlabel,#costingModuleRoot .metric .mvalue{text-align:center}
+
+/* Business card: wider currency field, narrower accounting period */
+#costingModuleRoot .fields-business{grid-template-columns:minmax(0,1.2fr) minmax(0,.7fr) minmax(0,1.5fr)}
+@media(max-width:900px){
+  #costingModuleRoot .fields-business{grid-template-columns:minmax(0,1.4fr) minmax(0,.9fr)}
+  #costingModuleRoot .fields-business .field-currency{grid-column:1 / -1}
+}

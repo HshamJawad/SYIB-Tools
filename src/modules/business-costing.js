@@ -73,7 +73,7 @@ function loadScenario(key){
    {name:'المعاطف الواقية من الغبار',units:100,materials:30400,labor:4800,price:0},
    {name:'وزرات العمل',units:50,materials:20200,labor:1800,price:0}
   ];
-  $('business').value='شركة نادية للنسيج';$('period').value='شهري';$('currency').value='MAD';
+  $('business').value='شركة نادية للنسيج';$('period').value='شهري';$('currency').value='IQD';
   $('manufacturingOH').value=8150;$('generalOH').value=9770;
   // Keep the scenario data available without showing handbook commentary in the user interface.
  }else if(key==='salon'){
@@ -86,13 +86,13 @@ function loadScenario(key){
    {name:'تدليك القدمين',units:100,materials:1200,labor:10000,price:80},
    {name:'تدليك الجسم',units:150,materials:7200,labor:30000,price:500}
   ];
-  $('business').value='صالون الحلاقة والتجميل';$('period').value='شهري';$('currency').value='MAD';
+  $('business').value='صالون الحلاقة والتجميل';$('period').value='شهري';$('currency').value='IQD';
   $('manufacturingOH').value=11500;$('generalOH').value=28000;
   notice='';
  }else if(key==='chair'){
   // SIYB single-product case: Alibaba Chairs, printed pages 50–59.
   products=[{name:'كرسي',units:120,materials:9580,labor:19000,price:400}];
-  $('business').value='شركة كراسي علي بابا';$('period').value='شهري';$('currency').value='MAD';
+  $('business').value='شركة كراسي علي بابا';$('period').value='شهري';$('currency').value='IQD';
   $('manufacturingOH').value=0;$('generalOH').value=14200;
   notice='';
  }else if(key==='retail'){
@@ -106,7 +106,7 @@ function loadScenario(key){
    {name:'ظرف صغير',units:1,materials:14,labor:0,price:0},
    {name:'شريط لاصق',units:1,materials:45.2,labor:0,price:0}
   ];
-  $('business').value='مكتبة آسفي';$('period').value='شهري';$('currency').value='MAD';
+  $('business').value='مكتبة آسفي';$('period').value='شهري';$('currency').value='IQD';
   $('manufacturingOH').value=0;$('generalOH').value=15000;
   notice='';
  }else{
@@ -183,18 +183,29 @@ function calcLedger(){
 function renderDepreciation(){
  const body=$('deprRows');body.innerHTML='';
  depreciationData.forEach((r,i)=>{
-  const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12,book=r.purchase-acc;
   const tr=document.createElement('tr');
   tr.innerHTML=`<td>${r.name}</td><td>${r.date}</td>
   <td><input type="number" min="0" step=".1" value="${r.purchase}" data-depr="${i}" data-key="purchase"></td>
   <td><input type="number" min=".1" step=".1" value="${r.life}" data-depr="${i}" data-key="life"></td>
   <td><input type="number" min="0" step="1" value="${r.months}" data-depr="${i}" data-key="months"></td>
-  <td class="num">${fmt(annual)}</td><td class="num">${fmt(acc)}</td><td class="num"><b>${fmt(book)}</b></td>`;
+  <td class="num" data-cell="annual"></td><td class="num" data-cell="acc"></td><td class="num"><b data-cell="book"></b></td>`;
   body.appendChild(tr);
  });
+ // Inputs keep focus while typing: only the computed cells are refreshed (never the whole table).
  body.querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{
-  const r=depreciationData[+e.target.dataset.depr],k=e.target.dataset.key;r[k]=Math.max(0,parseNumber(e.target.value));renderDepreciation();
+  const r=depreciationData[+e.target.dataset.depr],k=e.target.dataset.key;r[k]=Math.max(0,parseNumber(e.target.value));updateDepreciation();
  }));
+ updateDepreciation();
+}
+function updateDepreciation(){
+ const rows=$('deprRows').children;
+ depreciationData.forEach((r,i)=>{
+  const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12,book=r.purchase-acc,tr=rows[i];
+  if(!tr)return;
+  tr.querySelector('[data-cell="annual"]').textContent=fmt(annual);
+  tr.querySelector('[data-cell="acc"]').textContent=fmt(acc);
+  tr.querySelector('[data-cell="book"]').textContent=fmt(book);
+ });
  const totals=depreciationData.reduce((a,r)=>{
   const annual=r.life>0?r.purchase/r.life:0,acc=annual*r.months/12;
   a.purchase+=r.purchase;a.annual+=annual;a.acc+=acc;a.book+=r.purchase-acc;return a;

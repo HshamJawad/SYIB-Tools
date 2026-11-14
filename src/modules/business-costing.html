@@ -109,10 +109,10 @@
 <div id="mainCalculator">
 <div class="layout">
 <section>
-<div class="card"><div class="cardhead"><div><h2>01 / بيانات المقاولة والفترة</h2><p>أدخل بيانات النشاط للفترة المحاسبية نفسها (مثلاً شهر واحد)</p></div></div><div class="body"><div class="fields">
-<div class="field"><label>اسم المقاولة</label><input id="business" value="شركة نادية للنسيج"></div>
-<div class="field"><label>الفترة المحاسبية</label><select id="period"><option>شهري</option><option>أسبوعي</option><option>سنوي</option></select></div>
-<div class="field"><label>العملة</label><select id="currency"><option value="MAD">MAD — درهم مغربي (مثال الكتيب)</option><option value="IQD">IQD — دينار عراقي</option><option value="USD">USD — دولار أمريكي</option><option value="EUR">EUR — يورو</option></select></div>
+<div class="card"><div class="cardhead"><div><h2>01 / بيانات المقاولة والفترة</h2><p>أدخل بيانات النشاط للفترة المحاسبية نفسها (مثلاً شهر واحد)</p></div></div><div class="body"><div class="fields fields-business">
+<div class="field field-name"><label>اسم المقاولة</label><input id="business" value="شركة نادية للنسيج"></div>
+<div class="field field-period"><label>الفترة المحاسبية</label><select id="period"><option>شهري</option><option>أسبوعي</option><option>سنوي</option></select></div>
+<div class="field field-currency"><label>العملة</label><select id="currency"><option value="IQD" selected>IQD — دينار عراقي</option><option value="MAD">MAD — درهم مغربي</option><option value="USD">USD — دولار أمريكي</option><option value="EUR">EUR — يورو</option></select></div>
 </div></div></div>
 <div class="card"><div class="cardhead"><div><h2>02 / المنتجات والإنتاج خلال الفترة</h2><p>أدخل كل منتج على حدة. سجّل مجموع المواد والأجور المباشرة وعدد الوحدات المنتجة خلال الفترة.</p></div></div><div class="body">
 <div class="tablewrap"><table class="data"><thead><tr><th>اسم المنتج</th><th>عدد الوحدات المنتجة</th><th>المواد المباشرة الإجمالية</th><th>اليد العاملة المباشرة الإجمالية</th><th>سعر البيع للوحدة (اختياري)</th><th></th></tr></thead><tbody id="products"></tbody></table></div>
