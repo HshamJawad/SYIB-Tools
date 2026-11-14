@@ -173,7 +173,7 @@
 
   function shell(ex) {
     return '<div class="training-banner"><span class="tb-icon" aria-hidden="true">✎</span><div><b>وضع التدريب</b> — أدخل إجاباتك في الخانات الفارغة ثم اضغط «تحقق من الإجابة». لا تظهر النتائج إلا بعد التحقق.</div></div>' +
-      '<div class="layout"><section><div class="card training-card"><div class="cardhead"><div><h2>' + esc(ex.title) + '</h2><p>' + esc(ex.desc) + '</p></div><span class="tag">TRAINING MODE</span></div><div class="body">' +
+      '<div class="layout"><section><div class="card training-card"><div class="cardhead"><div><h2>' + esc(ex.title) + '</h2><p>' + esc(ex.desc) + '</p></div></div><div class="body">' +
       '<div class="callout">' + esc(ex.task) + '</div>' +
       '<div class="training-actions">' +
       '<button type="button" class="tbtn primary" data-act="check">تحقق من الإجابة</button>' +
@@ -185,7 +185,7 @@
       '<button type="button" class="tbtn" data-act="slides">أرقام الشرائح</button>' +
       '</div><div class="tset" data-role="set"></div><div data-role="body"></div>' +
       '<p class="hint">للمدرب: اكتب رقم المجموعة نفسه عند جميع المتدربين ليحصلوا على الأرقام نفسها، أو اضغط «أرقام جديدة» ثم أعطِهم الرقم الظاهر.</p></div></div></section>' +
-      '<aside><div class="card summary-card"><div class="cardhead"><div><h2>تقدّم المتدرب</h2><p>نتيجة التحقق من الإجابات</p></div><span class="tag">TRAINING</span></div><div class="body">' +
+      '<aside><div class="card summary-card"><div class="cardhead"><div><h2>تقدّم المتدرب</h2><p>نتيجة التحقق من الإجابات</p></div></div><div class="body">' +
       '<div class="metrics">' +
       '<div class="metric blue"><div class="mlabel">عدد الخانات المطلوبة</div><div class="mvalue" data-k="total">—</div></div>' +
       '<div class="metric green"><div class="mlabel">إجابات صحيحة</div><div class="mvalue" data-k="ok">—</div></div>' +

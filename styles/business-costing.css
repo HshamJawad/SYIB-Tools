@@ -168,7 +168,6 @@
 #costingModuleRoot .summary-card .cardhead p,
 #costingModuleRoot .summary-card .mlabel,
 #costingModuleRoot .summary-card .rowline span{color:#111}
-#costingModuleRoot .summary-card .tag{color:var(--brand-ink);background:#24A8E01f;border:1px solid #24A8E066;border-radius:99px;padding:3px 10px}
 #costingModuleRoot .summary-card .metric{border-width:1px 1px 1px 1px;border-inline-start:5px solid var(--line)}
 #costingModuleRoot .summary-card .metric.blue{background:#24A8E01a;border-color:#24A8E04d;border-inline-start-color:var(--brand-blue)}
 #costingModuleRoot .summary-card .metric.orange{background:#F48D011a;border-color:#F48D014d;border-inline-start-color:var(--brand-orange)}
@@ -189,7 +188,6 @@
 #costingModuleRoot .training-banner .tb-icon{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:10px;background:#24A8E0;color:#fff;font-size:18px}
 #costingModuleRoot .training-card{border-top:4px solid #F48D01}
 #costingModuleRoot .training-card .cardhead h2{color:#111}
-#costingModuleRoot .training-card .tag{color:#111;background:#F48D0126;border:1px solid #F48D0166;border-radius:99px;padding:3px 10px}
 #costingModuleRoot .training-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
 #costingModuleRoot .tsep{flex:1 1 12px}
 #costingModuleRoot .tbtn{border:1px solid #cfd9e0;background:#fff;color:#111;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
