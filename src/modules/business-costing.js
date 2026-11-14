@@ -94,7 +94,7 @@ function loadScenario(key){
   products=[{name:'كرسي',units:120,materials:9580,labor:19000,price:400}];
   $('business').value='شركة كراسي علي بابا';$('period').value='شهري';$('currency').value='MAD';
   $('manufacturingOH').value=0;$('generalOH').value=14200;
-  notice='مثال شركة كراسي علي بابا من كتيب ILO، الصفحات المطبوعة 50–59. تكلفة المواد الشهرية 9,580 درهم، اليد العاملة 19,000 درهم، النفقات العامة 14,200 درهم، والإنتاج 120 كرسياً. التكلفة الإجمالية الشهرية 42,780 درهماً وتكلفة الكرسي 356.50 درهماً. هذا المثال يستخدم منهج السلعة الواحدة، وليس توزيع التكاليف على منتجات متعددة.';
+  notice='';
  }else if(key==='retail'){
   // SIYB retail example: Asfi bookstore. Monthly purchases 60,000, overhead 15,000.
   products=[
@@ -108,7 +108,7 @@ function loadScenario(key){
   ];
   $('business').value='مكتبة آسفي';$('period').value='شهري';$('currency').value='MAD';
   $('manufacturingOH').value=0;$('generalOH').value=15000;
-  notice='مثال تجارة التقسيط – مكتبة آسفي، من الصفحات المطبوعة 88–89. متوسط مشتريات البضائع المعدة للبيع 60,000 درهم شهرياً، والنفقات العامة 15,000 درهم؛ أي نسبة نفقات عامة 25%. أسعار شراء الأصناف في الجدول مدخلة كتكلفة مواد للوحدة. في تجارة التقسيط لا تُضاف اليد العاملة إلى معادلة تكلفة السلعة بحسب نموذج الكتيب؛ بل تدخل أجور العاملين ضمن النفقات العامة.';
+  notice='';
  }else{
   products=[{name:'منتج 1',units:100,materials:0,labor:0,price:0}];
   $('business').value='مقاولتي';$('period').value='شهري';$('currency').value='IQD';
