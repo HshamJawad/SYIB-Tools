@@ -64,7 +64,6 @@ body.sidebar-collapsed .sidebar-empty-state{padding:15px 0}
 .workspace-page-badge span{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#eaf3f6;color:#2b7181;font:800 11px Inter,Arial,sans-serif}
 .workspace-page-badge small{color:#6f8492;font-size:10px;font-weight:700}
 .welcome-screen{max-width:950px;margin:clamp(30px,8vh,90px) auto 30px;padding:28px 10px}
-.welcome-eyebrow{color:#168f89;font:850 10px Inter,Arial,sans-serif;letter-spacing:.14em}
 .welcome-screen>h1{margin:10px 0;color:#153b53;font-size:clamp(27px,4vw,42px);font-weight:850}
 .welcome-screen>p{max-width:680px;color:#718494;font-size:14px;line-height:2}
 .welcome-cards{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:28px}
