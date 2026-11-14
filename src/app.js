@@ -234,7 +234,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.4";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.5";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -255,7 +255,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.5.4";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.5.5";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -462,7 +462,7 @@ $("globalPDFButton").addEventListener("click", () => {
   });
 
   /* Number steppers: small up/down arrows for numeric inputs (works with Arabic digits) */
-  const STEPPER_SELECTOR = 'input[data-siyb-numeric="true"]:not([disabled]):not([readonly]):not(.tin):not(.tseed-input):not([data-no-stepper])';
+  const STEPPER_SELECTOR = 'input[data-siyb-numeric="true"]:not([disabled]):not([readonly]):not(.tseed-input):not([data-no-stepper])';
 
   function decimalsOf(value) {
     const text = toWesternDigits(value).replace(/[٬,]/g, "").replace(/[٫]/g, ".").trim();
@@ -471,6 +471,7 @@ $("globalPDFButton").addEventListener("click", () => {
   }
 
   function stepInput(input, direction) {
+    if (input.disabled || input.readOnly) return;
     const raw = input.value;
     const current = window.SIYBParseNumber(raw);
     const decimals = input.dataset.step ? decimalsOf(input.dataset.step) : decimalsOf(raw);

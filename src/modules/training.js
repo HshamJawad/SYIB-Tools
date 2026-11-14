@@ -261,6 +261,11 @@
     st.q = built.questions;
     st.answers = {}; st.results = {}; st.checked = false; st.solution = false; st.dirty = false;
     st.container.querySelector('[data-role="body"]').innerHTML = built.html;
+    // Stepper arrows move by the precision the answer is rounded to (1, 0.1 or 0.01).
+    st.q.forEach((q) => {
+      const inp = st.container.querySelector('.tin[data-q="' + q.id + '"]');
+      if (inp) inp.dataset.step = q.dec > 0 ? String(Math.pow(10, -q.dec)) : '1';
+    });
     st.container.querySelector('[data-role="set"]').textContent = st.seed ? 'مجموعة الأرقام الحالية: رقم ' + st.seed : 'مجموعة الأرقام الحالية: أرقام الشرائح الأصلية';
     st.container.querySelector('.tseed-input').value = st.seed ? String(st.seed) : '';
     st.container.querySelector('[data-act="slides"]').disabled = !st.seed;
