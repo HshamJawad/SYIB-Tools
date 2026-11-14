@@ -14,7 +14,7 @@
   let costingScriptPromise = null;
   let waitingWorker = null;
 
-  const toWesternDigits = (value) => String(value ?? "").replace(/[٠-٩]/g, digit => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+  const toWesternDigits = (value) => String(value ?? "").replace(/[٠-٩]/g, digit => "٠١٢٣٤٥٦٧٨٩".indexOf(digit)).replace(/٫/g, ".").replace(/٬/g, ",");
   const toArabicDigits = (value) => String(value ?? "").replace(/[0-9]/g, digit => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]);
   const localizeDigits = (value) => language === "ar" ? toArabicDigits(value) : toWesternDigits(value);
 
@@ -117,6 +117,9 @@
   const reverseTextKeys=Object.keys(reverseUiTextMap).sort((x,y)=>y.length-x.length);
   function translateUiText(value){
     let output=String(value??"");
+    // Arabic-Indic digits are applied to the DOM in Arabic mode; normalize them first so
+    // full-string dictionary keys (written with Western digits) still match when switching to English.
+    if(language==="en")output=toWesternDigits(output);
     const map=language==="en"?uiTextMap:reverseUiTextMap;
     const keys=language==="en"?textKeys:reverseTextKeys;
     const exact=map[output.trim()];
@@ -230,7 +233,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.1";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.2";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -251,7 +254,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.5.1";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.5.2";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
