@@ -573,3 +573,28 @@ html[dir="ltr"] #costingModuleRoot input,html[dir="ltr"] #costingModuleRoot sele
 html[dir="ltr"] #costingModuleRoot .layout{direction:ltr}
 html[dir="ltr"] #costingModuleRoot .data td,html[dir="ltr"] #costingModuleRoot .resulttable td,html[dir="ltr"] #costingModuleRoot .resulttable th{text-align:left}
 @media(max-width:900px){html[dir="ltr"] .global-sidebar{left:0!important;right:auto!important;transform:translateX(-105%)!important}html[dir="ltr"] body.sidebar-open .global-sidebar{transform:translateX(0)!important}}
+
+/* Light sky-blue sidebar (brand blue #24A8E0): the active item is solid blue with an orange edge so the current tab stands out */
+.global-sidebar{background:linear-gradient(180deg,#e8f5fc 0%,#d7eef9 100%);color:#0b1f2b;border-inline-start:1px solid #24A8E040}
+.global-sidebar-head{border-bottom-color:#24A8E040}
+.global-sidebar-mark{background:#fff;color:#12394f;border:2px solid #24A8E0}
+.global-sidebar-brand-copy strong{color:#0b1f2b}
+.global-sidebar-brand-copy small{color:#3d6277}
+.sidebar-collapse-button{background:#fff;border-color:#24A8E066;color:#0b1f2b}
+.sidebar-context-label,.sidebar-nav-caption{color:#3d6277}
+.sidebar-context strong{color:#0b1f2b}
+.sidebar-empty-state{color:#3d6277}
+.sidebar-empty-state span{border-color:#24A8E066;background:#fff}
+.global-nav-item{color:#0b1f2b;font-weight:700}
+.global-nav-item:hover{background:#24A8E02b;color:#0b1f2b;border-color:#24A8E04d}
+.global-nav-item.active{background:#24A8E0;border-color:#1c92c4;color:#0b1f2b;font-weight:800;box-shadow:0 3px 10px #24A8E04d}
+html[dir="rtl"] .global-nav-item.active{box-shadow:inset -5px 0 0 #F48D01,0 3px 10px #24A8E04d}
+html[dir="ltr"] .global-nav-item.active{box-shadow:inset 5px 0 0 #F48D01,0 3px 10px #24A8E04d}
+.global-nav-icon{background:#fff;color:#1c8ab8}
+.global-nav-item.active .global-nav-icon{background:#fff;color:#0b1f2b}
+.global-nav-item.active .global-nav-current{background:#F48D01}
+.sidebar-training-note{border-color:#24A8E066;background:#ffffffa6;color:#12394f}
+.global-sidebar-footer{border-top-color:#24A8E040}
+.sidebar-footer-mark{border-color:#24A8E0;color:#1c8ab8;background:#fff}
+.sidebar-footer-copy strong{color:#0b1f2b}
+.sidebar-footer-copy small{color:#3d6277}
