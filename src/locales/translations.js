@@ -184,7 +184,7 @@ window.SIYB_UI_TEXT = {
   "أسبوعي": "Weekly",
   "سنوي": "Yearly",
   "العملة": "Currency",
-  "MAD — درهم مغربي (مثال الكتيب)": "MAD — Moroccan Dirham (handbook example)",
+  "MAD — درهم مغربي": "MAD — Moroccan Dirham",
   "IQD — دينار عراقي": "IQD — Iraqi Dinar",
   "USD — دولار أمريكي": "USD — US Dollar",
   "EUR — يورو": "EUR — Euro",
