@@ -646,3 +646,9 @@ html[dir="ltr"] .global-nav-item.active{box-shadow:inset 5px 0 0 #F48D01,0 3px 1
 .num-step-down::before{clip-path:polygon(0 0,100% 0,50% 100%)}
 @media (hover:none){.num-step:hover{background:#24A8E01f;color:#1c8ab8}.num-step:active{background:#24A8E0;color:#fff}}
 @media (pointer:coarse){.num-step::before{width:12px;height:7px}}
+
+/* Centered text in stepper inputs: symmetric padding so numbers never sit under the arrows */
+.num-stepper{--sw:22px}
+@media (pointer:coarse){.num-stepper{--sw:28px}}
+.num-step{width:var(--sw)}
+#costingModuleRoot .num-stepper>.tin{padding-left:calc(var(--sw) + 8px)!important;padding-right:calc(var(--sw) + 8px)!important;text-align:center}
