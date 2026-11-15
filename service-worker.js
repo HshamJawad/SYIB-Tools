@@ -13,7 +13,7 @@ const APP_SHELL = [
   "./src/modules/training.js",
   "./src/modules/arabic-pdf.js",
   "./font/Cairo-Regular.ttf",
-  "./assets/icons/app-icon.svg",
+  "./assets/icons/app-icon.png",
   "./font/Cairo.woff2",
   "./vendor/jspdf/jspdf.umd.min.js",
   "./vendor/exceljs/exceljs.min.js"
