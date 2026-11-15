@@ -199,8 +199,8 @@
 #costingModuleRoot .tseed{display:flex;align-items:center;gap:6px;font-size:13px;color:#111}
 #costingModuleRoot .tseed-input{width:96px;padding:8px;border:1px solid #cfd9e0;border-radius:8px;text-align:center}
 #costingModuleRoot .tset{margin:0 0 12px;font-size:13px;font-weight:700;color:#111}
-#costingModuleRoot .tcell{min-width:112px}
-#costingModuleRoot .tin{width:100%;min-width:96px;padding:8px;border:2px solid #cfd9e0;border-radius:8px;background:#fff;color:#111;text-align:center;direction:ltr}
+#costingModuleRoot .tcell{min-width:128px}
+#costingModuleRoot .tin{width:100%;min-width:112px;padding:8px;border:2px solid #cfd9e0;border-radius:8px;background:#fff;color:#111;text-align:center;direction:ltr}
 #costingModuleRoot .tin:focus{outline:none;border-color:#24A8E0;box-shadow:0 0 0 3px #24A8E033}
 #costingModuleRoot .tin.ok{border-color:#A4CF06;background:#A4CF0626}
 #costingModuleRoot .tin.bad,#costingModuleRoot .tin.empty{border-color:#F48D01;background:#F48D011a}
@@ -212,7 +212,7 @@
 #costingModuleRoot .tnum{font-weight:700}
 #costingModuleRoot .tstatus{margin-top:14px;color:#111}
 body.mode-training .global-sidebar .sidebar-training-note{border-inline-start:3px solid #F48D01}
-@media(max-width:700px){#costingModuleRoot .tcell{min-width:104px}#costingModuleRoot .tbtn{flex:1 1 40%}}
+@media(max-width:700px){#costingModuleRoot .tcell{min-width:124px}#costingModuleRoot .tbtn{flex:1 1 40%}}
 
 /* Phones in portrait: put the example selector on its own full-width row so the list title is readable */
 @media(max-width:640px){
