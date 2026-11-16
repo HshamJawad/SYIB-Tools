@@ -88,3 +88,8 @@ body.mode-stock .global-sidebar .sidebar-nav-caption.sub{margin-top:8px;color:#1
   .ps-step .body{display:block!important}
   .ps-answer{display:block!important}
 }
+
+/* Stepper inputs: symmetric padding (cells are direction:ltr) so centered numbers never sit under the arrows; wider cells */
+.ps-root .num-stepper>.ps-in.num{padding-left:calc(var(--sw,22px) + 8px)!important;padding-right:calc(var(--sw,22px) + 8px)!important;text-align:center}
+.ps-table input.ps-in.num,.ps-table .num-stepper{min-width:112px}
+@media(max-width:600px){.ps-table input.ps-in.num,.ps-table .num-stepper{min-width:112px}}
