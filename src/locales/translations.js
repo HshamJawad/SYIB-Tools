@@ -89,6 +89,8 @@ window.SIYB_UI_TEXT = {
   "أدخل حساباتك بنفسك، تحقق من إجاباتك، وراجع خطوات الحل الصحيحة. يمكن للمدرب عرض الحل النموذجي وتوليد أرقام جديدة لكل مجموعة.": "Enter your own calculations, check your answers and review the correct steps. Trainers can show the model solution and generate new numbers for each group.",
   "وضع إدارة الأعمال": "Business Mode",
   "وضع التدريب": "Training Mode",
+  "المشتريات والمخزون": "Purchasing & Stock",
+  "المشتريات وتدبير المخزون": "Purchasing & stock management",
   "تصدير PDF": "Export PDF",
   "تصدير البيانات": "Export Data",
   "جاهز للعمل دون إنترنت": "Ready to work offline",

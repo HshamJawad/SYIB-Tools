@@ -174,6 +174,7 @@
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "عربي";
     document.title = language === "ar" ? "أدوات ورش SIYB الرقمية" : "SIYB Digital Workshop Tools";
+    window.dispatchEvent(new CustomEvent("siyb:languagechange", { detail: { language } }));
   }
 
   function setActiveModeButton(mode) {
@@ -191,7 +192,8 @@
     $("sidebarEmptyState").hidden = !!mode;
     $("sidebarContextTitle").textContent = mode === "business"
       ? "وضع إدارة الأعمال"
-      : mode === "training" ? "وضع التدريب" : "اختر وضعاً من الشريط العلوي";
+      : mode === "training" ? "وضع التدريب"
+      : mode === "stock" ? "المشتريات وتدبير المخزون" : "اختر وضعاً من الشريط العلوي";
   }
 
   function setActiveNav(item) {
@@ -234,7 +236,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.5.6";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.6.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -255,7 +257,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.5.6";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.6.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -265,6 +267,40 @@
       });
     }
     await trainingScriptPromise;
+  }
+
+  let stockScriptPromise = null;
+  async function ensureStockScripts() {
+    if (window.SIYBStock) return;
+    if (!stockScriptPromise) {
+      const load = (src) => new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = assetUrl(src) + "?v=0.6.0";
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
+        document.body.appendChild(script);
+      });
+      stockScriptPromise = load("src/modules/purchasing-stock-data.js")
+        .then(() => load("src/modules/purchasing-stock.js"))
+        .catch((error) => { stockScriptPromise = null; throw error; });
+    }
+    await stockScriptPromise;
+  }
+
+  async function loadStockModule(sectionId) {
+    setGlobalExportActionsVisible(false);
+    const host = $("workspaceContent");
+    $("welcomeScreen").hidden = true;
+    $("workspace").hidden = false;
+    try {
+      await ensureStockScripts();
+      if (!host.querySelector("#psRoot")) window.SIYBStock.mount(host);
+      window.SIYBStock.open(sectionId || "home");
+    } catch (error) {
+      console.error("Purchasing & Stock module loading failed:", error);
+      host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل الوحدة</strong><p dir="ltr">' +
+        String(error && error.message || error).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])) + '</p></div>';
+    }
   }
 
   function setGlobalExportActionsVisible(visible) {
@@ -327,12 +363,20 @@
   }
 
   async function activateMode(mode) {
-    if (mode !== "business" && mode !== "training") return;
+    if (mode !== "business" && mode !== "training" && mode !== "stock") return;
     activeMode = mode;
     document.body.classList.toggle("mode-training", mode === "training");
+    document.body.classList.toggle("mode-stock", mode === "stock");
     setActiveModeButton(mode);
     setSidebarGroup(mode);
     closeMobileSidebar();
+
+    if (mode === "stock") {
+      $("workspaceBadgeNumber").textContent = "PS";
+      await loadStockModule("home");
+      translateUiTree($("workspaceContent"));
+      return;
+    }
 
     if (mode === "business") {
       $("workspaceTitle").textContent = "احتساب تكاليف";
@@ -358,6 +402,11 @@
   $("globalSidebarNav").addEventListener("click", (event) => {
     const button = event.target.closest("[data-nav-item]");
     if (!button || !activeMode) return;
+    if (activeMode === "stock") {
+      loadStockModule(button.dataset.stock);
+      closeMobileSidebar();
+      return;
+    }
     setActiveNav(button.dataset.navItem);
     if (activeMode === "business") {
       loadCostingModule("business", button.dataset.example || "textile");
