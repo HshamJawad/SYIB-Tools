@@ -96,6 +96,7 @@ window.SIYB_UI_TEXT = {
   "خطوات الشراء وبطاقات المخزون والجرد وإدارة علاقات المزوّدين، مع أنشطة وتمارين.": "Purchasing steps, stock cards, stocktaking and managing supplier relationships, with activities and exercises.",
   "2- انتقل بين الأمثلة والتمارين والأقسام": "2- Move between examples, exercises and sections",
   "عند اختيار أداة تنفتح قائمتها الفرعية. اختر المثال أو التمرين أو القسم الذي تريده، ويمكنك التبديل بين الأدوات في أي وقت.": "Choosing a tool opens its sub-menu. Pick the example, exercise or section you want, and switch between tools at any time.",
+  "توليد فكرة مشروعك (GYB)": "Generate Your Business Idea (GYB)",
   "وضع التدريب": "Training Mode",
   "المشتريات والمخزون": "Purchasing & Stock",
   "المشتريات وتدبير المخزون": "Purchasing & stock management",
