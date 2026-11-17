@@ -135,5 +135,65 @@ window.SIYB_GYB_DATA = (() => {
       'Your answers are saved on this device and in this browser only (local storage); they are never sent to a server, and the module works offline. Your data here is completely separate from the Cost Calculation and Purchasing & Stock modules. To move your work to another device or keep a copy, export a backup.')
   };
 
-  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT };
+  /* ---------- Part I content (Phase 2): short original adaptations of the manual's topics ---------- */
+  const P1 = {
+    areas: [
+      { id: 'passion', t: B('الشغف', 'Passion'), q: B('هل أنت متحمس لفكرة امتلاك مشروعك، وهل ستواصل حتى حين يصعب الأمر؟', 'Are you excited about running your own business, and would you keep going when it gets hard?') },
+      { id: 'goals', t: B('التوجه نحو الأهداف', 'Goal orientation'), q: B('هل تضع لنفسك أهدافاً واضحة وتعمل بإصرار لتحقيقها؟', 'Do you set clear goals for yourself and work steadily to reach them?') },
+      { id: 'decisions', t: B('اتخاذ القرارات', 'Making decisions'), q: B('هل تستطيع أن تقرر في الوقت المناسب بعد دراسة الخيارات، وتتحمل نتيجة قراراتك؟', 'Can you decide in good time after weighing the options, and accept the results of your decisions?') },
+      { id: 'risk', t: B('تحمل المخاطرة', 'Taking risks'), q: B('هل تقبل المخاطر المحسوبة وتعرف كيف تقلل أثرها؟', 'Do you accept calculated risks and know how to reduce their impact?') },
+      { id: 'stress', t: B('القدرة على تحمل الضغط', 'Ability to handle stress'), q: B('هل تبقى هادئاً وفعّالاً حين يزداد العمل والضغط؟', 'Do you stay calm and effective when work and pressure increase?') },
+      { id: 'support', t: B('الدعم الاجتماعي', 'Social support'), q: B('هل تجد دعماً من أسرتك وأصدقائك ومعارفك لتحمل متطلبات المشروع؟', 'Do your family, friends and acquaintances support you in facing the demands of a business?') },
+      { id: 'finance', t: B('وضعك المالي', 'Financial situation'), q: B('هل لديك ما تبدأ به، أو مصادر تمويل ممكنة، وهل تستطيع تدبّر أمرك في بدايات قد تكون قليلة الدخل؟', 'Do you have something to start with, or possible sources of funds, and can you manage through a start that may bring little income?') },
+      { id: 'mgmt', t: B('مهارات إدارة المشروع', 'Business management skills'), q: B('هل لديك أو تستطيع اكتساب مهارات البيع والحسابات والتنظيم وإدارة الناس؟', 'Do you have, or can you gain, skills in selling, record keeping, organising and managing people?') },
+      { id: 'community', t: B('الالتزام تجاه مجتمعك', 'Commitment to your community'), q: B('هل يهمك أن يفيد مشروعك مجتمعك وأن تراعي الناس والبيئة من حولك؟', 'Do you care that your business benefits your community and respects the people and environment around you?') }
+    ],
+    answers: [
+      { v: 'strength', t: B('نقطة قوة', 'Strength') },
+      { v: 'improve', t: B('تحتاج تحسيناً', 'Needs improvement') },
+      { v: 'unsure', t: B('لست متأكداً', 'Not sure') }
+    ],
+    reflective: B(
+      'هذا التقييم للتأمل الذاتي وليس اختباراً: لا توجد نتيجة نجاح أو رسوب، ولا حكم بأنك مناسب أو غير مناسب. هدفه أن ترى نقاط قوتك والمجالات التي تستحق عنايتك، فتخطط لتقويتها.',
+      'This assessment is for self-reflection, not a test: there is no pass or fail, and no verdict on whether you are suited. It helps you see your strengths and the areas that deserve attention, so you can plan to strengthen them.'),
+    act1Intro: B(
+      'اختر المجالات التي ترى أنها أكثر ما يحتاج إلى تحسين ونمو لديك الآن، ثم دوّن ما يهمك. يمكنك البدء من المجالات التي علّمتها «تحتاج تحسيناً»، ثم تعدّل الاختيار كما تشاء.',
+      'Choose the areas that most need improvement and growth for you now, then write what matters to you. You can start from the areas you marked "Needs improvement" and adjust the choice freely.'),
+    types: [
+      { id: 'manufacturing', t: B('التصنيع', 'Manufacturing'), d: B('تصنع منتجاً من مواد خام أو مكونات وتبيعه (مثل الخبز أو الأثاث أو الملابس).', 'You make a product from raw materials or components and sell it (for example bread, furniture or clothes).') },
+      { id: 'service', t: B('تقديم الخدمات', 'Service provision'), d: B('تبيع وقتك ومهارتك لا سلعة مادية (مثل التوصيل أو التصليح أو التدريب).', 'You sell your time and skill rather than a physical product (for example delivery, repairs or training).') },
+      { id: 'wholesale', t: B('البيع بالجملة', 'Wholesaling'), d: B('تشتري بكميات كبيرة وتبيع لتجار ومشاريع أخرى.', 'You buy in large quantities and sell to traders and other businesses.') },
+      { id: 'retail', t: B('البيع بالتجزئة', 'Retailing'), d: B('تشتري من تجار الجملة أو المنتجين وتبيع للمستهلك النهائي بكميات صغيرة.', 'You buy from wholesalers or producers and sell to final consumers in small quantities.') }
+    ],
+    cases: [
+      { n: B('حسن', 'Hasan'), f: B('نقل وتوصيل', 'Courier'), ty: 'service', s: B('يقدم خدمة توصيل الطرود داخل المدينة.', 'Delivers parcels inside the city.') },
+      { n: B('ماريا', 'Maria'), f: B('خضروات عضوية', 'Organic vegetables'), ty: 'manufacturing', s: B('تزرع الخضروات العضوية وتبيعها.', 'Grows organic vegetables and sells them.') },
+      { n: B('كيم', 'Kim'), f: B('الأزياء', 'Fashion'), ty: 'wholesale', s: B('تبيع الملابس بالجملة للمحال.', 'Sells clothing in bulk to shops.') },
+      { n: B('غيتوكو', 'Githuku'), f: B('مواد البناء', 'Construction materials'), ty: 'retail', s: B('يبيع مواد البناء للأفراد في محله.', 'Sells building materials to individuals in his shop.') }
+    ],
+    fieldIntro: B(
+      '«المجال» هو ما تعمل فيه (مثل الغذاء أو الأزياء أو البناء)، و«النوع» هو كيف تعمل فيه (تصنيع أو خدمات أو جملة أو تجزئة). المجال الواحد قد يحتمل أكثر من نوع، لذلك يتقاطعان في شبكة. الحالات الأربع أدناه أمثلة فقط.',
+      'The "field" is what you work in (such as food, fashion or construction); the "type" is how you work in it (manufacturing, service, wholesale or retail). One field can host more than one type, so they cross in a grid. The four cases below are only examples.'),
+    prompts: {
+      interests: B('اهتماماتك وهواياتك: ما الذي تحب فعله وتجيده؟ (سطر لكل مجال محتمل)', 'Your interests and hobbies: what do you enjoy doing and do well? (one line per possible field)'),
+      experience: B('خبراتك: أين عملت أو تعلمت، وماذا اكتسبت؟', 'Your experience: where have you worked or learned, and what did you gain?'),
+      skills: B('مهاراتك: ماذا تتقن عملياً؟', 'Your skills: what can you do well in practice?'),
+      network: B('شبكة علاقاتك: من تعرف ممن قد يساعدك أو يشتري منك أو يعلّمك؟', 'Your network: who do you know who could help, buy from you or teach you?'),
+      why: B('لماذا يناسبك هذا المجال وهذا النوع؟', 'Why do this field and this type suit you?')
+    },
+    strengthen: [
+      B('تعلّم من أصحاب أعمال ناجحين: زر مشروعاً مشابهاً أو اسأل صاحبه.', 'Learn from successful business owners: visit a similar business or ask its owner.'),
+      B('احضر تدريباً أو دورة في المهارة الناقصة.', 'Attend training or a course in the missing skill.'),
+      B('اكتسب خبرة بالعمل أو التطوع في مشروع مماثل.', 'Gain experience by working or volunteering in a similar business.'),
+      B('اقرأ وتابع مواد تعليمية موثوقة عن إدارة الأعمال.', 'Read and follow reliable learning material on running a business.'),
+      B('اطلب نصيحة وإرشاداً من مرشد أو صديق ذي خبرة.', 'Ask for advice and guidance from a mentor or an experienced friend.'),
+      B('جرّب أولاً بخطوة صغيرة لتختبر قدرتك قبل الالتزام الكبير.', 'Try a small first step to test your ability before a large commitment.'),
+      B('اشرح لأسرتك خطتك واطلب دعمها وتفهمها.', 'Explain your plan to your family and ask for their understanding and support.')
+    ],
+    strengthenNote: B(
+      'خطة العمل الكاملة (النشاط 2: ماذا ستفعل ومتى) تُضاف في مرحلة لاحقة من الوحدة وتجمع كل ما تحتاج تقويته. دوّن الآن ما ينفعك في ملاحظات النشاط 1.',
+      'The full action plan (Activity 2: what you will do and when) is added in a later stage of the module and gathers everything you need to strengthen. For now, note what helps you in the Activity 1 notes.')
+  };
+
+  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1 };
 })();

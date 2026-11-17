@@ -64,8 +64,109 @@
       `<div class="gyb-actions">${btn('go', X('ابدأ: الجزء الأول ←', 'Start: Part I →'), 'primary', 'data-id="p1"')}</div>`;
   }
 
+  /* ---------- Part I: You as an entrepreneur (Phase 2) ---------- */
+  const P1 = D.P1;
+  const isO = (o) => o !== null && typeof o === 'object' && !Array.isArray(o);
+  const strArr = (a) => (Array.isArray(a) ? a.filter((x) => typeof x === 'string') : []);
+  const readResponses = () => { const r = store.get('readinessAssessment.responses', {}); return isO(r) ? r : {}; };
+  const lines = (txt) => String(txt || '').split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+  // experienceSkillsNetworks is stored as [{k:'experience'|'skills'|'network', text}]
+  const enGet = (k) => { const a = store.get('businessProfile.experienceSkillsNetworks', []); const e = Array.isArray(a) ? a.find((x) => x && x.k === k) : null; return e && typeof e.text === 'string' ? e.text : ''; };
+  const enSet = (k, text) => {
+    const a = store.get('businessProfile.experienceSkillsNetworks', []);
+    const list = (Array.isArray(a) ? a : []).filter((x) => x && x.k !== k);
+    if (text.trim()) list.push({ k, text });
+    store.set('businessProfile.experienceSkillsNetworks', list);
+  };
+  const ta = (f, val, rows = 3) => `<textarea class="gyb-ta" rows="${rows}" data-f="${f}">${esc(val)}</textarea>`;
+  const fld = (label, inner) => `<label class="gyb-fld"><span>${esc(T(label))}</span>${inner}</label>`;
+
+  function renderPart1(s) {
+    const p = s.part; const resp = readResponses();
+    const crit = strArr(store.get('readinessAssessment.criticalImprovementAreas', []));
+    const types = strArr(store.get('businessProfile.businessTypes', []));
+    const areas = P1.areas.map((a, i) => `<fieldset class="gyb-area" data-area="${a.id}"><legend><span class="gyb-area-n">${i + 1}</span>${esc(T(a.t))}</legend>
+      <p class="gyb-q">${esc(T(a.q))}</p>
+      <div class="gyb-choices" role="radiogroup">${P1.answers.map((o) => `<label class="gyb-choice ${o.v}"><input type="radio" name="ra-${a.id}" value="${o.v}" data-f="area" data-id="${a.id}"${resp[a.id] === o.v ? ' checked' : ''}><span>${esc(T(o.t))}</span></label>`).join('')}</div></fieldset>`).join('');
+    const critBoxes = P1.areas.map((a) => `<label class="gyb-choice crit"><input type="checkbox" data-f="crit" value="${a.id}"${crit.includes(a.id) ? ' checked' : ''}><span>${esc(T(a.t))}</span></label>`).join('');
+    const typeBoxes = P1.types.map((t) => `<label class="gyb-type"><input type="checkbox" data-f="type" value="${t.id}"${types.includes(t.id) ? ' checked' : ''}><span><b>${esc(T(t.t))}</b><small>${esc(T(t.d))}</small></span></label>`).join('');
+    const typeName = (id) => T(P1.types.find((t) => t.id === id).t);
+    const cases = P1.cases.map((c) => `<li><b>${esc(T(c.n))}</b> — ${esc(T(c.f))} <span class="gyb-tag blue">${esc(typeName(c.ty))}</span><small>${esc(T(c.s))}</small></li>`).join('');
+    const statusOf = (id) => statusTag(p.items.find((i) => i.id === id));
+    return head(T(p.title), T(p.lead)) +
+      card('', `<p>${esc(T(P1.reflective))}</p>`, 'warn') +
+      `<nav class="gyb-steps" aria-label="${X('خطوات الجزء الأول', 'Part I steps')}">
+        <a href="#gyb-p1-a">${X('1 · الجاهزية', '1 · Readiness')}</a><a href="#gyb-p1-b">${X('2 · النشاط 1', '2 · Activity 1')}</a><a href="#gyb-p1-c">${X('3 · المجال والنوع', '3 · Field and type')}</a><a href="#gyb-p1-d">${X('4 · تقوية قدراتك', '4 · Strengthen')}</a></nav>` +
+      `<div id="gyb-p1-a">` + card(X('1 · هل لديك ما يلزم لتكون رائد أعمال؟', '1 · Do you have what it takes to be an entrepreneur?'),
+        `<p class="gyb-note">${X('لكل مجال من المجالات التسعة اختر ما يعبّر عنك الآن. يمكنك ترك أي مجال دون إجابة والعودة إليه، وتعديل إجاباتك في أي وقت.', 'For each of the nine areas, choose what describes you now. You may leave any area unanswered and return to it, and change your answers at any time.')}</p>
+        <div class="gyb-p1-status" data-o="ass1tag">${statusOf('ass1')}</div>${areas}
+        <div class="gyb-counts" role="status" aria-live="polite" data-o="counts"></div>`, 'accent') + `</div>` +
+      `<div id="gyb-p1-b">` + card(X('2 · النشاط 1: مجالات التحسين والنمو الحرجة', '2 · Activity 1: critical areas needing improvement and growth'),
+        `<p>${esc(T(P1.act1Intro))}</p><div class="gyb-p1-status" data-o="act1tag">${statusOf('act1')}</div>
+        <div class="gyb-choices wrap">${critBoxes}</div>
+        <div class="gyb-actions">${btn('p1-fillcrit', X('اقترح من مجالات «تحتاج تحسيناً»', 'Suggest from "Needs improvement" areas'))}</div>
+        ${fld(D.B('ملاحظاتك: ما أهم ما تريد تحسينه ولماذا؟', 'Your notes: what do you most want to improve, and why?'), ta('critnotes', store.get('readinessAssessment.criticalNotes', ''), 4))}`) + `</div>` +
+      `<div id="gyb-p1-c">` + card(X('3 · أي مجال وأي نوع من الأعمال يناسبك؟', '3 · Which field and type of business suit you?'),
+        `<p>${esc(T(P1.fieldIntro))}</p><ul class="gyb-cases">${cases}</ul>
+        <div class="gyb-p1-status" data-o="ass2tag">${statusOf('ass2')}</div>
+        ${fld(P1.prompts.interests, ta('interests', strArr(store.get('businessProfile.fieldsOfInterest', [])).join('\n'), 4))}
+        <h4>${X('أنواع الأعمال التي تفكر فيها (اختر واحداً أو أكثر)', 'Business types you are considering (choose one or more)')}</h4><div class="gyb-types">${typeBoxes}</div>
+        <div class="gyb-grid two">${fld(P1.prompts.experience, ta('experience', enGet('experience')))}${fld(P1.prompts.skills, ta('skills', enGet('skills')))}</div>
+        ${fld(P1.prompts.network, ta('network', enGet('network')))}
+        ${fld(P1.prompts.why, ta('why', store.get('businessProfile.whySuits', ''), 4))}
+        <p class="gyb-note">${X('هذه الإجابات مسودة تفكير وليست قراراً: ستقارن أفكارك وتختار لاحقاً في أجزاء الرحلة التالية.', 'These answers are a thinking draft, not a decision: you will compare and choose your ideas later in the next parts of the journey.')}</p>`) + `</div>` +
+      `<div id="gyb-p1-d">` + card(X('4 · كيف تقوّي قدراتك؟', '4 · How to strengthen your abilities'), `${ul(P1.strengthen)}<p class="gyb-note">${esc(T(P1.strengthenNote))}</p>
+        <p>${statusTag(p.items.find((i) => i.id === 'act2'))}</p>`, 'good') + `</div>`;
+  }
+
+  function updatePart1() {
+    if (!root) return;
+    const resp = readResponses();
+    const ids = P1.areas.map((a) => a.id);
+    const strengths = ids.filter((i) => resp[i] === 'strength').length;
+    const improves = ids.filter((i) => resp[i] === 'improve').length;
+    const unsure = ids.filter((i) => resp[i] === 'unsure').length;
+    const answered = strengths + improves + unsure;
+    const left = ids.length - answered;
+    store.set('readinessAssessment.strengthsCount', strengths);
+    store.set('readinessAssessment.improvementCount', improves);
+    const c = root.querySelector('[data-o="counts"]');
+    if (c) c.innerHTML = `<span class="gyb-count good"><b>${strengths}</b>${X('نقاط قوة', 'strengths')}</span><span class="gyb-count warn"><b>${improves}</b>${X('مجالات تحتاج تحسيناً', 'areas to improve')}</span><span class="gyb-count"><b>${unsure}</b>${X('غير متأكد', 'not sure')}</span><span class="gyb-count"><b>${left}</b>${left ? X('بلا إجابة', 'unanswered') : X('كلها أُجيبت', 'all answered')}</span>` +
+      (left ? `<p class="gyb-note">${X('التقييم غير مكتمل بعد، وهذا طبيعي؛ المجالات غير المجابة ليست نقاط ضعف.', 'The assessment is not complete yet, which is fine; unanswered areas are not weaknesses.')}</p>` : '');
+    const crit = strArr(store.get('readinessAssessment.criticalImprovementAreas', []));
+    const fields = strArr(store.get('businessProfile.fieldsOfInterest', []));
+    const types = strArr(store.get('businessProfile.businessTypes', []));
+    const why = String(store.get('businessProfile.whySuits', '')).trim();
+    const notes = String(store.get('readinessAssessment.criticalNotes', '')).trim();
+    const prog = {
+      ass1: answered === 0 ? '' : left === 0 ? 'done' : 'inprogress',
+      act1: crit.length || notes ? 'done' : '',
+      ass2: (fields.length && types.length && why) ? 'done' : (fields.length || types.length || why || enGet('experience') || enGet('skills') || enGet('network')) ? 'inprogress' : ''
+    };
+    const p = byId('p1').part;
+    Object.keys(prog).forEach((id) => {
+      if (stateOf({ id }) !== prog[id]) store.set('progress.' + id, prog[id]);
+      const el = root.querySelector(`[data-o="${id}tag"]`);
+      if (el) el.innerHTML = statusTag(p.items.find((i) => i.id === id));
+    });
+  }
+
+  function onP1Input(el) {
+    const f = el.dataset.f;
+    if (f === 'area') { const r = readResponses(); r[el.dataset.id] = el.value; store.set('readinessAssessment.responses', r); }
+    else if (f === 'crit') { store.set('readinessAssessment.criticalImprovementAreas', P1.areas.map((a) => a.id).filter((id) => root.querySelector(`[data-f="crit"][value="${id}"]`).checked)); }
+    else if (f === 'type') { store.set('businessProfile.businessTypes', P1.types.map((t) => t.id).filter((id) => root.querySelector(`[data-f="type"][value="${id}"]`).checked)); }
+    else if (f === 'critnotes') store.set('readinessAssessment.criticalNotes', el.value);
+    else if (f === 'interests') store.set('businessProfile.fieldsOfInterest', lines(el.value));
+    else if (f === 'why') store.set('businessProfile.whySuits', el.value);
+    else if (f === 'experience' || f === 'skills' || f === 'network') enSet(f, el.value);
+    else return;
+    updatePart1();
+  }
+
   function renderPart(s) {
     const p = s.part;
+    if (p.id === 'p1') return renderPart1(s);
     const items = p.items.map((it) => `<li class="gyb-item"><span class="gyb-tag blue">${esc(T(KIND[it.kind]))}</span><span class="gyb-item-t">${esc(T(it.title))}</span>${statusTag(it)}</li>`).join('');
     return head(T(p.title), T(p.lead)) +
       card(X('ما ستعمل عليه في هذا الجزء', 'What you will work on in this part'), `<ul class="gyb-items">${items}</ul>
@@ -129,6 +230,7 @@
     const s = byId(currentId); const y = window.scrollY;
     root.innerHTML = SECTION_RENDER(s) + pager(s);
     setHeading(s);
+    if (s.part && s.part.id === 'p1') updatePart1();
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   }
@@ -147,6 +249,14 @@
   const msg = (text, ok) => { const e = root && root.querySelector('[data-o="msg"]'); if (e) { e.textContent = text; e.className = 'gyb-res ' + (ok ? 'ok' : 'bad'); } };
   const ACT = {
     go: (el) => open(el.dataset.id),
+    'p1-fillcrit': () => {
+      const r = readResponses();
+      const ids = P1.areas.map((a) => a.id).filter((id) => r[id] === 'improve');
+      if (!ids.length) { window.alert(X('لم تضع علامة «تحتاج تحسيناً» على أي مجال بعد.', 'You have not marked any area as "Needs improvement" yet.')); return; }
+      root.querySelectorAll('[data-f="crit"]').forEach((b) => { b.checked = ids.includes(b.value); });
+      store.set('readinessAssessment.criticalImprovementAreas', ids);
+      updatePart1();
+    },
     export: () => {
       const blob = new Blob([store.exportJson()], { type: 'application/json' });
       const a = document.createElement('a');
@@ -159,6 +269,9 @@
     import: () => { const f = root.querySelector('[data-act-file="import"]'); if (f) { f.value = ''; f.click(); } },
     reset: () => {
       if (!window.confirm(X('سيُمسح كل ما أدخلته في وحدة GYB على هذا الجهاز ولا يمكن التراجع. هل تريد المتابعة؟ (بيانات الوحدات الأخرى لن تتأثر)', 'Everything you entered in the GYB module on this device will be erased and this cannot be undone. Continue? (Other modules\' data is not affected.)'))) return;
+      const word = X('مسح', 'ERASE');
+      const typed = window.prompt(X('للتأكيد النهائي اكتب الكلمة: ', 'For final confirmation type the word: ') + word, '');
+      if (typed === null || typed.trim().toLowerCase() !== word.toLowerCase()) { msg(X('لم يتم المسح: لم تُكتب كلمة التأكيد.', 'Nothing erased: the confirmation word was not typed.'), false); return; }
       store.reset(); currentId = 'about'; render(false);
       msg(X('تم مسح بيانات GYB.', 'GYB data erased.'), true);
     }
@@ -185,7 +298,8 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       const fn = ACT[b.dataset.act]; if (fn) fn(b);
     });
-    root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); });
+    root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches('[data-f]')) onP1Input(e.target); });
+    root.addEventListener('input', (e) => { if (e.target.matches('textarea[data-f]')) onP1Input(e.target); });
   }
 
   function mount(host) {
