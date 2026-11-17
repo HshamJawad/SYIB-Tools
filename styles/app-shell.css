@@ -653,9 +653,21 @@ html[dir="ltr"] .global-nav-item.active{box-shadow:inset 5px 0 0 #F48D01,0 3px 1
 .num-step{width:var(--sw)}
 #costingModuleRoot .num-stepper>.tin{padding-left:calc(var(--sw) + 8px)!important;padding-right:calc(var(--sw) + 8px)!important;text-align:center}
 
-/* Three mode buttons on phones: stack icon above a wrapping label so nothing is truncated */
-@media (max-width:700px){
- .mode-switch{gap:3px;padding:4px}
- .mode-switch-button{flex-direction:column;gap:1px;min-width:0;padding:4px 3px;white-space:normal;text-align:center;line-height:1.25;font-size:10px}
- .mode-switch-icon{font-size:13px;line-height:1}
-}
+/* Tool-based sidebar: main tools with collapsible sub-menus */
+.sidebar-tool{margin:0 0 8px}
+.sidebar-tool-head{display:flex;align-items:center;gap:11px;width:100%;min-height:50px;padding:9px 10px;border:1px solid #24A8E04d;border-radius:12px;background:#fff;color:#0b1f2b;font:800 14px Cairo,Arial,sans-serif;text-align:start;cursor:pointer;transition:background .16s,border-color .16s}
+.sidebar-tool-head:hover{background:#24A8E02b}
+.sidebar-tool.active .sidebar-tool-head{border-color:#24A8E0;background:#e6f5fc}
+html[dir="rtl"] .sidebar-tool.active .sidebar-tool-head{box-shadow:inset -5px 0 0 #F48D01}
+html[dir="ltr"] .sidebar-tool.active .sidebar-tool-head{box-shadow:inset 5px 0 0 #F48D01}
+.sidebar-tool-head .global-nav-label{flex:1;min-width:0}
+.sidebar-tool-chevron{width:8px;height:8px;border-inline-end:2px solid #3d6277;border-bottom:2px solid #3d6277;transform:rotate(45deg);transition:transform .16s;margin-inline:4px}
+.sidebar-tool-head[aria-expanded="true"] .sidebar-tool-chevron{transform:rotate(-135deg)}
+.sidebar-tool-body{margin-top:6px;margin-inline-start:10px;padding-inline-start:6px;border-inline-start:2px solid #24A8E04d}
+.sidebar-tool-body[hidden]{display:none}
+.topbar-tool-title{min-height:42px;justify-content:center;padding:6px 20px;font:800 13px Cairo,Arial,sans-serif;color:#13506C;min-width:150px;text-align:center}
+.topbar-tool-title[hidden]{display:block;visibility:hidden}
+body.sidebar-collapsed .sidebar-tool-head{justify-content:center;padding:8px}
+body.sidebar-collapsed .sidebar-tool-head .global-nav-label,body.sidebar-collapsed .sidebar-tool-chevron{display:none}
+body.sidebar-collapsed .sidebar-tool-body{margin-inline-start:0;padding-inline-start:0;border:0}
+@media(max-width:620px){.topbar-tool-title{min-width:0;width:100%;font-size:12px;padding:4px 8px}}

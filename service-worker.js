@@ -1,4 +1,4 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.6.1";
+const CACHE_NAME = "siyb-workshop-shell-v0.7.0";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -41,7 +41,7 @@ self.addEventListener("activate", (event) => {
   );
   self.clients.claim();
   self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.6.1" }));
+    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.7.0" }));
   });
 });
 
@@ -79,7 +79,7 @@ self.addEventListener("fetch", (event) => {
   })());
 });
 
-// Release note: v0.6.1 update flow is ready for the Pages deployment.
+// Release note: v0.7.0 update flow is ready for the Pages deployment.
 // The update is activated only after an explicit user action in the app banner.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();

@@ -177,23 +177,28 @@
     window.dispatchEvent(new CustomEvent("siyb:languagechange", { detail: { language } }));
   }
 
-  function setActiveModeButton(mode) {
-    document.querySelectorAll("[data-mode]").forEach((button) => {
-      const active = button.dataset.mode === mode;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
+  const TOOL_OF = { business: "costing", training: "costing", stock: "stock" };
+  const TOOL_TITLE = { costing: "احتساب التكاليف", stock: "المشتريات والمخزون" };
+
+  function setToolExpanded(tool, expanded) {
+    const el = document.querySelector('[data-tool="' + tool + '"]');
+    if (!el) return;
+    el.querySelector(".sidebar-tool-body").hidden = !expanded;
+    el.querySelector(".sidebar-tool-head").setAttribute("aria-expanded", String(expanded));
   }
 
-  function setSidebarGroup(mode) {
-    document.querySelectorAll("[data-nav-group]").forEach((group) => {
-      group.hidden = group.dataset.navGroup !== mode;
+  // Marks the active tool, expands its sub-menu and collapses the others (accordion).
+  function setActiveTool(tool) {
+    document.querySelectorAll("[data-tool]").forEach((el) => {
+      const on = el.dataset.tool === tool;
+      el.classList.toggle("active", on);
+      setToolExpanded(el.dataset.tool, on);
     });
-    $("sidebarEmptyState").hidden = !!mode;
-    $("sidebarContextTitle").textContent = mode === "business"
-      ? "وضع إدارة الأعمال"
-      : mode === "training" ? "وضع التدريب"
-      : mode === "stock" ? "المشتريات وتدبير المخزون" : "اختر وضعاً من الشريط العلوي";
+    const name = $("topbarToolName");
+    if (name) name.textContent = TOOL_TITLE[tool] || "";
+    const pill = $("topbarToolTitle");
+    if (pill) pill.hidden = !tool;
+    if (name && tool) translateUiTree(pill);
   }
 
   function setActiveNav(item) {
@@ -236,7 +241,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.6.1";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.7.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -257,7 +262,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.6.1";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.7.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -275,7 +280,7 @@
     if (!stockScriptPromise) {
       const load = (src) => new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl(src) + "?v=0.6.1";
+        script.src = assetUrl(src) + "?v=0.7.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -349,6 +354,9 @@
         select.value = targetExample;
         select.dispatchEvent(new Event("change", { bubbles: true }));
       }
+      if (select) select.addEventListener("change", () => {
+        setActiveNav(select.value === "overheadExercise" ? "business-overhead" : "business-" + select.value);
+      });
       translateUiTree(host);
       refreshLocaleDigits(host);
       setGlobalExportActionsVisible(true);
@@ -362,18 +370,18 @@
     }
   }
 
-  async function activateMode(mode) {
+  async function activateMode(mode, example, navId, opts) {
     if (mode !== "business" && mode !== "training" && mode !== "stock") return;
+    const keepDrawer = !!(opts && opts.keepDrawer);
     activeMode = mode;
     document.body.classList.toggle("mode-training", mode === "training");
     document.body.classList.toggle("mode-stock", mode === "stock");
-    setActiveModeButton(mode);
-    setSidebarGroup(mode);
-    closeMobileSidebar();
+    setActiveTool(TOOL_OF[mode]);
+    if (!keepDrawer) closeMobileSidebar();
 
     if (mode === "stock") {
       $("workspaceBadgeNumber").textContent = "PS";
-      await loadStockModule("home");
+      await loadStockModule(example || "home");
       translateUiTree($("workspaceContent"));
       return;
     }
@@ -383,37 +391,39 @@
       $("workspaceDescription").textContent = "احتساب تكلفة المنتجات وتوزيع النفقات غير المباشرة والعامة وفق منهجية الكتيب.";
       $("workspaceBadgeNumber").textContent = "01";
       $("workspaceBadgeLabel").textContent = "الوحدة الأولى";
-      setActiveNav("business-textile");
-      await loadCostingModule(mode, "textile");
+      setActiveNav(navId || "business-textile");
+      await loadCostingModule(mode, example || "textile");
     } else {
       $("workspaceTitle").textContent = "تمارين احتساب التكاليف";
       $("workspaceDescription").textContent = "أدخل حساباتك بنفسك، تحقق من إجاباتك، وراجع خطوات الحل الصحيحة. يمكن للمدرب عرض الحل النموذجي وتوليد أرقام جديدة لكل مجموعة.";
       $("workspaceBadgeNumber").textContent = "T";
       $("workspaceBadgeLabel").textContent = "التدريب العملي";
-      setActiveNav("training-overhead");
-      await loadCostingModule(mode, "overheadExercise");
+      setActiveNav(navId || "training-overhead");
+      await loadCostingModule(mode, example || "overheadExercise");
     }
+    translateUiTree($("workspaceTitle").parentElement);
+    translateUiTree($("workspaceBadgeNumber").parentElement);
   }
 
-  document.querySelectorAll("[data-mode]").forEach((button) => {
-    button.addEventListener("click", () => activateMode(button.dataset.mode));
-  });
-
   $("globalSidebarNav").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-nav-item]");
-    if (!button || !activeMode) return;
-    if (activeMode === "stock") {
-      loadStockModule(button.dataset.stock);
-      closeMobileSidebar();
+    const head = event.target.closest(".sidebar-tool-head");
+    if (head) {
+      const tool = head.dataset.toolHead;
+      if (tool !== TOOL_OF[activeMode]) {
+        // Open the tool's default page; keep the drawer open on phones so its sub-menu is visible.
+        activateMode(tool === "stock" ? "stock" : "business", null, null, { keepDrawer: true });
+      } else {
+        const body = head.parentElement.querySelector(".sidebar-tool-body");
+        setToolExpanded(tool, body.hidden);
+      }
       return;
     }
-    setActiveNav(button.dataset.navItem);
-    if (activeMode === "business") {
-      loadCostingModule("business", button.dataset.example || "textile");
-    } else {
-      loadCostingModule("training", button.dataset.example || "overheadExercise");
-    }
-    closeMobileSidebar();
+    const button = event.target.closest("[data-nav-item]");
+    if (!button) return;
+    const group = button.closest("[data-nav-group]");
+    const mode = group && group.dataset.navGroup;
+    if (mode === "stock") activateMode("stock", button.dataset.stock, null);
+    else if (mode === "business" || mode === "training") activateMode(mode, button.dataset.example, button.dataset.navItem);
   });
 
   function syncSidebarToggleState() {
@@ -473,7 +483,7 @@ $("globalPDFButton").addEventListener("click", () => {
   });
 
   applyLanguage();
-  setSidebarGroup(null);
+  setActiveTool(null);
   syncSidebarToggleState();
 
 

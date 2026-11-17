@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="./styles/main.css">
   <link rel="stylesheet" href="./styles/app-shell.css">
   <link rel="stylesheet" href="./styles/business-costing.css">
-  <link rel="stylesheet" href="./styles/purchasing-stock.css?v=0.6.1">
+  <link rel="stylesheet" href="./styles/purchasing-stock.css?v=0.7.0">
 </head>
 <body>
 <div id="appShell">
@@ -26,17 +26,7 @@
       <span class="app-brand-copy"><strong>SIYB</strong></span>
     </div>
 
-    <div class="mode-switch" role="group" aria-label="اختيار وضع العمل">
-      <button type="button" class="mode-switch-button" data-mode="business" aria-pressed="false">
-        <span class="mode-switch-icon">▦</span><span>وضع إدارة الأعمال</span>
-      </button>
-      <button type="button" class="mode-switch-button" data-mode="training" aria-pressed="false">
-        <span class="mode-switch-icon">✎</span><span>وضع التدريب</span>
-      </button>
-      <button type="button" class="mode-switch-button" data-mode="stock" aria-pressed="false">
-        <span class="mode-switch-icon">▤</span><span>المشتريات والمخزون</span>
-      </button>
-    </div>
+    <div class="mode-switch topbar-tool-title" id="topbarToolTitle" aria-live="polite"><span id="topbarToolName"></span></div>
 
     <div class="app-top-actions">
       <div id="globalExportActions" class="topbar-export-actions" hidden>
@@ -62,18 +52,14 @@
         <button type="button" id="sidebarCollapse" class="sidebar-collapse-button" title="طي الشريط الجانبي" aria-label="طي الشريط الجانبي"><span class="sidebar-collapse-chevron" aria-hidden="true"></span></button>
       </div>
 
-      <div class="sidebar-context">
-        <span class="sidebar-context-label">الوضع المختار</span>
-        <strong id="sidebarContextTitle">اختر وضعاً من الشريط العلوي</strong>
-      </div>
-
       <nav class="global-sidebar-nav" id="globalSidebarNav">
-        <div class="sidebar-empty-state" id="sidebarEmptyState">
-          <p>اختر «وضع إدارة الأعمال» لاستخدام أدوات احتساب التكاليف، أو «وضع التدريب» لتنفيذ التمارين التطبيقية. ستظهر وحدات الوضع المختار هنا.</p>
-        </div>
-
-        <section class="sidebar-nav-group" data-nav-group="business" hidden>
-          <div class="sidebar-nav-caption">أدوات إدارة الأعمال</div>
+        <div class="sidebar-tool" data-tool="costing">
+          <button type="button" class="sidebar-tool-head" data-tool-head="costing" aria-expanded="false">
+            <span class="global-nav-icon">▦</span><span class="global-nav-label">احتساب التكاليف</span><span class="sidebar-tool-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-tool-body" hidden>
+<section class="sidebar-nav-group" data-nav-group="business">
+          <div class="sidebar-nav-caption">الأدوات والأمثلة</div>
           <button type="button" class="global-nav-item" data-example="custom" data-nav-item="business-custom">
             <span class="global-nav-icon">＋</span><span class="global-nav-label">بيانات جديدة / إدخال يدوي</span><span class="global-nav-current"></span>
           </button>
@@ -100,8 +86,8 @@
           </button>
         </section>
 
-        <section class="sidebar-nav-group" data-nav-group="training" hidden>
-          <div class="sidebar-nav-caption">تمارين وتطبيقات</div>
+        <section class="sidebar-nav-group" data-nav-group="training">
+          <div class="sidebar-nav-caption">التمارين</div>
           <button type="button" class="global-nav-item" data-example="ledger" data-nav-item="training-ledger">
             <span class="global-nav-icon">▥</span><span class="global-nav-label">سجل الحسابات والمصروفات</span><span class="global-nav-current"></span>
           </button>
@@ -113,7 +99,16 @@
           </button>
           <div class="sidebar-training-note">في هذا الوضع تُخفى النتائج ويحسبها المتدرب بنفسه، ثم يتحقق من إجاباته ويراجع خطوات الحل.</div>
         </section>
-        <section class="sidebar-nav-group" data-nav-group="stock" hidden></section>
+          </div>
+        </div>
+        <div class="sidebar-tool" data-tool="stock">
+          <button type="button" class="sidebar-tool-head" data-tool-head="stock" aria-expanded="false">
+            <span class="global-nav-icon">▤</span><span class="global-nav-label">المشتريات والمخزون</span><span class="sidebar-tool-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-tool-body" hidden>
+<section class="sidebar-nav-group" data-nav-group="stock"></section>
+          </div>
+        </div>
       </nav>
 
       <div class="global-sidebar-footer">
@@ -133,15 +128,15 @@
           <div class="welcome-guide-step">
             
             <div class="welcome-guide-step-content">
-              <h3>1- اختر أحد الوضعين من الشريط العلوي</h3>
+              <h3>1- اختر أداة من القائمة الجانبية</h3>
               <div class="welcome-guide-modes">
                 <div class="welcome-guide-mode">
-                  <strong>وضع إدارة الأعمال</strong>
-                  <p>استخدم الأدوات العملية لاحتساب تكاليف مشروعك ومراجعة بياناته.</p>
+                  <strong>احتساب التكاليف</strong>
+                  <p>أدوات وأمثلة لاحتساب تكاليف مشروعك، وتمارين تطبيقية على خطوات الاحتساب.</p>
                 </div>
                 <div class="welcome-guide-mode">
-                  <strong>وضع التدريب</strong>
-                  <p>نفّذ التمارين التطبيقية وتدرّب على خطوات احتساب التكاليف.</p>
+                  <strong>المشتريات والمخزون</strong>
+                  <p>خطوات الشراء وبطاقات المخزون والجرد وإدارة علاقات المزوّدين، مع أنشطة وتمارين.</p>
                 </div>
               </div>
             </div>
@@ -149,8 +144,8 @@
           <div class="welcome-guide-step welcome-guide-sidebar-step">
             
             <div class="welcome-guide-step-content">
-              <h3>2- انتقل بين الوحدات من القائمة الجانبية</h3>
-              <p>بعد اختيار الوضع، تعرض القائمة الجانبية الأدوات أو التمارين المتاحة فيه. اختر الوحدة التي تريد فتحها، ويمكنك العودة إلى الشريط العلوي للتبديل بين الوضعين في أي وقت.</p>
+              <h3>2- انتقل بين الأمثلة والتمارين والأقسام</h3>
+              <p>عند اختيار أداة تنفتح قائمتها الفرعية. اختر المثال أو التمرين أو القسم الذي تريده، ويمكنك التبديل بين الأدوات في أي وقت.</p>
             </div>
           </div>
         </section>
@@ -168,7 +163,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.6.1 · © 2026 هشام جواد كاظم — مطور الأداة</span>
+        <span>SIYB Digital Workshop Tools</span><span>الإصدار 0.7.0 · © 2026 هشام جواد كاظم — مطور الأداة</span>
       </footer>
     </main>
   </div>
@@ -183,6 +178,6 @@
 <script src="./src/modules/arabic-pdf.js"></script>
 <script src="./vendor/exceljs/exceljs.min.js"></script>
 <script src="./src/locales/translations.js"></script>
-<script src="./src/app.js?v=0.6.1"></script>
+<script src="./src/app.js?v=0.7.0"></script>
 </body>
 </html>

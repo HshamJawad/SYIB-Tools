@@ -427,10 +427,11 @@
   const byId = (id) => SECTIONS.find((s) => s.id === id) || SECTIONS[0];
   function buildNav() {
     const nav = document.querySelector('[data-nav-group="stock"]'); if (!nav) return;
-    let html = '<div class="sidebar-nav-caption">' + X('المشتريات وتدبير المخزون', 'Purchasing & stock management') + '</div>'; let last = '';
+    const act = document.body.classList.contains('mode-stock');
+    let html = ''; let last = '';
     SECTIONS.forEach((s) => {
       if (s.grp !== last) { if (s.grp !== 'H') html += `<div class="sidebar-nav-caption sub">${esc(T(GROUPS[s.grp]))}</div>`; last = s.grp; }
-      html += `<button type="button" class="global-nav-item${s.id === currentId ? ' active' : ''}" data-nav-item="stock-${s.id}" data-stock="${s.id}"${s.id === currentId ? ' aria-current="page"' : ''}><span class="global-nav-icon">${s.icon}</span><span class="global-nav-label">${esc(T(s.title))}</span><span class="global-nav-current"></span></button>`;
+      html += `<button type="button" class="global-nav-item${act && s.id === currentId ? ' active' : ''}" data-nav-item="stock-${s.id}" data-stock="${s.id}"${act && s.id === currentId ? ' aria-current="page"' : ''}><span class="global-nav-icon">${s.icon}</span><span class="global-nav-label">${esc(T(s.title))}</span><span class="global-nav-current"></span></button>`;
     });
     nav.innerHTML = html;
   }
@@ -516,5 +517,5 @@
     bind(); buildNav(); open(currentId || 'home');
   }
   window.SIYBStock = { mount, open, refresh: () => { buildNav(); render(true); }, sections: SECTIONS.map((s) => s.id) };
-  window.addEventListener('siyb:languagechange', () => { if (root && document.body.classList.contains('mode-stock')) window.SIYBStock.refresh(); });
+  window.addEventListener('siyb:languagechange', () => { if (!root) return; if (document.body.classList.contains('mode-stock')) window.SIYBStock.refresh(); else buildNav(); });
 })();

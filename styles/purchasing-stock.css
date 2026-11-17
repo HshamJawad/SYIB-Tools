@@ -80,7 +80,7 @@
 .ps-hero .part:nth-child(2) .k{background:#F48D01}
 .ps-hero .part:nth-child(3) .k{background:#A4CF06;color:#111}
 .ps-pager{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
-body.mode-stock .global-sidebar .sidebar-nav-caption.sub{margin-top:8px;color:#13506C}
+.global-sidebar .sidebar-nav-caption.sub{margin-top:8px;color:#13506C}
 @media(max-width:600px){.ps-card{padding:12px}.ps-table input.ps-in{min-width:60px}.ps-grid.two{grid-template-columns:1fr}}
 @media print{
   .ps-actions,.ps-btn,.ps-pager,.num-step{display:none!important}
