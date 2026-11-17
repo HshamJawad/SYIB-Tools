@@ -177,8 +177,34 @@
     window.dispatchEvent(new CustomEvent("siyb:languagechange", { detail: { language } }));
   }
 
-  const TOOL_OF = { business: "costing", training: "costing", stock: "stock" };
-  const TOOL_TITLE = { costing: "احتساب التكاليف", stock: "المشتريات والمخزون" };
+  const REG = window.SIYBModules;
+  const toolOf = (mode) => { const m = REG.byMode(mode); return m ? m.id : null; };
+  const toolTitle = (tool) => { const m = REG.get(tool); return m ? m.title.ar : ""; };
+
+  // Builds the sidebar tool blocks from the module registry (one block per registered module, in order).
+  function renderSidebarTools() {
+    const nav = $("globalSidebarNav");
+    nav.innerHTML = "";
+    REG.list().forEach((m) => {
+      const block = document.createElement("div");
+      block.className = "sidebar-tool";
+      block.dataset.tool = m.id;
+      block.innerHTML =
+        '<button type="button" class="sidebar-tool-head" data-tool-head="' + m.id + '" aria-expanded="false">' +
+        '<span class="global-nav-icon">' + m.icon + '</span><span class="global-nav-label">' + m.title.ar + '</span>' +
+        '<span class="sidebar-tool-chevron" aria-hidden="true"></span></button>' +
+        '<div class="sidebar-tool-body" hidden></div>';
+      const body = block.querySelector(".sidebar-tool-body");
+      if (m.navTemplate) body.appendChild(document.getElementById(m.navTemplate).content.cloneNode(true));
+      else {
+        const group = document.createElement("section");
+        group.className = "sidebar-nav-group";
+        group.dataset.navGroup = m.modes[0];
+        body.appendChild(group);
+      }
+      nav.appendChild(block);
+    });
+  }
 
   function setToolExpanded(tool, expanded) {
     const el = document.querySelector('[data-tool="' + tool + '"]');
@@ -195,7 +221,7 @@
       setToolExpanded(el.dataset.tool, on);
     });
     const name = $("topbarToolName");
-    if (name) name.textContent = TOOL_TITLE[tool] || "";
+    if (name) name.textContent = toolTitle(tool);
     const pill = $("topbarToolTitle");
     if (pill) pill.hidden = !tool;
     if (name && tool) translateUiTree(pill);
@@ -241,7 +267,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.7.0";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.8.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -262,7 +288,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.7.0";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.8.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -274,35 +300,39 @@
     await trainingScriptPromise;
   }
 
-  let stockScriptPromise = null;
-  async function ensureStockScripts() {
-    if (window.SIYBStock) return;
-    if (!stockScriptPromise) {
-      const load = (src) => new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = assetUrl(src) + "?v=0.7.0";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
-        document.body.appendChild(script);
-      });
-      stockScriptPromise = load("src/modules/purchasing-stock-data.js")
-        .then(() => load("src/modules/purchasing-stock.js"))
-        .catch((error) => { stockScriptPromise = null; throw error; });
+  // External (lazy-loaded) modules registered with an `external` descriptor: gyb, stock, future modules.
+  const externalScripts = {};
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = assetUrl(src) + "?v=0.8.0";
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
+      document.body.appendChild(script);
+    });
+  }
+  async function ensureExternalScripts(def) {
+    const ext = def.external;
+    if (window[ext.global]) return;
+    if (!externalScripts[def.id]) {
+      externalScripts[def.id] = ext.scripts.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+        .catch((error) => { externalScripts[def.id] = null; throw error; });
     }
-    await stockScriptPromise;
+    await externalScripts[def.id];
   }
 
-  async function loadStockModule(sectionId) {
+  async function loadExternalModule(def, sectionId) {
     setGlobalExportActionsVisible(false);
     const host = $("workspaceContent");
     $("welcomeScreen").hidden = true;
     $("workspace").hidden = false;
     try {
-      await ensureStockScripts();
-      if (!host.querySelector("#psRoot")) window.SIYBStock.mount(host);
-      window.SIYBStock.open(sectionId || "home");
+      await ensureExternalScripts(def);
+      const api = window[def.external.global];
+      if (!host.querySelector(def.external.rootSelector)) api.mount(host);
+      api.open(sectionId || def.external.defaultSection);
     } catch (error) {
-      console.error("Purchasing & Stock module loading failed:", error);
+      console.error(def.id + " module loading failed:", error);
       host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل الوحدة</strong><p dir="ltr">' +
         String(error && error.message || error).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])) + '</p></div>';
     }
@@ -371,17 +401,18 @@
   }
 
   async function activateMode(mode, example, navId, opts) {
-    if (mode !== "business" && mode !== "training" && mode !== "stock") return;
+    if (!REG.byMode(mode)) return;
     const keepDrawer = !!(opts && opts.keepDrawer);
     activeMode = mode;
     document.body.classList.toggle("mode-training", mode === "training");
-    document.body.classList.toggle("mode-stock", mode === "stock");
-    setActiveTool(TOOL_OF[mode]);
+    REG.list().forEach((m) => { if (m.external) document.body.classList.toggle(m.external.bodyClass, m.modes.includes(mode)); });
+    setActiveTool(toolOf(mode));
     if (!keepDrawer) closeMobileSidebar();
 
-    if (mode === "stock") {
-      $("workspaceBadgeNumber").textContent = "PS";
-      await loadStockModule(example || "home");
+    const ext = REG.byMode(mode);
+    if (ext && ext.external) {
+      $("workspaceBadgeNumber").textContent = ext.external.badge;
+      await loadExternalModule(ext, example);
       translateUiTree($("workspaceContent"));
       return;
     }
@@ -409,9 +440,10 @@
     const head = event.target.closest(".sidebar-tool-head");
     if (head) {
       const tool = head.dataset.toolHead;
-      if (tool !== TOOL_OF[activeMode]) {
+      if (tool !== toolOf(activeMode)) {
         // Open the tool's default page; keep the drawer open on phones so its sub-menu is visible.
-        activateMode(tool === "stock" ? "stock" : "business", null, null, { keepDrawer: true });
+        const def = REG.get(tool);
+        activateMode(def.external ? def.modes[0] : def.defaultMode, null, null, { keepDrawer: true });
       } else {
         const body = head.parentElement.querySelector(".sidebar-tool-body");
         setToolExpanded(tool, body.hidden);
@@ -422,8 +454,9 @@
     if (!button) return;
     const group = button.closest("[data-nav-group]");
     const mode = group && group.dataset.navGroup;
-    if (mode === "stock") activateMode("stock", button.dataset.stock, null);
-    else if (mode === "business" || mode === "training") activateMode(mode, button.dataset.example, button.dataset.navItem);
+    const def = REG.byMode(mode);
+    if (def && def.external) activateMode(mode, button.dataset.section || button.dataset.stock, null);
+    else if (def) activateMode(mode, button.dataset.example, button.dataset.navItem);
   });
 
   function syncSidebarToggleState() {
@@ -482,6 +515,7 @@ $("globalPDFButton").addEventListener("click", () => {
     applyLanguage();
   });
 
+  renderSidebarTools();
   applyLanguage();
   setActiveTool(null);
   syncSidebarToggleState();

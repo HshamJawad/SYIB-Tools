@@ -61,3 +61,9 @@ The legacy V1.0 scenario and CSV export have been removed. Excel workbook export
 Publish the repository root with GitHub Pages. The Service Worker cache is versioned `0.2.0`. For local testing, use localhost (for example, `python -m http.server 8000`).
 
 After publishing, reload with Ctrl+Shift+R. If an older service worker remains active, unregister it once from DevTools → Application → Service Workers and clear site data.
+
+## Generate Your Business Idea (GYB) module
+
+An independent digital learning module based on the structure of *Generate Your Business Idea (GYB)*, International Labour Office (ILO), 2015, distributed under CC BY-SA 3.0 IGO (https://creativecommons.org/licenses/by-sa/3.0/igo/). This is an adaptation; responsibility for the views and opinions expressed in the adaptation rests solely with its author(s) and they are not endorsed by the ILO. Translations are not official ILO translations. The application does not use ILO or SIYB logos or emblems.
+
+Module data is stored locally in the browser under the single key `siyb.gyb.v1` (separate from all other modules) and can be exported/imported as JSON from the module's "About and data" page. Modules are registered in `src/modules/registry.js`.

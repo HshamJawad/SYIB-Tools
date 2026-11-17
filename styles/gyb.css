@@ -1,0 +1,49 @@
+/* Generate Your Business Idea (GYB) module (mode "gyb"). Scoped under .gyb-root. Brand: #24A8E0 / #F48D01 / #A4CF06, black text. */
+.gyb-root{color:#111;font-size:14px;line-height:1.7}
+.gyb-root *{box-sizing:border-box}
+.gyb-root h2{margin:0 0 6px;font-size:19px;font-weight:850;color:#111}
+.gyb-root h3{margin:0 0 6px;font-size:15px;font-weight:800;color:#111}
+.gyb-root p{margin:0 0 10px}
+.gyb-lead{color:#111;font-size:14px}
+.gyb-card{background:#fff;border:1px solid #dce8ec;border-radius:14px;padding:16px;margin:0 0 16px;box-shadow:0 2px 8px rgba(20,55,73,.05)}
+.gyb-card.accent{border-inline-start:5px solid #24A8E0}
+.gyb-card.warn{border-inline-start:5px solid #F48D01}
+.gyb-card.good{border-inline-start:5px solid #A4CF06}
+.gyb-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.gyb-grid.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.gyb-grid.two>.gyb-card{margin:0 0 4px}
+.gyb-list{margin:6px 0 10px;padding-inline-start:22px}
+.gyb-list li{margin:3px 0}
+.gyb-note{color:#2a4656;font-size:13px;margin-top:10px}
+.gyb-quote{margin:8px 0;padding:8px 12px;border-inline-start:3px solid #24A8E0;background:#f3f8fa;border-radius:6px;font-size:13px}
+.gyb-tag{display:inline-block;padding:2px 10px;border-radius:999px;background:#f3f8fa;border:1px solid #cfd9e0;font-size:12px;font-weight:800;color:#111;white-space:nowrap}
+.gyb-tag.blue{background:#24A8E01f;border-color:#24A8E066}
+.gyb-tag.orange{background:#F48D011f;border-color:#F48D0188}
+.gyb-tag.green{background:#A4CF0626;border-color:#A4CF06}
+.gyb-btn{border:1px solid #cfd9e0;background:#fff;color:#111;padding:8px 14px;border-radius:10px;font:700 13px Cairo,Arial,sans-serif;cursor:pointer}
+.gyb-btn:hover:not(:disabled){background:#f3f8fa}
+.gyb-btn.primary{background:#24A8E0;border-color:#24A8E0;color:#fff}
+.gyb-btn.primary:hover{background:#1c92c4}
+.gyb-btn.orange{background:#F48D01;border-color:#F48D01;color:#fff}
+.gyb-btn:focus-visible,.gyb-step:focus-visible{outline:3px solid #24A8E066;outline-offset:2px}
+.gyb-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.gyb-res{margin-top:8px;padding:9px 12px;border-radius:10px;background:#f3f8fa;border:1px dashed #24A8E088;font-weight:700;min-height:0}
+.gyb-res:empty{display:none}
+.gyb-res.ok{background:#A4CF0626;border:1px solid #A4CF06}
+.gyb-res.bad{background:#F48D011a;border:1px solid #F48D01}
+.gyb-bar{height:9px;border-radius:999px;background:#e7eef2;overflow:hidden;margin:6px 0}
+.gyb-bar>span{display:block;height:100%;background:#24A8E0;border-radius:999px}
+.gyb-journey{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.gyb-step{display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px;border:1px solid #dce8ec;border-radius:12px;background:#f8fcfe;color:#111;font:inherit;text-align:start;cursor:pointer}
+.gyb-step:hover{background:#eaf6fc;border-color:#24A8E0}
+.gyb-step-n{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:#24A8E0;color:#fff;font:800 14px Inter,Arial,sans-serif}
+.gyb-step-body{display:flex;flex-direction:column;min-width:0;flex:1}
+.gyb-step-body small{color:#2a4656;font-size:12px}
+.gyb-items{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.gyb-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 12px;border:1px solid #dce8ec;border-radius:10px;background:#fff}
+.gyb-item-t{flex:1 1 220px;min-width:0;font-weight:700}
+.gyb-pager{display:flex;justify-content:space-between;gap:10px;margin:18px 0 6px;flex-wrap:wrap}
+.gyb-file{display:none}
+.global-sidebar .sidebar-nav-caption.sub{margin-top:8px;color:#13506C}
+@media(max-width:600px){.gyb-card{padding:12px}.gyb-grid.two{grid-template-columns:1fr}.gyb-pager .gyb-btn{flex:1 1 100%}}
+@media print{.gyb-actions,.gyb-pager{display:none}}
