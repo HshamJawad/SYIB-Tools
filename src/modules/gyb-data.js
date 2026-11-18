@@ -191,8 +191,8 @@ window.SIYB_GYB_DATA = (() => {
       B('اشرح لأسرتك خطتك واطلب دعمها وتفهمها.', 'Explain your plan to your family and ask for their understanding and support.')
     ],
     strengthenNote: B(
-      'خطة العمل الكاملة (النشاط 2: ماذا ستفعل ومتى) تُضاف في مرحلة لاحقة من الوحدة وتجمع كل ما تحتاج تقويته. دوّن الآن ما ينفعك في ملاحظات النشاط 1.',
-      'The full action plan (Activity 2: what you will do and when) is added in a later stage of the module and gathers everything you need to strengthen. For now, note what helps you in the Activity 1 notes.')
+      'سجّل في خطة العمل أدناه (النشاط 2) ما ستفعله لتقوية المجالات التي تحتاج تحسيناً: ماذا ستفعل ومتى. تظهر الخطة نفسها في الجزء الخامس (النشاط 14).',
+      'Record in the action plan below (Activity 2) what you will do to strengthen the areas that need improvement: what you will do and when. The same plan appears in Part V (Activity 14).')
   };
 
   /* ---------- Parts II and III content (Phase 3): short original adaptations ---------- */
@@ -317,5 +317,36 @@ window.SIYB_GYB_DATA = (() => {
     compareNote: B('قارن بنفسك: اختر الفكرة ذات المزايا الأكثر والعيوب الأقل، أو التي يسهل التغلب على عيوبها. قرارك النهائي تسجّله في الجزء الخامس.', 'Compare for yourself: prefer the idea with more advantages and fewer disadvantages, or whose disadvantages are easier to overcome. You record your final decision in Part V.')
   };
 
-  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1, P2, P3, P4 };
+  /* ---------- Part V content (Phase 5): short original adaptations ---------- */
+  const P5 = {
+    intro13: B('إن حسمتَ اختيارك فاكتب ملخص فكرتك هنا. اختر الفكرة من قائمتك (ويفضّل من أفكارك المرشحة بعد دراستك الميدانية وتحليل SWOT)، أو سجّل فكرة أخرى مع بيان سببها. يمكنك تعبئة الحقول من وصف الفكرة ثم تعديلها كما تشاء. كل ما تكتبه قابل للتعديل والحفظ.', 'If you have decided, write the summary of your idea here. Choose the idea from your list (preferably one of your shortlisted ideas after your field study and SWOT), or record another idea and say why. You can fill the fields from the idea description and then edit them freely. Everything you write can be edited and saved.'),
+    fields: [
+      { k: 'offering', l: B('سلعتي أو خدمتي ستكون', 'My goods or services will be'), r: 2 },
+      { k: 'customers', l: B('زبائني سيكونون', 'My customers will be'), r: 2 },
+      { k: 'needs', l: B('حاجات الزبائن التي ستُلبّى', 'The customer needs that will be satisfied'), r: 2 },
+      { k: 'reasons', l: B('اخترت هذه الفكرة لأن (المزايا والعيوب)', 'I chose this idea because (advantages and disadvantages)'), r: 3 },
+      { k: 'learning', l: B('ماذا يجب أن أتعلم لأستعد للمشروع؟', 'What should I learn further to prepare for the business?'), r: 3 }
+    ],
+    undecidedIntro: B('إن كنت لم تحسم بعد فلا بأس. الهدف من هذه الرحلة أن تستعد قبل أن تبدأ. حدّد ما يسبب ترددك، ثم ضع في خطة العمل ما ستفعله لاحقاً.', 'If you have not decided yet, that is fine. The purpose of this journey is to prepare before you start. Identify what causes your hesitation, then put what you will do next in the action plan.'),
+    undecided: [
+      { id: 'capability', t: B('لست واثقاً من قدرتي كرائد أعمال', 'I am unsure about my personal capability as an entrepreneur') },
+      { id: 'market', t: B('لست متأكداً من وجود حاجة في السوق يمكنني تلبيتها', 'I am unsure there is an unmet market need I can fulfil') },
+      { id: 'many', t: B('لدي أفكار كثيرة ولا أعرف أيها أتابع', 'I have many ideas and do not know which to pursue') },
+      { id: 'analysis', t: B('لست متأكداً أنني حلّلت أفكاري وقارنتها بما يكفي', 'I am unsure I have analysed and compared my ideas enough') }
+    ],
+    next: B('الخطوة التالية بعد حسم فكرتك هي إعداد خطة عمل للمشروع (يمكن الاستفادة من برنامج «ابدأ مشروعك» ضمن عائلة SIYB)، ثم «حسّن مشروعك» بعد انطلاق المشروع. هذه الأداة تساعدك على توليد الفكرة فقط.', 'The next step after deciding on your idea is to prepare a business plan for the business (the Start Your Business programme of the SIYB family can help), then Improve Your Business once the business is running. This tool only helps you generate the idea.'),
+    planIntro: B('خطة عملك الشخصية: دوّن ما ستفعله لتقوية قدراتك ولتستعد لفكرتك. أبقِها مركّزة على التحضير والتعلم، لا على توقعات مالية. الخطة نفسها تظهر في الجزء الأول (النشاط 2) وهنا (النشاط 14).', 'Your personal action plan: record what you will do to strengthen your abilities and prepare for your idea. Keep it focused on preparation and learning, not on financial projections. The same plan appears in Part I (Activity 2) and here (Activity 14).'),
+    planFields: [
+      { k: 'action', l: B('ماذا سأفعل؟', 'What will I do?') },
+      { k: 'reason', l: B('السبب أو مجال التحسين', 'Reason or area to improve'), r: 2 },
+      { k: 'steps', l: B('الخطوات', 'Steps'), r: 2 },
+      { k: 'support', l: B('الدعم والموارد التي أحتاجها', 'Support and resources needed'), r: 2 },
+      { k: 'who', l: B('المسؤول (اختياري)', 'Person responsible (optional)') },
+      { k: 'when', l: B('الموعد المستهدف', 'Target date'), date: true },
+      { k: 'status', l: B('الحالة', 'Status'), sel: [['todo', B('لم يبدأ', 'Not started')], ['doing', B('قيد التنفيذ', 'In progress')], ['done', B('مكتمل', 'Completed')]] },
+      { k: 'outcome', l: B('ملاحظات أو نتيجة', 'Notes or outcome'), r: 2 }
+    ]
+  };
+
+  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1, P2, P3, P4, P5 };
 })();
