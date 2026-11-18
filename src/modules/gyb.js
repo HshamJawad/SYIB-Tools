@@ -40,7 +40,7 @@
     const s = stateOf(it);
     if (s === 'done') return `<span class="gyb-tag green">${X('مكتمل', 'Completed')}</span>`;
     if (s === 'inprogress') return `<span class="gyb-tag orange">${X('قيد العمل', 'In progress')}</span>`;
-    return it.phase <= 3 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
+    return it.phase <= 4 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
   };
 
   /* ---------- sections ---------- */
@@ -372,11 +372,106 @@
     const again = root.querySelector(`[data-chip="${path}"]`); if (again) again.focus();
   }
 
+  /* ---------- Part IV: The best business ideas for you (Phase 4) ---------- */
+  const P4 = D.P4;
+  const shortlist = () => strArr(store.get('screening.shortlistedIdeaIds', [])).filter((id) => ideas().some((i) => i.id === id));
+  const ideaTitle = (i) => i.title || X('(فكرة بلا عنوان)', '(untitled idea)');
+  const fsIdx = (id) => arrAt('fieldStudies').findIndex((r) => r.ideaId === id);
+  const swIdx = (id) => arrAt('swotAnalyses').findIndex((r) => r.ideaId === id);
+  const IV_FIELDS = [
+    { k: 'group', l: D.B('الجهة', 'Group'), sel: P4.groups },
+    { k: 'who', l: D.B('من سأقابل؟ (الاسم أو الوصف)', 'Who will I talk to? (name or description)') },
+    { k: 'questions', l: D.B('الأسئلة التي سأطرحها', 'Questions to ask'), r: 3 },
+    { k: 'notes', l: D.B('ملاحظات المقابلة والنتائج', 'Interview notes and findings'), r: 3 },
+    { k: 'followUp', l: D.B('إجراءات المتابعة', 'Follow-up actions'), r: 2 }
+  ];
+  function ensureP4() {
+    const sl = shortlist();
+    const fs = arrAt('fieldStudies'); const sw = arrAt('swotAnalyses');
+    let cf = false, cs = false;
+    sl.forEach((id) => {
+      if (!fs.some((r) => r.ideaId === id)) { fs.push({ ideaId: id, needToFind: '', interviews: [] }); cf = true; }
+      if (!sw.some((r) => r.ideaId === id)) { sw.push({ ideaId: id, s: '', w: '', o: '', t: '', advantages: '', disadvantages: '', addressing: '', matching: '', managing: '' }); cs = true; }
+    });
+    if (cf) store.set('fieldStudies', fs);
+    if (cs) store.set('swotAnalyses', sw);
+    fs.forEach((r, i) => { ENT['fieldStudies.' + i + '.interviews'] = { fields: IV_FIELDS, add: D.B('+ أضف مقابلة', '+ Add an interview'), title: (e, j) => e.who || X('مقابلة ', 'Interview ') + (j + 1), idea: null }; });
+  }
+  function toggleShortlist(id) {
+    const cur = shortlist(); const list = ideas(); const it = list.find((i) => i.id === id); if (!it) return;
+    if (cur.includes(id)) { store.set('screening.shortlistedIdeaIds', cur.filter((x) => x !== id)); if (it.status === 'shortlisted') { it.status = 'review'; saveIdeas(list); } }
+    else {
+      if (cur.length >= 3) { window.alert(X('يمكنك ترشيح ثلاث أفكار كحد أقصى. أزل فكرة أولاً.', 'You can shortlist at most three ideas. Remove one first.')); return; }
+      store.set('screening.shortlistedIdeaIds', cur.concat([id])); it.status = 'shortlisted'; saveIdeas(list);
+    }
+    ensureP4(); render(true);
+  }
+  const emptyP4 = () => `<p class="gyb-note">${X('لم ترشّح أي فكرة بعد. ارجع إلى «الغربلة» أعلاه واختر حتى ثلاث أفكار.', 'You have not shortlisted any idea yet. Go back to "Screen your ideas" above and choose up to three.')}</p>`;
+
+  function renderPart4(s) {
+    ensureP4();
+    const p = s.part; const list = ideas(); const sl = shortlist();
+    const rows = list.map((it) => {
+      const n = elemDone(it); const on = sl.includes(it.id);
+      const crit = P2.elements.map((e) => { const has = isO(it.elements) && String(it.elements[e.id] || '').trim(); return `<li class="${has ? 'ok' : 'miss'}"><span aria-hidden="true">${has ? '✓' : '○'}</span> ${esc(T(e.t))}${has ? '' : ` <small>${X('— ناقص', '— missing')}</small>`}</li>`; }).join('');
+      return `<div class="gyb-screen${on ? ' on' : ''}"><div class="gyb-screen-h"><b>${esc(ideaTitle(it))}</b><span class="gyb-tag ${n === 5 ? 'green' : 'orange'}">${n === 5 ? X('الوصف مكتمل', 'Description complete') : X(`وصف غير مكتمل: ${n} من 5`, `Incomplete description: ${n} of 5`)}</span></div>
+        <ul class="gyb-crit">${crit}</ul>
+        <label class="gyb-choice crit"><input type="checkbox" data-act="sl-toggle" data-id="${it.id}"${on ? ' checked' : ''}><span>${X('أرشّح هذه الفكرة للفحص', 'Shortlist this idea for further study')}</span></label></div>`;
+    }).join('');
+    const screen = card(X('1 · غربلة قائمة الأفكار', '1 · Screen your ideas list'),
+      `<p>${esc(T(P4.screenIntro))}</p><h4>${X('أسئلة تساعدك على التأمل', 'Questions to reflect on')}</h4>${ul(P4.reflect)}
+       <div class="gyb-counts"><span class="gyb-count good"><b>${sl.length}</b>${X('من 3 مرشحة', 'of 3 shortlisted')}</span><span class="gyb-count"><b>${list.length}</b>${X('أفكار في قائمتك', 'ideas in your list')}</span></div>
+       ${list.length ? rows : `<p class="gyb-note">${X('قائمة أفكارك فارغة. أضف أفكاراً في الجزء الثالث (النشاط 10).', 'Your ideas list is empty. Add ideas in Part III (Activity 10).')}</p><div class="gyb-actions">${btn('go', X('إلى الجزء الثالث', 'Go to Part III'), 'primary', 'data-id="p3"')}</div>`}`, 'accent');
+    const fsHtml = sl.map((id) => { const it = list.find((i) => i.id === id); const i = fsIdx(id); const r = arrAt('fieldStudies')[i] || {};
+      return `<div class="gyb-case"><h4>${esc(ideaTitle(it))}</h4>${fld(D.B('ماذا أحتاج أن أعرف؟', 'What do I need to find out?'), `<textarea class="gyb-ta" rows="3" data-p4="fs" data-id="${id}" data-k="needToFind">${esc(r.needToFind || '')}</textarea>`)}${entriesHtml('fieldStudies.' + i + '.interviews')}</div>`; }).join('');
+    const act11 = card(X('2 · النشاط 11: خطة الدراسة الميدانية', '2 · Activity 11: field study plan'),
+      `<div class="gyb-res">${esc(T(P4.fieldIntro))}</div><p>${esc(T(P4.wh))}</p>${tagBox('act11', 'p4')}${sl.length ? fsHtml : emptyP4()}`);
+    const swotCard = (id) => { const it = list.find((i) => i.id === id); const r = arrAt('swotAnalyses')[swIdx(id)] || {};
+      const q = P4.quad.map((x) => fld(x.t, `<textarea class="gyb-ta" rows="3" data-p4="sw" data-id="${id}" data-k="${x.k}">${esc(r[x.k] || '')}</textarea>`)).join('');
+      const rf = P4.refl.map((x) => fld(x.t, `<textarea class="gyb-ta" rows="2" data-p4="sw" data-id="${id}" data-k="${x.k}">${esc(r[x.k] || '')}</textarea>`)).join('');
+      return `<div class="gyb-case"><h4>${esc(ideaTitle(it))}</h4><div class="gyb-grid two">${q}</div>${rf}</div>`; };
+    const cmp = sl.length > 1 ? `<h4>${X('مقارنة نوعية جنباً إلى جنب', 'Side-by-side qualitative comparison')}</h4><div class="gyb-cmp">${sl.map((id) => { const it = list.find((i) => i.id === id); const r = arrAt('swotAnalyses')[swIdx(id)] || {}; return `<div class="gyb-cmp-c"><b>${esc(ideaTitle(it))}</b><small>${X('المزايا', 'Advantages')}</small><p>${esc(r.advantages || '—')}</p><small>${X('العيوب', 'Disadvantages')}</small><p>${esc(r.disadvantages || '—')}</p></div>`; }).join('')}</div><p class="gyb-note">${esc(T(P4.compareNote))}</p>` : '';
+    const act12 = card(X('3 · النشاط 12: تحليل SWOT', '3 · Activity 12: SWOT analysis'),
+      `<p>${esc(T(P4.swotIntro))}</p>${tagBox('act12', 'p4')}${sl.length ? sl.map(swotCard).join('') + `<div data-o="cmp">${cmp}</div>` : emptyP4()}`, 'good');
+    return head(T(p.title), T(p.lead)) + jump([['gyb-p4-a', D.B('الغربلة', 'Screening')], ['gyb-p4-b', D.B('النشاط 11', 'Act. 11')], ['gyb-p4-c', D.B('النشاط 12', 'Act. 12')]]) +
+      `<div id="gyb-p4-a">${screen}</div><div id="gyb-p4-b">${act11}</div><div id="gyb-p4-c">${act12}</div>`;
+  }
+
+  function updatePart4() {
+    if (!root) return;
+    const sl = shortlist(); const fs = arrAt('fieldStudies'); const sw = arrAt('swotAnalyses');
+    const t = (v) => String(v || '').trim();
+    const fsOn = fs.filter((r) => sl.includes(r.ideaId));
+    const swOn = sw.filter((r) => sl.includes(r.ideaId));
+    const a11Any = fsOn.some((r) => t(r.needToFind) || (Array.isArray(r.interviews) && r.interviews.length));
+    const a11Done = fsOn.some((r) => t(r.needToFind) && Array.isArray(r.interviews) && r.interviews.some((e) => isO(e) && t(e.who) && t(e.questions)));
+    const a12Any = swOn.some((r) => ['s', 'w', 'o', 't', 'advantages', 'disadvantages'].some((k) => t(r[k])));
+    const a12Done = swOn.some((r) => ['s', 'w', 'o', 't', 'advantages', 'disadvantages'].every((k) => t(r[k])));
+    const prog = { act11: a11Done ? 'done' : a11Any ? 'inprogress' : '', act12: a12Done ? 'done' : a12Any ? 'inprogress' : '' };
+    const part = byId('p4').part;
+    part.items.forEach((it) => {
+      if (!(it.id in prog)) return;
+      if (stateOf(it) !== prog[it.id]) store.set('progress.' + it.id, prog[it.id]);
+      root.querySelectorAll(`[data-o="${it.id}tag"]`).forEach((el) => { el.innerHTML = statusTag(it); });
+    });
+  }
+  function onP4Input(el) {
+    if (!el.dataset.p4) return false;
+    const key = el.dataset.p4 === 'fs' ? 'fieldStudies' : 'swotAnalyses';
+    const l = arrAt(key); const r = l.find((x) => x.ideaId === el.dataset.id);
+    if (r) { r[el.dataset.k] = el.value; store.set(key, l); }
+    updatePart4();
+    if (key === 'swotAnalyses') { const box = root.querySelector('[data-o="cmp"]'); if (box && !box.contains(el)) { /* comparison refreshed on re-render */ } }
+    return true;
+  }
+  ACT_EXTRA['sl-toggle'] = (el) => toggleShortlist(el.dataset.id);
+
   function renderPart(s) {
     const p = s.part;
     if (p.id === 'p1') return renderPart1(s);
     if (p.id === 'p2') return renderPart2(s);
     if (p.id === 'p3') return renderPart3(s);
+    if (p.id === 'p4') return renderPart4(s);
     const items = p.items.map((it) => `<li class="gyb-item"><span class="gyb-tag blue">${esc(T(KIND[it.kind]))}</span><span class="gyb-item-t">${esc(T(it.title))}</span>${statusTag(it)}</li>`).join('');
     return head(T(p.title), T(p.lead)) +
       card(X('ما ستعمل عليه في هذا الجزء', 'What you will work on in this part'), `<ul class="gyb-items">${items}</ul>
@@ -442,6 +537,7 @@
     setHeading(s);
     if (s.part && s.part.id === 'p1') updatePart1();
     if (s.part && (s.part.id === 'p2' || s.part.id === 'p3')) updatePartN();
+    if (s.part && s.part.id === 'p4') updatePart4();
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   }
@@ -509,8 +605,8 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       const fn = ACT[b.dataset.act] || ACT_EXTRA[b.dataset.act]; if (fn) fn(b);
     });
-    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs]';
-    const dispatch = (el) => { if (!onPartNInput(el)) onP1Input(el); };
+    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs],[data-p4]';
+    const dispatch = (el) => { if (onP4Input(el)) return; if (!onPartNInput(el)) onP1Input(el); if (el.dataset.ent && el.dataset.ent.startsWith('fieldStudies')) updatePart4(); };
     root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches(SEL)) dispatch(e.target); });
     root.addEventListener('input', (e) => { if (e.target.matches(SEL) && !e.target.matches('select,input[type=radio],input[type=checkbox]')) dispatch(e.target); });
     root.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-chip]')) { e.preventDefault(); addChip(e.target.dataset.chip, e.target); } });

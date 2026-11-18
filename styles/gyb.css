@@ -95,5 +95,13 @@
 .gyb-idea{border:1px solid #cddde4;border-radius:12px;background:#fff;margin:8px 0;padding:0 12px}
 .gyb-idea summary{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;cursor:pointer}
 .gyb-idea-body{padding-bottom:10px}
+.gyb-screen{padding:10px 12px;border:1px solid #dce8ec;border-radius:12px;background:#fff;margin:10px 0}
+.gyb-screen.on{border-color:#A4CF06;background:#A4CF0614}
+.gyb-screen-h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.gyb-crit{list-style:none;margin:8px 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px}
+.gyb-crit .ok{color:#3d5a00;font-weight:700}.gyb-crit .miss{color:#8a4d00}
+.gyb-cmp{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.gyb-cmp-c{padding:10px 12px;border:1px solid #cfe3ec;border-radius:12px;background:#fff}
+.gyb-cmp-c p{margin:2px 0 8px;white-space:pre-wrap}
 @media(max-width:600px){.gyb-card{padding:12px}.gyb-grid.two{grid-template-columns:1fr}.gyb-pager .gyb-btn{flex:1 1 100%}}
 @media print{.gyb-actions,.gyb-pager{display:none}}

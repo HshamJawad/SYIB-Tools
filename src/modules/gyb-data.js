@@ -286,5 +286,36 @@ window.SIYB_GYB_DATA = (() => {
     }
   };
 
-  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1, P2, P3 };
+  /* ---------- Part IV content (Phase 4): short original adaptations ---------- */
+  const P4 = {
+    screenIntro: B('بعد أن جمعت أفكاراً كثيرة، اغربل قائمتك بالمعايير الخمسة نفسها التي تصف الفكرة. الفكرة التي ينقصها وصف لأي معيار لا يمكن مقارنتها بعدُ، فأكمل وصفها أولاً. اختر بنفسك حتى ثلاث أفكار تريد فحصها أكثر. لا تحسب الأداة درجات ولا ترتّب أفكارك ولا تقترح «الأفضل»: القرار لك.', 'With many ideas collected, screen your list against the same five criteria that describe an idea. An idea missing a description for any criterion cannot be compared yet, so complete it first. Choose up to three ideas yourself to examine further. The tool calculates no scores, ranks nothing and recommends no "best" idea: the decision is yours.'),
+    reflect: [
+      B('هل أعرف حاجة الزبائن وأعرف كم عددهم؟', 'Do I know the customers\' need and how many customers there are?'),
+      B('ما قوة المنافسين وماذا سيكون تميّزي عنهم؟', 'How strong are the competitors and what will make me different?'),
+      B('هل تناسب الفكرة شخصيتي ومهاراتي وظروفي، وهل سأرضى عنها بعد عشر سنوات؟', 'Does the idea suit my personality, skills and situation, and would I still like it in ten years?'),
+      B('ماذا أحتاج من معدات ومقر وعاملين، وكيف أوفّر الموارد؟', 'What equipment, premises and staff do I need, and how will I get the resources?'),
+      B('كيف يمكن تقليل الكلفة بإعادة الاستخدام والتدوير، وما أثر المشروع في المجتمع والبيئة؟', 'How could I cut costs by reducing, re-using or recycling, and how will the business affect community and environment?')
+    ],
+    fieldIntro: B('الدراسة الميدانية: ما كتبته حتى الآن افتراضات. تحدث إلى الناس وراقب بنفسك ثم دوّن ما وجدته. هذه الأداة تحفظ خطتك وملاحظاتك فقط، ولا تغني عن البحث الفعلي في الميدان.', 'Field study: what you have written so far is assumption. Talk to people and observe for yourself, then record what you find. This tool only stores your plan and notes; it does not replace actual field research.'),
+    wh: B('اسأل أسئلة مفتوحة تبدأ بـ: من؟ ماذا؟ لماذا؟ أين؟ متى؟ كيف؟ ودع الحديث يجري بطبيعته. عرّف بفكرتك بإيجابية وبيّن كيف تفيد مجتمعك.', 'Ask open questions starting with who, what, why, where, when and how, and let the conversation flow. Present your idea positively and explain how it will help your community.'),
+    groups: [['customers', B('زبائن محتملون', 'Potential customers')], ['competitors', B('منافسون', 'Competitors')], ['suppliers', B('موردون', 'Suppliers')], ['finance', B('جهات تمويل ومؤسسات مالية', 'Funding bodies and financial institutions')], ['informants', B('أصحاب معرفة وقادة رأي', 'Key informants and opinion leaders')]],
+    iFields: null,
+    swotIntro: B('حلّل كل فكرة من أفكارك المرشحة (حتى ثلاث) بأداة SWOT: نقاط القوة والضعف داخلية تخصك، والفرص والتهديدات خارجية من السوق والبيئة. ثم طابق قوتك بالفرص، وانظر هل يمكن معالجة ضعفك أمام التهديدات. المقارنة هنا نوعية بكلماتك أنت، والأداة لا تختار فكرة نيابة عنك.', 'Analyse each shortlisted idea (up to three) with SWOT: strengths and weaknesses are internal to you; opportunities and threats are external, from the market and environment. Then match strengths to opportunities and see whether weaknesses can be handled against the threats. The comparison here is qualitative, in your own words, and the tool does not choose an idea for you.'),
+    quad: [
+      { k: 's', t: B('نقاط القوة (داخلية)', 'Strengths (internal)') },
+      { k: 'w', t: B('نقاط الضعف (داخلية)', 'Weaknesses (internal)') },
+      { k: 'o', t: B('الفرص (خارجية)', 'Opportunities (external)') },
+      { k: 't', t: B('التهديدات (خارجية)', 'Threats (external)') }
+    ],
+    refl: [
+      { k: 'advantages', t: B('المزايا', 'Advantages') },
+      { k: 'disadvantages', t: B('العيوب', 'Disadvantages') },
+      { k: 'addressing', t: B('كيف يمكن معالجة العيوب؟', 'How could the disadvantages be addressed?') },
+      { k: 'matching', t: B('مطابقة نقاط القوة مع الفرص: أين تمنحني ميزة؟', 'Matching strengths with opportunities: where do they give me an advantage?') },
+      { k: 'managing', t: B('نقاط الضعف في ضوء التهديدات: كيف أتعامل معها؟', 'Weaknesses in light of threats: how will I manage them?') }
+    ],
+    compareNote: B('قارن بنفسك: اختر الفكرة ذات المزايا الأكثر والعيوب الأقل، أو التي يسهل التغلب على عيوبها. قرارك النهائي تسجّله في الجزء الخامس.', 'Compare for yourself: prefer the idea with more advantages and fewer disadvantages, or whose disadvantages are easier to overcome. You record your final decision in Part V.')
+  };
+
+  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1, P2, P3, P4 };
 })();
