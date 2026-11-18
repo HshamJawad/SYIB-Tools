@@ -195,5 +195,96 @@ window.SIYB_GYB_DATA = (() => {
       'The full action plan (Activity 2: what you will do and when) is added in a later stage of the module and gathers everything you need to strengthen. For now, note what helps you in the Activity 1 notes.')
   };
 
-  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1 };
+  /* ---------- Parts II and III content (Phase 3): short original adaptations ---------- */
+  const P2 = {
+    intro: B('أنشئ فكرة مشروع واضحة قبل أن تبدأ: الجهد والمال قد يضيعان إن بدأت المشروع الخطأ. الحالتان أدناه ملخصان قصيران بصياغتنا لما ورد في الدليل.', 'Shape a clear business idea before you start: effort and money can be lost if you start the wrong business. The two cases below are our own short summaries of those in the manual.'),
+    janet: { n: B('حالة Janet', 'Janet\'s case'), s: B('تملك Janet مزرعة صغيرة ولا يكفي دخل الأسرة لتعليم الأطفال. قررت تربية الدجاج وتملك قرضاً صغيراً، ثم سمعت أن زيت عباد الشمس مطلوب فغيّرت فكرتها بسرعة وأنفقت القرض على البذور والأسمدة ومعدات العصر دون تجربة سابقة ودون التأكد من السوق. ضاقت أرض الأسرة عن غذائها، وأمرضت الأسمدة الأطفال، واحتاجت عاملاً، وامتلأ السوق بزيت المزارعين الآخرين، فباعت بسعر زهيد ولم تسدد القرض.', 'Janet has a small farm and the family income does not cover the children\'s education. She planned to raise chickens and had a small loan, then heard sunflower oil was in demand and quickly changed her idea. She spent the loan on seeds, fertiliser and pressing equipment with no experience and no check of the market. Family land was lost to food growing, the fertiliser made the children ill, she needed paid help, and the market filled with other farmers\' oil, so she sold cheaply and could not repay the loan.'), q: B('ما الخطأ في فكرة Janet، ولماذا؟', 'What is wrong with Janet\'s idea, and why?') },
+    lily: { n: B('حالة Lily', 'Lily\'s case'), s: B('تعمل Lily في مصنع ملابس براتب منخفض. سمعت شكوى قريبتها من صعوبة إيجاد ملابس لابنتها المراهقة، فتجولت في المحال ولاحظت قلة الخيارات لهذه الفئة. رسمت تصاميم وعرضتها على أصحاب المحال وسألتهم عن السعر والكمية، ثم اشترت آلة خياطة بمدخراتها وعملت مساءً. بيعت الفساتين جيداً بالدفع نقداً، فتركت المصنع وصارت تتلقى طلبات منتظمة.', 'Lily works in a garment factory for low pay. She heard a relative complain she could not find clothes for her teenage daughter, toured the shops and saw few choices for that age group. She drew designs, showed them to shop owners asking about price and quantity, then bought a sewing machine from her savings and worked evenings. The dresses sold well for cash, so she left the factory and now receives regular orders.'), q: B('لماذا نجحت Lily؟ ماذا فعلت؟', 'Why is Lily successful? What did she do?') },
+    elements: [
+      { id: 'need', t: B('الحاجة', 'The need'), q: B('أي حاجة لدى الزبائن سيلبّيها مشروعك، وأي زبائن ستجذب؟', 'Which customer need will your business fulfil, and which customers will it attract?') },
+      { id: 'offering', t: B('السلعة أو الخدمة', 'The good or service'), q: B('ماذا ستبيع تحديداً؟', 'What exactly will you sell?') },
+      { id: 'customers', t: B('الزبائن', 'The customers'), q: B('لمن ستبيع؟', 'Who will you sell to?') },
+      { id: 'selling', t: B('طريقة البيع', 'How you will sell'), q: B('كيف ستصل إلى زبائنك وتبيع لهم؟', 'How will you reach your customers and sell to them?') },
+      { id: 'environment', t: B('البيئة', 'Environment'), q: B('إلى أي حد يعتمد مشروعك على البيئة والموارد الطبيعية، وما أثره فيها وفي المجتمع؟', 'How far does your business depend on, and affect, the environment, natural resources and the community?') }
+    ],
+    act3: B('اكتب فكرة أو أكثر بعناصرها الخمسة. الفكرة غير المكتملة تبقى مسودة ولا تُعدّ فكرة جاهزة. تُحفظ أفكارك في قائمة أفكاري (النشاط 10).', 'Write one or more ideas with their five elements. An incomplete idea stays a draft and is not treated as a ready idea. Your ideas are kept in My ideas list (Activity 10).')
+  };
+
+  const P3 = {
+    hamisi: { s: B('عمل Hamisi خمس سنوات لدى مستورد مواقد غاز، وعرضت عمته أن تموّله. فكّر أولاً ببيع حقائب السيزال للسياح فتبيّن أن السياح قليلون، ثم بمحل مواقد غاز فوجد السوق مزدحماً ومبيعاته ضعيفة. وحين ساعد عمته في نقل أثاثها لاحظ أنه لا توجد شركة نقل وتغليف في منطقته، فبحث في الأمر ووصف فكرته بعناصرها الخمسة، وبدأ بأقاربه وأصدقائه وزبائن عمته، وصار يعيد استخدام الكراتين.', 'Hamisi worked five years for a gas-stove importer and his aunt offered to fund him. He first thought of selling sisal bags to tourists but found there were too few tourists, then of a gas-stove shop but found a crowded, slow market. When he helped his aunt move he noticed no packing-and-moving company in his area, researched it and described his idea with its five elements, starting with relatives, friends and his aunt\'s customers and reusing cartons.'), q: B('ماذا فعل Hamisi ليصل إلى فكرته؟ ولماذا لم يتمسك بأول فكرة؟', 'What did Hamisi do to find his idea, and why did he not stay with his first idea?') },
+    act4: {
+      intro: B('اختر حتى ثلاثة مشاريع ناجحة في منطقتك (يفضّل أن يكون عمرها ثلاث سنوات على الأقل)، وقابل أصحابها، وسجّل ما تعلمته في «نموذج تحليل أفكار الأعمال».', 'Choose up to three successful businesses in your area (preferably at least three years old), interview their owners and record what you learn in the Business Ideas Analysis Form.'),
+      fields: [
+        { k: 'name', l: B('اسم المشروع', 'Business name') },
+        { k: 'goods', l: B('السلع أو الخدمات التي يبيعها', 'Goods or services sold') },
+        { k: 'customers', l: B('الزبائن', 'Customers') },
+        { k: 'whenWhy', l: B('متى ولماذا بدأ المشروع؟', 'When and why was it started?'), r: 2 },
+        { k: 'whyGood', l: B('لماذا اعتبر صاحبه الفكرة جيدة؟', 'Why did the owner consider it a good idea?'), r: 2 },
+        { k: 'needKnown', l: B('كيف عرف حاجة الزبائن؟', 'How did the owner understand customer needs?'), r: 2 },
+        { k: 'strengths', l: B('نقاط القوة والأصول التي استفاد منها (خبرة، علاقات، مهارات)', 'Strengths and assets used (experience, contacts, skills)'), r: 2 },
+        { k: 'problems', l: B('مشكلات البداية', 'Start-up problems'), r: 2 },
+        { k: 'changes', l: B('ما الذي تغيّر مع الوقت؟', 'What changed over time?'), r: 2 },
+        { k: 'impact', l: B('الأثر في البيئة والمجتمع', 'Impact on the environment and community'), r: 2 },
+        { k: 'lessons', l: B('الدروس التي تعلمتها', 'Lessons you learned'), r: 2 },
+        { k: 'mistakes', l: B('أخطاء ترى أنه ارتكبها', 'Mistakes you think were made'), r: 2 },
+        { k: 'avoid', l: B('كيف تتجنبها؟', 'How could you avoid them?'), r: 2 }
+      ]
+    },
+    act5: {
+      intro: B('تأمل تجاربك وتجارب غيرك كزبائن وما واجهته من صعوبات ومشكلات بيئية، وسجّل لكل تجربة فكرة مشروع مرتبطة بها.', 'Reflect on your own and other people\'s experiences as customers, and on difficulties and environmental problems, and record a related business idea for each.'),
+      cats: [
+        { id: 'mine', t: B('تجاربي كزبون', 'My experiences as a customer') },
+        { id: 'others', t: B('تجارب الآخرين كزبائن', 'Other people\'s experiences as customers') },
+        { id: 'poor', t: B('شكاوى من سوء الخدمة', 'Comments on poor service') },
+        { id: 'difficulty', t: B('صعوبات واجهتها', 'Difficulties I met') },
+        { id: 'env', t: B('مشكلات بيئية', 'Environmental problems') }
+      ],
+      fields: [{ k: 'experience', l: B('التجربة أو المشكلة', 'The experience or problem'), r: 2 }, { k: 'idea', l: B('فكرة المشروع المرتبطة', 'Related business idea') }]
+    },
+    act6: {
+      intro: B('تجوّل في منطقتك التجارية وسجّل المشاريع حسب المجال، ثم دوّن ملاحظاتك. المخطط أدناه يلخص ما أدخلتَه أنت وهو ملاحظات متعلم لا بيانات سوق رسمية.', 'Walk around your business area and record the businesses by field, then note your observations. The chart below summarises what you entered and shows learner observations, not official market data.'),
+      fields: [
+        { k: 'category', l: B('المجال أو الفئة', 'Field or category') },
+        { k: 'name', l: B('اسم المشروع أو نوعه', 'Business name or type') },
+        { k: 'count', l: B('العدد أو الملاحظة (رقم)', 'Count or observation (number)'), num: true },
+        { k: 'density', l: B('كثافة المنافسين (تقدير نوعي)', 'Competitor density (qualitative)'), sel: [['', B('—', '—')], ['low', B('قليلة', 'Low')], ['medium', B('متوسطة', 'Medium')], ['high', B('كبيرة', 'High')]] }
+      ],
+      obs: B('خمس ملاحظات على السوق المحلي', 'Five observations about the local market'),
+      missing: B('مشاريع غير متوفرة حالياً في منطقتك (سطر لكل مشروع)', 'Businesses not currently available in your area (one per line)'),
+      opps: B('فرص محتملة (سطر لكل فرصة)', 'Possible opportunities (one per line)')
+    },
+    act7: {
+      intro: B('افحص بيئتك من المصادر الستة التالية: سجّل ما لاحظته وفكرة مشروع مرتبطة به.', 'Scan your environment through the six sources below: record what you noticed and a related business idea.'),
+      sources: [
+        { id: 'natural', t: B('الموارد الطبيعية', 'Natural resources'), h: B('ما الموارد المتوفرة محلياً ولا تُستثمر؟', 'Which local resources are available but not used?') },
+        { id: 'people', t: B('خصائص ومهارات أهل المجتمع المحلي', 'Characteristics and skills of local people'), h: B('ما المهارات والحِرف الشائعة بين الناس حولك؟', 'Which skills and crafts are common among people around you?') },
+        { id: 'waste', t: B('النفايات والمخلفات', 'Waste products'), h: B('ما المخلفات التي يمكن إعادة استخدامها أو تحويلها؟', 'Which waste could be reused or turned into something?') },
+        { id: 'import', t: B('الاستعاضة عن الاستيراد', 'Import substitution'), h: B('ما المنتجات التي تُستورد ويمكن إنتاجها محلياً؟', 'Which imported products could be produced locally?') },
+        { id: 'pubs', t: B('المطبوعات والنشرات', 'Publications'), h: B('ما الأفكار التي تقرؤها في الصحف والمجلات والمواقع المتخصصة؟', 'What ideas do you read in newspapers, magazines and specialist sites?') },
+        { id: 'fairs', t: B('المعارض والأسواق التجارية', 'Trade fairs and exhibitions'), h: B('ما الجديد الذي رأيته في المعارض؟', 'What new things did you see at fairs and exhibitions?') }
+      ],
+      fields: [{ k: 'obs', l: B('ما لاحظته', 'What you noticed'), r: 2 }, { k: 'idea', l: B('فكرة مشروع مرتبطة', 'Related business idea') }]
+    },
+    act8: {
+      intro: B('العصف الذهني المفتوح: اختر كلمة بداية (مجال أو مهارة أو خبرة أو دراسة أو اهتمام) ثم اكتب بسرعة كل ما يخطر ببالك. لا تقيّم ولا ترفض أي فكرة الآن؛ يمكنك لاحقاً مراجعتها ونقل ما يعجبك إلى قائمة أفكارك.', 'Open brainstorming: choose a starting word (a field, skill, work experience, education or interest) then quickly write everything that comes to mind. Do not judge or reject any idea now; later you can review them and move the ones you like to your ideas list.'),
+      kinds: [['field', B('مجال', 'Field')], ['skill', B('مهارة', 'Skill')], ['work', B('خبرة عمل', 'Work experience')], ['edu', B('دراسة', 'Education')], ['interest', B('اهتمام', 'Interest')]]
+    },
+    act9: {
+      intro: B('العصف الذهني المنظَّم: اكتب منتجاً، ثم ابحث عن فرص مرتبطة به في خمسة خطوط.', 'Structured brainstorming: enter a product, then look for related opportunities along five lines.'),
+      lines: [
+        { id: 'production', t: B('الإنتاج', 'Production'), h: B('ما الذي يلزم لإنتاجه أو ما الذي يدخل في صنعه؟', 'What is needed to make it, or what goes into making it?') },
+        { id: 'selling', t: B('البيع', 'Selling'), h: B('كيف يُباع ويُوزَّع ويُسوَّق؟', 'How is it sold, distributed and marketed?') },
+        { id: 'reuse', t: B('إعادة الاستخدام والتدوير', 'Re-use and recycling'), h: B('ماذا يمكن فعله بمخلفاته أو بعد استعماله؟', 'What can be done with its waste or after its use?') },
+        { id: 'spinoff', t: B('أنشطة فرعية', 'Spin-off activities'), h: B('ما المنتجات أو الأنشطة المشتقة منه؟', 'Which products or activities can spin off from it?') },
+        { id: 'services', t: B('الخدمات', 'Services'), h: B('ما الخدمات المرتبطة به (تركيب، صيانة، توصيل…)؟', 'Which related services (installation, repair, delivery…)?') }
+      ]
+    },
+    bank: {
+      intro: B('قائمة أفكارك: أضف كل فكرة تخطر لك، وعدّلها ورتّبها. كثرة الأفكار هدف في هذه المرحلة؛ الغربلة تأتي في الجزء الرابع. حالة «مرشحة» تعني فقط أنك تريد فحصها، وليست حكماً على جدواها.', 'Your ideas list: add every idea that occurs to you, edit and organise them. Many ideas is the goal at this stage; screening comes in Part IV. "Shortlisted" only means you want to examine it, not a verdict on its viability.'),
+      statuses: [['draft', B('مسودة', 'Draft')], ['review', B('للمراجعة', 'To review')], ['shortlisted', B('مرشحة', 'Shortlisted')], ['notproceeding', B('لن تُنفَّذ', 'Not proceeding')], ['selected', B('مختارة', 'Selected')]],
+      sources: [['own', B('من عندي', 'My own')], ['owners', B('أصحاب مشاريع ناجحة', 'Successful owners')], ['experience', B('التجارب', 'Experiences')], ['survey', B('مسح المنطقة', 'Local survey')], ['scan', B('فحص البيئة', 'Environmental scan')], ['brain', B('عصف ذهني', 'Brainstorming')], ['structured', B('عصف منظَّم', 'Structured brainstorming')], ['other', B('أخرى', 'Other')]]
+    }
+  };
+
+  return { B, GROUPS, PARTS, SECTIONS, HOME, ABOUT, P1, P2, P3 };
 })();

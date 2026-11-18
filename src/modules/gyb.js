@@ -40,7 +40,7 @@
     const s = stateOf(it);
     if (s === 'done') return `<span class="gyb-tag green">${X('مكتمل', 'Completed')}</span>`;
     if (s === 'inprogress') return `<span class="gyb-tag orange">${X('قيد العمل', 'In progress')}</span>`;
-    return `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
+    return it.phase <= 3 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
   };
 
   /* ---------- sections ---------- */
@@ -164,9 +164,219 @@
     updatePart1();
   }
 
+  /* ---------- Parts II and III (Phase 3): idea bank, case studies and idea-generation activities ---------- */
+  const P2 = D.P2, P3 = D.P3;
+  const ascii = (v) => String(v == null ? '' : v).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  const uid = () => 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const arrAt = (path) => { const a = store.get(path, []); return Array.isArray(a) ? a.filter(isO) : []; };
+  const strAt = (path) => { const v = store.get(path, ''); return typeof v === 'string' ? v : ''; };
+  const opts = (list, cur, blank) => (blank ? `<option value="">${esc(blank)}</option>` : '') + list.map(([v, t]) => `<option value="${v}"${cur === v ? ' selected' : ''}>${esc(T(t))}</option>`).join('');
+  const SRC_BY_PATH = [['successfulBusinessOwners', 'owners'], ['experienceToIdeas', 'experience'], ['localMarketSurvey', 'survey'], ['environmentalScanning', 'scan']];
+
+  // Generic entry lists: each entry is an object in an array in the store.
+  const ENT = {};
+  ENT['activities.successfulBusinessOwners'] = { fields: P3.act4.fields, max: 3, add: D.B('+ أضف مشروعاً', '+ Add a business'), title: (e, i) => e.name || X('مشروع ', 'Business ') + (i + 1), idea: (e) => ({ title: e.name ? X('فكرة مشابهة لـ ', 'Idea inspired by ') + e.name : '', notes: e.lessons || '' }) };
+  ENT['activities.experienceToIdeas'] = { fields: P3.act5.fields, add: D.B('+ أضف تجربة', '+ Add an experience'), idea: (e) => ({ title: e.idea || '', notes: e.experience || '' }) };
+  ENT['activities.localMarketSurvey.records'] = { fields: P3.act6.fields, add: D.B('+ أضف مشروعاً محلياً', '+ Add a local business'), idea: null };
+  P3.act7.sources.forEach((src) => { ENT['activities.environmentalScanning.' + src.id] = { fields: P3.act7.fields, add: D.B('+ أضف ملاحظة', '+ Add an observation'), idea: (e) => ({ title: e.idea || '', notes: e.obs || '' }) }; });
+  const srcOf = (path) => (SRC_BY_PATH.find(([k]) => path.includes(k)) || [0, 'own'])[1];
+
+  const ideas = () => arrAt('ideas');
+  const saveIdeas = (list) => store.set('ideas', list);
+  function addIdea(seed) {
+    const list = ideas();
+    const title = (seed.title || '').trim();
+    if (title && list.some((i) => i.title === title && i.source === seed.source)) return false;
+    list.push({ id: uid(), title, field: '', type: '', description: '', source: seed.source || 'own', notes: seed.notes || '', status: 'draft', elements: { need: '', offering: '', customers: '', selling: '', environment: '' }, createdAt: new Date().toISOString() });
+    saveIdeas(list); return list[list.length - 1].id;
+  }
+  const elemDone = (i) => P2.elements.filter((e) => isO(i.elements) && String(i.elements[e.id] || '').trim()).length;
+
+  const entryHtml = (path, e, idx) => {
+    const cfg = ENT[path];
+    const f = cfg.fields.map((d) => {
+      const v = e[d.k] == null ? '' : String(e[d.k]);
+      const inp = d.sel ? `<select class="gyb-ta" data-ent="${path}" data-i="${idx}" data-k="${d.k}">${opts(d.sel, v)}</select>`
+        : (d.r ? `<textarea class="gyb-ta" rows="${d.r}" data-ent="${path}" data-i="${idx}" data-k="${d.k}">${esc(v)}</textarea>` : `<input class="gyb-ta" type="${d.num ? 'number' : 'text'}"${d.num ? ' min="0" inputmode="numeric"' : ''} data-ent="${path}" data-i="${idx}" data-k="${d.k}" value="${esc(v)}">`);
+      return fld(d.l, inp);
+    }).join('');
+    const acts = `<div class="gyb-actions">${cfg.idea ? btn('ent-idea', X('← إلى قائمة أفكاري', 'To my ideas list'), '', `data-path="${path}" data-i="${idx}"`) : ''}${btn('ent-del', X('حذف', 'Delete'), 'orange', `data-path="${path}" data-i="${idx}"`)}</div>`;
+    return `<div class="gyb-entry">${cfg.title ? `<h4>${esc(cfg.title(e, idx))}</h4>` : ''}${f}${acts}</div>`;
+  };
+  const entriesHtml = (path, cat) => {
+    const list = arrAt(path); const cfg = ENT[path];
+    const rows = list.map((e, i) => (cat && e.cat !== cat ? '' : entryHtml(path, e, i))).join('');
+    const can = !cfg.max || list.length < cfg.max;
+    return `<div class="gyb-entries">${rows}</div>${can ? `<div class="gyb-actions">${btn('ent-add', esc(T(cfg.add)), '', `data-path="${path}"${cat ? ` data-cat="${cat}"` : ''}`)}</div>` : `<p class="gyb-note">${X('بلغت الحد الأقصى (3).', 'Maximum reached (3).')}</p>`}`;
+  };
+
+  // Chips (brainstorming): list of strings at path
+  const chipsHtml = (path, ph) => {
+    const list = (Array.isArray(store.get(path, [])) ? store.get(path, []) : []).filter((x) => typeof x === 'string');
+    return `<div class="gyb-chips">${list.map((w, i) => `<span class="gyb-chip"><span>${esc(w)}</span><button type="button" class="gyb-chip-b" data-act="chip-idea" data-path="${path}" data-i="${i}" title="${X('إلى قائمة أفكاري', 'To my ideas list')}" aria-label="${X('إلى قائمة أفكاري', 'To my ideas list')}">＋</button><button type="button" class="gyb-chip-b" data-act="chip-del" data-path="${path}" data-i="${i}" title="${X('حذف', 'Delete')}" aria-label="${X('حذف', 'Delete')}">×</button></span>`).join('')}</div>
+      <div class="gyb-chip-add"><input class="gyb-ta" type="text" data-chip="${path}" placeholder="${esc(ph || X('اكتب واضغط Enter', 'Type and press Enter'))}"><button type="button" class="gyb-btn" data-act="chip-add" data-path="${path}">${X('أضف', 'Add')}</button></div>`;
+  };
+  const sessions = () => arrAt('activities.brainstormingSessions');
+  const structs = () => arrAt('activities.structuredBrainstorming');
+  const sessionsHtml = () => sessions().map((s, i) => `<div class="gyb-entry"><div class="gyb-grid two">${fld(D.B('نوع كلمة البداية', 'Starting word type'), `<select class="gyb-ta" data-bs="kind" data-i="${i}">${opts(P3.act8.kinds, s.kind)}</select>`)}${fld(D.B('كلمة البداية', 'Starting word'), `<input class="gyb-ta" type="text" data-bs="topic" data-i="${i}" value="${esc(s.topic || '')}">`)}</div>
+      ${chipsHtml('activities.brainstormingSessions.' + i + '.words')}<div class="gyb-actions">${btn('bs-del', X('حذف الجلسة', 'Delete session'), 'orange', `data-i="${i}"`)}</div></div>`).join('') + `<div class="gyb-actions">${btn('bs-add', X('+ جلسة عصف ذهني جديدة', '+ New brainstorming session'))}</div>`;
+  const structHtml = () => structs().map((s, i) => `<div class="gyb-entry">${fld(D.B('المنتج', 'Product'), `<input class="gyb-ta" type="text" data-sb="product" data-i="${i}" value="${esc(s.product || '')}">`)}
+      <div class="gyb-lines">${P3.act9.lines.map((l) => `<div class="gyb-line"><b>${esc(T(l.t))}</b><small>${esc(T(l.h))}</small>${chipsHtml('activities.structuredBrainstorming.' + i + '.lines.' + l.id)}</div>`).join('')}</div>
+      <div class="gyb-actions">${btn('sb-del', X('حذف المنتج', 'Delete product'), 'orange', `data-i="${i}"`)}</div></div>`).join('') + `<div class="gyb-actions">${btn('sb-add', X('+ أضف منتجاً', '+ Add a product'))}</div>`;
+
+  // Idea bank
+  const bankUi = { status: '', type: '', field: '', open: new Set() };
+  const ideaCard = (it) => {
+    const done = elemDone(it);
+    const el = P2.elements.map((e) => fld(D.B(e.t.ar + ' — ' + e.q.ar, e.t.en + ' — ' + e.q.en), `<textarea class="gyb-ta" rows="2" data-idea="el.${e.id}" data-id="${it.id}">${esc((it.elements || {})[e.id] || '')}</textarea>`)).join('');
+    const stT = T((P3.bank.statuses.find(([v]) => v === it.status) || [0, D.B('مسودة', 'Draft')])[1]);
+    return `<details class="gyb-idea" data-id="${it.id}"${bankUi.open.has(it.id) ? ' open' : ''}><summary><b>${esc(it.title || X('(فكرة بلا عنوان)', '(untitled idea)'))}</b><span class="gyb-tag blue">${esc(stT)}</span><span class="gyb-tag ${done === 5 ? 'green' : 'orange'}">${done === 5 ? X('العناصر الخمسة مكتملة', 'Five elements complete') : X(`غير مكتملة: ${done} من 5`, `Incomplete: ${done} of 5`)}</span></summary>
+      <div class="gyb-idea-body">${fld(D.B('عنوان الفكرة', 'Idea title'), `<input class="gyb-ta" type="text" data-idea="title" data-id="${it.id}" value="${esc(it.title || '')}">`)}
+      <div class="gyb-grid two">${fld(D.B('المجال', 'Field'), `<input class="gyb-ta" type="text" data-idea="field" data-id="${it.id}" value="${esc(it.field || '')}">`)}${fld(D.B('النوع', 'Type'), `<select class="gyb-ta" data-idea="type" data-id="${it.id}">${opts(P1.types.map((t) => [t.id, t.t]), it.type, '—')}</select>`)}</div>
+      <div class="gyb-grid two">${fld(D.B('المصدر', 'Source'), `<select class="gyb-ta" data-idea="source" data-id="${it.id}">${opts(P3.bank.sources, it.source)}</select>`)}${fld(D.B('الحالة', 'Status'), `<select class="gyb-ta" data-idea="status" data-id="${it.id}">${opts(P3.bank.statuses, it.status)}</select>`)}</div>
+      ${fld(D.B('وصف الفكرة', 'Description'), `<textarea class="gyb-ta" rows="2" data-idea="description" data-id="${it.id}">${esc(it.description || '')}</textarea>`)}
+      <h4>${X('العناصر الخمسة للفكرة', 'The five elements of the idea')}</h4>${el}
+      ${fld(D.B('ملاحظات', 'Notes'), `<textarea class="gyb-ta" rows="2" data-idea="notes" data-id="${it.id}">${esc(it.notes || '')}</textarea>`)}
+      <div class="gyb-actions">${btn('idea-del', X('حذف الفكرة', 'Delete idea'), 'orange', `data-id="${it.id}"`)}</div></div></details>`;
+  };
+  const filteredIdeas = () => ideas().filter((i) => (!bankUi.status || i.status === bankUi.status) && (!bankUi.type || i.type === bankUi.type) && (!bankUi.field || String(i.field || '').toLowerCase().includes(bankUi.field.toLowerCase())));
+  const bankListHtml = () => {
+    const all = ideas(); const list = filteredIdeas();
+    return `<p class="gyb-note" data-o="bankcount">${X(`عدد الأفكار: ${all.length}` + (list.length !== all.length ? ` (المعروض ${list.length})` : ''), `Ideas: ${all.length}` + (list.length !== all.length ? ` (showing ${list.length})` : ''))}</p>` +
+      (list.length ? list.map(ideaCard).join('') : `<p class="gyb-note">${all.length ? X('لا أفكار تطابق التصفية.', 'No ideas match the filter.') : X('لم تضف أفكاراً بعد.', 'You have not added any ideas yet.')}</p>`);
+  };
+  const bankHtml = () => `<div class="gyb-filters">
+      <label>${X('الحالة', 'Status')}<select class="gyb-ta" data-bf="status">${opts(P3.bank.statuses, bankUi.status, X('الكل', 'All'))}</select></label>
+      <label>${X('النوع', 'Type')}<select class="gyb-ta" data-bf="type">${opts(P1.types.map((t) => [t.id, t.t]), bankUi.type, X('الكل', 'All'))}</select></label>
+      <label>${X('المجال', 'Field')}<input class="gyb-ta" type="text" data-bf="field" value="${esc(bankUi.field)}"></label></div>
+    <div class="gyb-actions">${btn('idea-add', X('+ فكرة جديدة', '+ New idea'), 'primary')}</div><div data-o="banklist">${bankListHtml()}</div>`;
+
+  const jump = (arr) => `<nav class="gyb-steps">${arr.map(([id, t]) => `<a href="#${id}">${esc(T(t))}</a>`).join('')}</nav>`;
+  const tagBox = (id, part) => `<div class="gyb-p1-status" data-o="${id}tag">${statusTag(byId(part).part.items.find((i) => i.id === id))}</div>`;
+
+  function renderPart2(s) {
+    const p = s.part;
+    const cs = (c) => `<div class="gyb-case"><h4>${esc(T(c.n))}</h4><p>${esc(T(c.s))}</p><p class="gyb-q"><b>${esc(T(c.q))}</b></p></div>`;
+    return head(T(p.title), T(p.lead)) + card('', `<p>${esc(T(P2.intro))}</p>`, 'warn') +
+      jump([['gyb-p2-a', D.B('الحالتان', 'Cases')], ['gyb-p2-b', D.B('العناصر الخمسة', 'Five elements')], ['gyb-p2-c', D.B('النشاط 3', 'Activity 3')]]) +
+      `<div id="gyb-p2-a">${card(X('حالتا Janet وLily', 'The cases of Janet and Lily'), cs(P2.janet) + cs(P2.lily) + `<p class="gyb-note">${X('فكّر في الإجابة ودوّنها في دفترك أو في ملاحظات أفكارك.', 'Think about your answer and note it in your notebook or in your idea notes.')}</p>`, 'accent')}</div>` +
+      `<div id="gyb-p2-b">${card(X('ما الذي يصنع فكرة المشروع؟', 'What makes a business idea?'), `<p>${esc(T(p.lead))}</p><ol class="gyb-list">${P2.elements.map((e) => `<li><b>${esc(T(e.t))}</b>: ${esc(T(e.q))}</li>`).join('')}</ol>`)}</div>` +
+      `<div id="gyb-p2-c">${card(X('النشاط 3: صِف فكرة مشروعك', 'Activity 3: describe your business idea'), `<p>${esc(T(P2.act3))}</p>${tagBox('act3', 'p2')}${bankHtml()}`, 'good')}</div>`;
+  }
+
+  function renderPart3(s) {
+    const p = s.part; const a5 = P3.act5; const a6 = P3.act6;
+    const obs = Array.from({ length: 5 }, (_, i) => { const o = store.get('activities.localMarketSurvey.observations', []); return Array.isArray(o) && typeof o[i] === 'string' ? o[i] : ''; });
+    const stages = [['gyb-p3-a', D.B('Hamisi', 'Hamisi')], ['gyb-p3-4', D.B('النشاط 4', 'Act. 4')], ['gyb-p3-5', D.B('النشاط 5', 'Act. 5')], ['gyb-p3-6', D.B('النشاط 6', 'Act. 6')], ['gyb-p3-7', D.B('النشاط 7', 'Act. 7')], ['gyb-p3-8', D.B('النشاط 8', 'Act. 8')], ['gyb-p3-9', D.B('النشاط 9', 'Act. 9')], ['gyb-p3-10', D.B('النشاط 10', 'Act. 10')]];
+    return head(T(p.title), T(p.lead)) + jump(stages) +
+      `<div id="gyb-p3-a">${card(X('تجربة Hamisi', 'Hamisi\'s experience'), `<p>${esc(T(P3.hamisi.s))}</p><p class="gyb-q"><b>${esc(T(P3.hamisi.q))}</b></p>`, 'accent')}</div>` +
+      `<div id="gyb-p3-4">${card(X('النشاط 4: التعلم من أصحاب المشاريع الناجحة', 'Activity 4: learn from successful business owners'), `<p>${esc(T(P3.act4.intro))}</p>${tagBox('act4', 'p3')}${entriesHtml('activities.successfulBusinessOwners')}`)}</div>` +
+      `<div id="gyb-p3-5">${card(X('النشاط 5: التجربة الشخصية وتجارب الآخرين', 'Activity 5: your own and other people\'s experience'), `<p>${esc(T(a5.intro))}</p>${tagBox('act5', 'p3')}${a5.cats.map((c) => `<h4>${esc(T(c.t))}</h4>${entriesHtml('activities.experienceToIdeas', c.id)}`).join('')}`)}</div>` +
+      `<div id="gyb-p3-6">${card(X('النشاط 6: مسح منطقتك التجارية', 'Activity 6: survey your local business area'), `<p>${esc(T(a6.intro))}</p>${tagBox('act6', 'p3')}${entriesHtml('activities.localMarketSurvey.records')}<div class="gyb-chart" data-o="chart"></div>
+        <h4>${esc(T(a6.obs))}</h4>${obs.map((o, i) => `<input class="gyb-ta gyb-obs" type="text" data-obs="${i}" value="${esc(o)}" aria-label="${X('ملاحظة', 'Observation')} ${i + 1}">`).join('')}
+        ${fld(a6.missing, ta('survmissing', strAt('activities.localMarketSurvey.missing'), 3))}${fld(a6.opps, ta('survopps', strAt('activities.localMarketSurvey.opportunities'), 3))}`)}</div>` +
+      `<div id="gyb-p3-7">${card(X('النشاط 7: فحص البيئة (ستة مصادر)', 'Activity 7: scan your environment (six sources)'), `<p>${esc(T(P3.act7.intro))}</p>${tagBox('act7', 'p3')}${P3.act7.sources.map((src) => `<h4>${esc(T(src.t))}</h4><p class="gyb-note">${esc(T(src.h))}</p>${entriesHtml('activities.environmentalScanning.' + src.id)}`).join('')}`)}</div>` +
+      `<div id="gyb-p3-8">${card(X('النشاط 8: العصف الذهني', 'Activity 8: brainstorming'), `<p>${esc(T(P3.act8.intro))}</p>${tagBox('act8', 'p3')}${sessionsHtml()}`)}</div>` +
+      `<div id="gyb-p3-9">${card(X('النشاط 9: العصف الذهني المنظَّم', 'Activity 9: structured brainstorming'), `<p>${esc(T(P3.act9.intro))}</p>${tagBox('act9', 'p3')}${structHtml()}`)}</div>` +
+      `<div id="gyb-p3-10">${card(X('النشاط 10: قائمة أفكاري', 'Activity 10: my ideas list'), `<p>${esc(T(P3.bank.intro))}</p>${tagBox('act10', 'p3')}${bankHtml()}`, 'good')}</div>`;
+  }
+
+  function updatePartN() {
+    if (!root) return;
+    const cnt = (p) => arrAt(p).length;
+    const filled = (p, k) => arrAt(p).filter((e) => String(e[k] || '').trim()).length;
+    const list = ideas();
+    const obs = store.get('activities.localMarketSurvey.observations', []);
+    const nObs = Array.isArray(obs) ? obs.filter((o) => typeof o === 'string' && o.trim()).length : 0;
+    const wordsOf = (o, path) => { const a = path.reduce((x, k) => (x == null ? x : x[k]), o); return Array.isArray(a) ? a.length : 0; };
+    const ss = sessions(); const st = structs();
+    const lvl = (done, any) => (done ? 'done' : any ? 'inprogress' : '');
+    const scanOk = P3.act7.sources.filter((src) => cnt('activities.environmentalScanning.' + src.id) > 0).length;
+    const catOk = P3.act5.cats.filter((c) => arrAt('activities.experienceToIdeas').some((e) => e.cat === c.id && String(e.experience || '').trim())).length;
+    const prog = {
+      act3: lvl(list.some((i) => elemDone(i) === 5), list.length > 0),
+      act4: lvl(arrAt('activities.successfulBusinessOwners').some((e) => String(e.name || '').trim() && String(e.lessons || '').trim()), cnt('activities.successfulBusinessOwners') > 0),
+      act5: lvl(catOk === P3.act5.cats.length, cnt('activities.experienceToIdeas') > 0),
+      act6: lvl(filled('activities.localMarketSurvey.records', 'name') > 0 && nObs >= 5, cnt('activities.localMarketSurvey.records') > 0 || nObs > 0 || strAt('activities.localMarketSurvey.missing').trim() || strAt('activities.localMarketSurvey.opportunities').trim()),
+      act7: lvl(scanOk === P3.act7.sources.length, scanOk > 0),
+      act8: lvl(ss.some((s) => String(s.topic || '').trim() && wordsOf(s, ['words']) >= 5), ss.length > 0),
+      act9: lvl(st.some((s) => String(s.product || '').trim() && P3.act9.lines.every((l) => wordsOf(s, ['lines', l.id]) > 0)), st.length > 0),
+      act10: lvl(list.length >= 3, list.length > 0)
+    };
+    ['p2', 'p3'].forEach((pid) => {
+      const part = byId(pid).part;
+      part.items.forEach((it) => {
+        if (!(it.id in prog)) return;
+        if (stateOf(it) !== prog[it.id]) store.set('progress.' + it.id, prog[it.id]);
+        root.querySelectorAll(`[data-o="${it.id}tag"]`).forEach((el) => { el.innerHTML = statusTag(it); });
+      });
+    });
+    // survey chart (learner observations only)
+    const ch = root.querySelector('[data-o="chart"]');
+    if (ch) {
+      const by = {};
+      arrAt('activities.localMarketSurvey.records').forEach((r) => { const k = String(r.category || '').trim(); const n = Number(ascii(r.count)); if (k && n > 0) by[k] = (by[k] || 0) + n; });
+      const keys = Object.keys(by); const max = Math.max(1, ...keys.map((k) => by[k]));
+      ch.innerHTML = keys.length ? `<h4>${X('ملخص ما سجّلته (ملاحظات المتعلم)', 'Summary of what you recorded (learner observations)')}</h4>` + keys.map((k) => `<div class="gyb-brow"><span>${esc(k)}</span><div class="gyb-bar"><span style="width:${Math.round(by[k] / max * 100)}%"></span></div><b>${by[k]}</b></div>`).join('') : '';
+    }
+  }
+
+  function setPath(path, mut) {
+    const keys = path.split('.'); const top = keys[0];
+    const root0 = store.get(top, null);
+    const clone = JSON.parse(JSON.stringify(root0 == null ? (['ideas'].includes(top) ? [] : {}) : root0));
+    let o = clone; keys.slice(1, -1).forEach((k) => { if (o[k] == null) o[k] = {}; o = o[k]; });
+    mut(o, keys[keys.length - 1]); store.set(top, clone);
+  }
+  const getArr = (path) => { const v = store.get(path, []); return Array.isArray(v) ? v : []; };
+
+  function onPartNInput(el) {
+    if (el.dataset.ent) { const path = el.dataset.ent; setPath(path, (o, k) => { const a = Array.isArray(o[k]) ? o[k] : []; if (a[+el.dataset.i]) a[+el.dataset.i][el.dataset.k] = el.type === 'number' || el.inputMode === 'numeric' ? ascii(el.value) : el.value; o[k] = a; }); if (path.endsWith('records')) updatePartN(); else updatePartN(); return true; }
+    if (el.dataset.idea) {
+      const list = ideas(); const it = list.find((i) => i.id === el.dataset.id); if (!it) return true;
+      const k = el.dataset.idea;
+      if (k.startsWith('el.')) { it.elements = isO(it.elements) ? it.elements : {}; it.elements[k.slice(3)] = el.value; } else it[k] = el.value;
+      saveIdeas(list); updatePartN();
+      if (el.tagName === 'SELECT' || k === 'title' || k.startsWith('el.')) { const d = el.closest('details'); const sm = d && d.querySelector('summary'); if (sm) { const fresh = document.createElement('div'); fresh.innerHTML = ideaCard(it); sm.innerHTML = fresh.querySelector('summary').innerHTML; } }
+      return true;
+    }
+    if (el.dataset.obs != null && el.dataset.obs !== '') { const o = getArr('activities.localMarketSurvey.observations').slice(); while (o.length < 5) o.push(''); o[+el.dataset.obs] = el.value; store.set('activities.localMarketSurvey.observations', o); updatePartN(); return true; }
+    if (el.dataset.f === 'survmissing') { store.set('activities.localMarketSurvey.missing', el.value); updatePartN(); return true; }
+    if (el.dataset.f === 'survopps') { store.set('activities.localMarketSurvey.opportunities', el.value); updatePartN(); return true; }
+    if (el.dataset.bs) { const l = sessions(); if (l[+el.dataset.i]) { l[+el.dataset.i][el.dataset.bs] = el.value; store.set('activities.brainstormingSessions', l); updatePartN(); } return true; }
+    if (el.dataset.sb) { const l = structs(); if (l[+el.dataset.i]) { l[+el.dataset.i][el.dataset.sb] = el.value; store.set('activities.structuredBrainstorming', l); updatePartN(); } return true; }
+    if (el.dataset.bf) { bankUi[el.dataset.bf] = el.value; const box = root.querySelector('[data-o="banklist"]'); const all = root.querySelectorAll('[data-o="banklist"]'); all.forEach((b) => { b.innerHTML = bankListHtml(); }); return true; }
+    return false;
+  }
+
+  const confirmDel = () => window.confirm(X('هل تريد الحذف؟ لا يمكن التراجع.', 'Delete this? This cannot be undone.'));
+  const ACT_EXTRA = {};
+  Object.assign(ACT_EXTRA, {
+    'ent-add': (el) => { const path = el.dataset.path; setPath(path, (o, k) => { const a = Array.isArray(o[k]) ? o[k] : []; const n = {}; if (el.dataset.cat) n.cat = el.dataset.cat; a.push(n); o[k] = a; }); render(true); },
+    'ent-del': (el) => { if (!confirmDel()) return; setPath(el.dataset.path, (o, k) => { const a = Array.isArray(o[k]) ? o[k] : []; a.splice(+el.dataset.i, 1); o[k] = a; }); render(true); },
+    'ent-idea': (el) => { const e = getArr(el.dataset.path)[+el.dataset.i]; const cfg = ENT[el.dataset.path]; if (!e || !cfg.idea) return; const seed = cfg.idea(e); if (!String(seed.title || '').trim()) { window.alert(X('اكتب عنوان الفكرة أولاً.', 'Write the idea first.')); return; } const ok = addIdea({ ...seed, source: srcOf(el.dataset.path) }); window.alert(ok ? X('أُضيفت الفكرة إلى قائمة أفكاري.', 'Added to your ideas list.') : X('هذه الفكرة موجودة بالفعل في قائمتك.', 'This idea is already in your list.')); updatePartN(); },
+    'chip-add': (el) => { const inp = root.querySelector(`[data-chip="${el.dataset.path}"]`); addChip(el.dataset.path, inp); },
+    'chip-del': (el) => { setPath(el.dataset.path, (o, k) => { const a = Array.isArray(o[k]) ? o[k] : []; a.splice(+el.dataset.i, 1); o[k] = a; }); render(true); },
+    'chip-idea': (el) => { const w = getArr(el.dataset.path)[+el.dataset.i]; if (typeof w !== 'string') return; const ok = addIdea({ title: w, source: el.dataset.path.includes('structured') ? 'structured' : 'brain' }); window.alert(ok ? X('أُضيفت الفكرة إلى قائمة أفكاري.', 'Added to your ideas list.') : X('هذه الفكرة موجودة بالفعل في قائمتك.', 'This idea is already in your list.')); updatePartN(); },
+    'bs-add': () => { store.set('activities.brainstormingSessions', sessions().concat([{ kind: 'field', topic: '', words: [] }])); render(true); },
+    'bs-del': (el) => { if (!confirmDel()) return; const l = sessions(); l.splice(+el.dataset.i, 1); store.set('activities.brainstormingSessions', l); render(true); },
+    'sb-add': () => { store.set('activities.structuredBrainstorming', structs().concat([{ product: '', lines: {} }])); render(true); },
+    'sb-del': (el) => { if (!confirmDel()) return; const l = structs(); l.splice(+el.dataset.i, 1); store.set('activities.structuredBrainstorming', l); render(true); },
+    'idea-add': () => { const id = addIdea({ title: '', source: 'own' }); bankUi.open.add(id); render(true); },
+    'idea-del': (el) => { if (!confirmDel()) return; saveIdeas(ideas().filter((i) => i.id !== el.dataset.id)); bankUi.open.delete(el.dataset.id); render(true); }
+  });
+  function addChip(path, inp) {
+    const v = inp ? inp.value.trim() : ''; if (!v) return;
+    setPath(path, (o, k) => { const a = Array.isArray(o[k]) ? o[k] : []; a.push(v); o[k] = a; });
+    render(true);
+    const again = root.querySelector(`[data-chip="${path}"]`); if (again) again.focus();
+  }
+
   function renderPart(s) {
     const p = s.part;
     if (p.id === 'p1') return renderPart1(s);
+    if (p.id === 'p2') return renderPart2(s);
+    if (p.id === 'p3') return renderPart3(s);
     const items = p.items.map((it) => `<li class="gyb-item"><span class="gyb-tag blue">${esc(T(KIND[it.kind]))}</span><span class="gyb-item-t">${esc(T(it.title))}</span>${statusTag(it)}</li>`).join('');
     return head(T(p.title), T(p.lead)) +
       card(X('ما ستعمل عليه في هذا الجزء', 'What you will work on in this part'), `<ul class="gyb-items">${items}</ul>
@@ -231,6 +441,7 @@
     root.innerHTML = SECTION_RENDER(s) + pager(s);
     setHeading(s);
     if (s.part && s.part.id === 'p1') updatePart1();
+    if (s.part && (s.part.id === 'p2' || s.part.id === 'p3')) updatePartN();
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   }
@@ -296,10 +507,13 @@
   function bind() {
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
-      const fn = ACT[b.dataset.act]; if (fn) fn(b);
+      const fn = ACT[b.dataset.act] || ACT_EXTRA[b.dataset.act]; if (fn) fn(b);
     });
-    root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches('[data-f]')) onP1Input(e.target); });
-    root.addEventListener('input', (e) => { if (e.target.matches('textarea[data-f]')) onP1Input(e.target); });
+    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs]';
+    const dispatch = (el) => { if (!onPartNInput(el)) onP1Input(el); };
+    root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches(SEL)) dispatch(e.target); });
+    root.addEventListener('input', (e) => { if (e.target.matches(SEL) && !e.target.matches('select,input[type=radio],input[type=checkbox]')) dispatch(e.target); });
+    root.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-chip]')) { e.preventDefault(); addChip(e.target.dataset.chip, e.target); } });
   }
 
   function mount(host) {
