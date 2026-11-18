@@ -40,7 +40,7 @@
     const s = stateOf(it);
     if (s === 'done') return `<span class="gyb-tag green">${X('مكتمل', 'Completed')}</span>`;
     if (s === 'inprogress') return `<span class="gyb-tag orange">${X('قيد العمل', 'In progress')}</span>`;
-    return it.phase <= 5 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
+    return it.phase <= 6 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
   };
 
   /* ---------- sections ---------- */
@@ -548,6 +548,128 @@
     }
   });
 
+  /* ---------- Phase 6: knowledge checks, consolidated report ---------- */
+  const KN = D.KNOW;
+  const kcAll = () => arrAt('knowledgeChecks');
+  const kcGet = (id) => kcAll().find((r) => r.id === id) || null;
+  const kcSet = (id, patch) => { const l = kcAll(); let r = l.find((x) => x.id === id); if (!r) { r = { id }; l.push(r); } Object.assign(r, patch); store.set('knowledgeChecks', l); };
+  // option values are letters, not digits: the locale-digit refresher rewrites digits inside attribute values
+  const L = (i) => 'abcdefgh'[i];
+  const kcCorrect = (q, ans) => {
+    if (q.type === 'match') return Array.isArray(ans) && q.items.every((it, i) => ans[i] === L(it.a));
+    return typeof ans === 'string' && ans === L(q.a);
+  };
+  const kcAnswered = (q, r) => r && (q.type === 'match' ? Array.isArray(r.answer) && q.items.every((_, i) => r.answer[i] !== undefined && r.answer[i] !== '') : r.answer !== undefined && r.answer !== null && r.answer !== '');
+  const kcStats = () => {
+    const rs = KN.q.map((q) => ({ q, r: kcGet(q.id) }));
+    return { total: KN.q.length, checked: rs.filter((x) => x.r && x.r.checked).length, correct: rs.filter((x) => x.r && x.r.checked && x.r.correct).length, reflective: KN.reflective.filter((x) => { const r = kcGet(x.id); return r && String(r.answer || '').trim(); }).length };
+  };
+  function kcQuestion(q, n) {
+    const r = kcGet(q.id) || {}; const ans = r.answer;
+    let body = '';
+    if (q.type === 'match') {
+      const order = q.o.map((_, i) => i).reverse();
+      body = q.items.map((it, i) => `<label class="gyb-fld"><span>${esc(T(it.t))}</span><select class="gyb-ta" data-kc="match" data-id="${q.id}" data-i="${i}"><option value="">—</option>${order.map((oi) => `<option value="${L(oi)}"${Array.isArray(ans) && ans[i] === L(oi) ? ' selected' : ''}>${esc(T(q.o[oi]))}</option>`).join('')}</select></label>`).join('');
+    } else {
+      body = `<div class="gyb-choices wrap" role="radiogroup">${q.o.map((o, i) => `<label class="gyb-choice"><input type="radio" name="kc-${q.id}" value="${L(i)}" data-kc="mc" data-id="${q.id}"${ans === L(i) ? ' checked' : ''}><span>${esc(T(o))}</span></label>`).join('')}</div>`;
+    }
+    const fb = r.checked ? `<div class="gyb-res ${r.correct ? 'ok' : 'warn'}" role="status"><b>${r.correct ? X('إجابة صحيحة.', 'Correct.') : X('ليست صحيحة بعد، راجع التوضيح وأعد المحاولة.', 'Not correct yet; read the explanation and try again.')}</b> ${esc(T(q.e))}</div>` : '';
+    return `<div class="gyb-case" id="kc-${q.id}"><div class="gyb-screen-h"><b>${n}. ${esc(T(q.q))}</b><span class="gyb-tag blue">${esc(T(KN.topics[q.topic]))}</span></div>${body}<div class="gyb-actions">${btn('kc-check', X('تحقق', 'Check'), 'primary', `data-id="${q.id}"`)}</div>${fb}</div>`;
+  }
+  function renderKnowledge(s) {
+    const st = kcStats();
+    return head(T(s.title), '') + card('', `<p>${esc(T(KN.note))}</p>`, 'warn') +
+      card(X('ملخص إجاباتك', 'Your answers so far'), `<div class="gyb-counts" data-o="kcsum"><span class="gyb-count"><b>${st.checked}</b>${X(`من ${st.total} فُحصت`, `of ${st.total} checked`)}</span><span class="gyb-count good"><b>${st.correct}</b>${X('صحيحة', 'correct')}</span><span class="gyb-count"><b>${st.reflective}</b>${X(`من ${KN.reflective.length} تأملية`, `of ${KN.reflective.length} reflective`)}</span></div><p class="gyb-note">${X('هذه عدّادات لمراجعتك الشخصية وليست نتيجة نجاح أو رسوب.', 'These counters are for your own review, not a pass or fail result.')}</p>`, 'accent') +
+      card(X('أسئلة موضوعية', 'Objective questions'), KN.q.map((q, i) => kcQuestion(q, i + 1)).join('')) +
+      card(X('أسئلة تأملية (بلا درجة)', 'Reflective questions (unscored)'), KN.reflective.map((q) => fld(q.q, `<textarea class="gyb-ta" rows="3" data-kc="ref" data-id="${q.id}">${esc(String((kcGet(q.id) || {}).answer || ''))}</textarea>`)).join('') + `<p class="gyb-note">${X('تُحفظ إجاباتك تلقائياً ولا تُصحَّح آلياً.', 'Your answers are saved automatically and are not marked automatically.')}</p>`, 'good');
+  }
+  function onKcInput(el) {
+    if (!el.dataset.kc) return false;
+    const id = el.dataset.id; const q = KN.q.find((x) => x.id === id);
+    if (el.dataset.kc === 'ref') kcSet(id, { answer: el.value, reflective: true });
+    else if (el.dataset.kc === 'mc') kcSet(id, { answer: el.value, checked: false, correct: null });
+    else if (el.dataset.kc === 'match' && q) { const r = kcGet(id) || {}; const a = Array.isArray(r.answer) ? r.answer.slice() : []; a[+el.dataset.i] = el.value; kcSet(id, { answer: a, checked: false, correct: null }); const box = el.closest('.gyb-case'); const fb = box && box.querySelector('.gyb-res'); if (fb) fb.remove(); }
+    if (el.dataset.kc === 'mc') { const box = el.closest('.gyb-case'); const fb = box && box.querySelector('.gyb-res'); if (fb) fb.remove(); }
+    refreshKcSummary();
+    return true;
+  }
+  function refreshKcSummary() {
+    const el = root && root.querySelector('[data-o="kcsum"]'); if (!el) return;
+    const st = kcStats();
+    el.innerHTML = `<span class="gyb-count"><b>${st.checked}</b>${X(`من ${st.total} فُحصت`, `of ${st.total} checked`)}</span><span class="gyb-count good"><b>${st.correct}</b>${X('صحيحة', 'correct')}</span><span class="gyb-count"><b>${st.reflective}</b>${X(`من ${KN.reflective.length} تأملية`, `of ${KN.reflective.length} reflective`)}</span>`;
+  }
+  ACT_EXTRA['kc-check'] = (el) => {
+    const q = KN.q.find((x) => x.id === el.dataset.id); const r = kcGet(q.id);
+    if (!kcAnswered(q, r)) { window.alert(X('اختر إجابة أولاً (وأكمل كل البنود في أسئلة المطابقة).', 'Choose an answer first (and complete every item in matching questions).')); return; }
+    kcSet(q.id, { checked: true, correct: kcCorrect(q, r.answer) });
+    render(true);
+  };
+  ACT_EXTRA['print'] = () => window.print();
+
+  /* ----- consolidated report (FR-19): everything comes from saved learner data ----- */
+  function renderReport(s) {
+    const t = (v) => String(v == null ? '' : v).trim();
+    const empty = `<p class="gyb-incomplete">${X('غير مكتمل: لم تُدخل بيانات في هذا القسم بعد.', 'Incomplete: no data has been entered in this section yet.')}</p>`;
+    const sec = (title, body, has) => `<section class="gyb-rsec"><h3>${esc(title)}</h3>${has ? body : empty}</section>`;
+    const kv = (label, v) => (t(v) ? `<p class="gyb-kv"><b>${esc(T(label))}:</b> ${esc(t(v)).replace(/\n/g, '<br>')}</p>` : '');
+    const table = (heads, rows) => `<table class="gyb-rtable"><thead><tr>${heads.map((h) => `<th>${esc(T(h))}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${esc(t(c)).replace(/\n/g, '<br>') || '—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    const nameOf = (id) => { const i = ideas().find((x) => x.id === id); return i ? ideaTitle(i) : '—'; };
+    const typeName = (id) => { const ty = P1.types.find((x) => x.id === id); return ty ? T(ty.t) : ''; };
+    const stT = (v) => { const e = P3.bank.statuses.find(([k]) => k === v); return e ? T(e[1]) : ''; };
+    const srcT = (v) => { const e = P3.bank.sources.find(([k]) => k === v); return e ? T(e[1]) : ''; };
+    const ansT = (v) => { const e = P1.answers.find((x) => x.v === v); return e ? T(e.t) : X('لم يُجب', 'Not answered'); };
+    const out = [];
+    // progress
+    const tt = totals();
+    out.push(sec(X('التقدم', 'Progress'), `<p>${X(`أنشطة مكتملة: ${tt.done} من ${tt.total}`, `Completed activities: ${tt.done} of ${tt.total}`)}</p>${bar(tt.done, tt.total)}` + D.PARTS.map((p) => `<p><b>${esc(T(p.title))}</b></p><ul class="gyb-list">${p.items.filter(tracked).map((it) => `<li>${esc(T(it.title))} — ${statusTag(it)}</li>`).join('')}</ul>`).join(''), true));
+    // readiness
+    const resp = readResponses(); const st1 = P1.areas.filter((a) => resp[a.id]).length;
+    out.push(sec(X('ملخص الجاهزية (تأملي وليس تشخيصاً)', 'Readiness summary (reflective, not diagnostic)'), `<p>${X(`نقاط قوة: ${store.get('readinessAssessment.strengthsCount', 0)} | مجالات تحتاج تحسيناً: ${store.get('readinessAssessment.improvementCount', 0)} | مجالات بلا إجابة: ${P1.areas.length - st1}`, `Strengths: ${store.get('readinessAssessment.strengthsCount', 0)} | Areas to improve: ${store.get('readinessAssessment.improvementCount', 0)} | Unanswered: ${P1.areas.length - st1}`)}</p>` + table([X('المجال', 'Area'), X('إجابتك', 'Your answer')], P1.areas.map((a) => [T(a.t), ansT(resp[a.id])])), st1 > 0));
+    // improvement priorities
+    const crit = strArr(store.get('readinessAssessment.criticalImprovementAreas', [])); const cn = t(store.get('readinessAssessment.criticalNotes', ''));
+    out.push(sec(X('أولويات التحسين والنمو (النشاط 1)', 'Improvement priorities (Activity 1)'), `<ul class="gyb-list">${crit.map((id) => { const a = P1.areas.find((x) => x.id === id); return a ? `<li>${esc(T(a.t))}</li>` : ''; }).join('')}</ul>${kv(D.B('ملاحظاتك', 'Your notes'), cn)}`, crit.length || cn));
+    // field/type
+    const fi = strArr(store.get('businessProfile.fieldsOfInterest', [])); const bt = strArr(store.get('businessProfile.businessTypes', []));
+    out.push(sec(X('المجال والنوع', 'Field and type'), kv(D.B('مجالات الاهتمام', 'Fields of interest'), fi.join('، ')) + kv(D.B('أنواع الأعمال', 'Business types'), bt.map(typeName).join('، ')) + kv(D.B('الخبرات', 'Experience'), enGet('experience')) + kv(D.B('المهارات', 'Skills'), enGet('skills')) + kv(D.B('العلاقات', 'Network'), enGet('network')) + kv(D.B('لماذا يناسبني', 'Why it suits me'), store.get('businessProfile.whySuits', '')), fi.length || bt.length || enGet('experience') || enGet('skills') || enGet('network') || t(store.get('businessProfile.whySuits', ''))));
+    // ideas
+    const il = ideas();
+    out.push(sec(X('قائمة أفكاري', 'My ideas list'), table([X('الفكرة', 'Idea'), X('المجال', 'Field'), X('النوع', 'Type'), X('المصدر', 'Source'), X('الحالة', 'Status'), X('العناصر الخمسة', 'Five elements')], il.map((i) => [ideaTitle(i), i.field, typeName(i.type), srcT(i.source), stT(i.status), elemDone(i) === 5 ? X('مكتملة', 'Complete') : X(`غير مكتملة (${elemDone(i)}/5)`, `Incomplete (${elemDone(i)}/5)`)])), il.length > 0));
+    // owners / experiences
+    const ow = arrAt('activities.successfulBusinessOwners');
+    out.push(sec(X('التعلم من أصحاب المشاريع الناجحة (النشاط 4)', 'Learning from successful owners (Activity 4)'), ow.map((e) => `<p><b>${esc(t(e.name) || '—')}</b></p>${kv(D.B('الدروس', 'Lessons'), e.lessons)}${kv(D.B('أخطاء ينبغي تجنبها', 'Mistakes to avoid'), e.avoid)}`).join(''), ow.length > 0));
+    const ex = arrAt('activities.experienceToIdeas');
+    out.push(sec(X('الخبرات وأفكارها (النشاط 5)', 'Experiences and ideas (Activity 5)'), table([X('التجربة', 'Experience'), X('الفكرة', 'Idea')], ex.map((e) => [e.experience, e.idea])), ex.length > 0));
+    // survey
+    const recs = arrAt('activities.localMarketSurvey.records'); const obs = getArr('activities.localMarketSurvey.observations').filter((o) => t(o));
+    const miss = strAt('activities.localMarketSurvey.missing'); const opp = strAt('activities.localMarketSurvey.opportunities');
+    out.push(sec(X('ملاحظات السوق المحلي (النشاط 6) — ملاحظات المتعلم', 'Local market observations (Activity 6) — learner observations'), table([X('المجال', 'Field'), X('المشروع', 'Business'), X('العدد', 'Count'), X('الكثافة', 'Density')], recs.map((r) => [r.category, r.name, ascii(r.count), r.density ? T((P3.act6.fields[3].sel.find(([k]) => k === r.density) || [0, D.B('', '')])[1]) : ''])) + (obs.length ? `<ul class="gyb-list">${obs.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>` : '') + kv(D.B('مشاريع غير متوفرة', 'Missing businesses'), miss) + kv(D.B('فرص محتملة', 'Possible opportunities'), opp), recs.length || obs.length || t(miss) || t(opp)));
+    // scan
+    const scanRows = []; P3.act7.sources.forEach((src) => arrAt('activities.environmentalScanning.' + src.id).forEach((e) => scanRows.push([T(src.t), e.obs, e.idea])));
+    out.push(sec(X('فحص البيئة (النشاط 7)', 'Environmental scan (Activity 7)'), table([X('المصدر', 'Source'), X('الملاحظة', 'Observation'), X('الفكرة', 'Idea')], scanRows), scanRows.length > 0));
+    // brainstorm
+    const ss = sessions(); const sb = structs();
+    out.push(sec(X('العصف الذهني (النشاطان 8 و9)', 'Brainstorming (Activities 8 and 9)'), ss.map((x) => `<p><b>${esc(t(x.topic) || '—')}</b>: ${esc(strArr(x.words).join('، '))}</p>`).join('') + sb.map((x) => `<p><b>${esc(t(x.product) || '—')}</b></p><ul class="gyb-list">${P3.act9.lines.map((l) => (isO(x.lines) && strArr(x.lines[l.id]).length ? `<li><b>${esc(T(l.t))}:</b> ${esc(strArr(x.lines[l.id]).join('، '))}</li>` : '')).join('')}</ul>`).join(''), ss.length || sb.length));
+    // shortlist, field study, swot
+    const sl = shortlist();
+    out.push(sec(X('الأفكار المرشحة', 'Shortlisted ideas'), `<ol class="gyb-list">${sl.map((id) => `<li>${esc(nameOf(id))}</li>`).join('')}</ol>`, sl.length > 0));
+    const fsr = arrAt('fieldStudies').filter((r) => sl.includes(r.ideaId));
+    out.push(sec(X('الدراسة الميدانية (النشاط 11)', 'Field study (Activity 11)'), fsr.map((r) => `<p><b>${esc(nameOf(r.ideaId))}</b></p>${kv(D.B('ما أحتاج معرفته', 'What I need to find out'), r.needToFind)}` + (Array.isArray(r.interviews) && r.interviews.length ? table([X('الجهة', 'Group'), X('من', 'Who'), X('الأسئلة', 'Questions'), X('النتائج', 'Findings'), X('المتابعة', 'Follow-up')], r.interviews.filter(isO).map((e) => [e.group ? T((P4.groups.find(([k]) => k === e.group) || [0, D.B('', '')])[1]) : '', e.who, e.questions, e.notes, e.followUp])) : '')).join(''), fsr.some((r) => t(r.needToFind) || (Array.isArray(r.interviews) && r.interviews.length))));
+    const swr = arrAt('swotAnalyses').filter((r) => sl.includes(r.ideaId));
+    out.push(sec(X('تحليل SWOT (النشاط 12)', 'SWOT analysis (Activity 12)'), swr.map((r) => `<p><b>${esc(nameOf(r.ideaId))}</b></p>` + P4.quad.map((q) => kv(q.t, r[q.k])).join('') + P4.refl.map((q) => kv(q.t, r[q.k])).join('')).join(''), swr.some((r) => ['s', 'w', 'o', 't', 'advantages', 'disadvantages'].some((k) => t(r[k])))));
+    // final profile
+    const f = profile(); const fidea = t(f.ideaId) ? nameOf(f.ideaId) : t(f.otherIdea);
+    out.push(sec(X('ملخص فكرة مشروعي (النشاط 13)', 'Summary of my business idea (Activity 13)'), kv(D.B('فكرة مشروعي', 'My business idea'), fidea) + kv(D.B('سبب اختيار فكرة أخرى', 'Reason for another idea'), f.otherWhy) + kv(D.B('نوع المشروع', 'Type'), typeName(f.type)) + P5.fields.concat([{ k: 'field', l: D.B('المجال', 'Field') }]).map((d) => kv(d.l, f[d.k])).join('') + (strArr(f.undecided).length ? kv(D.B('أسباب التردد', 'Reasons for hesitation'), strArr(f.undecided).map((id) => T(P5.undecided.find((u) => u.id === id).t)).join('؛ ')) : ''), fidea || ['type', 'field', 'offering', 'customers', 'needs', 'reasons', 'learning'].some((k) => t(f[k]))));
+    // action plan
+    const plan = arrAt('actionPlan');
+    out.push(sec(X('خطة العمل الشخصية (النشاطان 2 و14)', 'Personal action plan (Activities 2 and 14)'), table([X('الإجراء', 'Action'), X('السبب', 'Reason'), X('الخطوات', 'Steps'), X('الدعم', 'Support'), X('الموعد', 'Date'), X('الحالة', 'Status'), X('النتيجة', 'Outcome')], plan.map((e) => [e.action, e.reason, e.steps, e.support, e.when, e.status ? T((P5.planFields[6].sel.find(([k]) => k === e.status) || [0, D.B('', '')])[1]) : '', e.outcome])), plan.length > 0));
+    // quiz
+    const ks = kcStats(); const refl = KN.reflective.filter((x) => t((kcGet(x.id) || {}).answer));
+    out.push(sec(X('نتائج اختبر معلوماتك', 'Knowledge check results'), `<p>${X(`أسئلة فُحصت: ${ks.checked} من ${ks.total} | صحيحة: ${ks.correct}`, `Questions checked: ${ks.checked} of ${ks.total} | correct: ${ks.correct}`)}</p>` + refl.map((x) => `<p><b>${esc(T(x.q))}</b><br>${esc(t(kcGet(x.id).answer))}</p>`).join(''), ks.checked || refl.length));
+    const date = new Date().toLocaleDateString(lang() === 'en' ? 'en-GB' : 'ar-IQ');
+    return head(T(s.title), '') + `<div class="gyb-actions gyb-noprint">${btn('print', X('طباعة أو حفظ PDF', 'Print or save as PDF'), 'primary')}${btn('export', X('تصدير نسخة احتياطية JSON', 'Export JSON backup'))}</div>` +
+      `<article class="gyb-report"><header class="gyb-rhead"><h2>${X('تقرير توليد فكرة مشروعي (GYB)', 'My Generate Your Business Idea (GYB) report')}</h2><p>${esc(date)}</p><p class="gyb-note">${X('يعرض هذا التقرير ما أدخلته أنت فقط. تقييم الجاهزية تأملي وليس تشخيصاً، ولا توجد درجات جدوى أو ترتيب تلقائي للأفكار.', 'This report shows only what you entered. The readiness assessment is reflective, not diagnostic, and there are no feasibility scores or automatic ranking of ideas.')}</p></header>${out.join('')}</article>`;
+  }
+
   function renderPart(s) {
     const p = s.part;
     if (p.id === 'p1') return renderPart1(s);
@@ -587,7 +709,7 @@
         <div class="gyb-res" data-o="msg" role="status" aria-live="polite"></div>`, 'good');
   }
 
-  const SECTION_RENDER = (s) => (s.part ? renderPart(s) : s.id === 'home' ? renderHome() : s.id === 'about' ? renderAbout() : renderPlaceholder(s));
+  const SECTION_RENDER = (s) => (s.part ? renderPart(s) : s.id === 'home' ? renderHome() : s.id === 'about' ? renderAbout() : s.id === 'knowledge' ? renderKnowledge(s) : s.id === 'report' ? renderReport(s) : renderPlaceholder(s));
 
   /* ---------- nav / heading / render ---------- */
   function buildNav() {
@@ -689,8 +811,8 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       const fn = ACT[b.dataset.act] || ACT_EXTRA[b.dataset.act]; if (fn) fn(b);
     });
-    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs],[data-p4],[data-p5]';
-    const dispatch = (el) => { if (onP5Input(el)) return; if (onP4Input(el)) return; if (!onPartNInput(el)) onP1Input(el); if (el.dataset.ent && el.dataset.ent.startsWith('fieldStudies')) updatePart4(); if (el.dataset.ent === 'actionPlan') updatePart5(); };
+    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs],[data-p4],[data-p5],[data-kc]';
+    const dispatch = (el) => { if (onKcInput(el)) return; if (onP5Input(el)) return; if (onP4Input(el)) return; if (!onPartNInput(el)) onP1Input(el); if (el.dataset.ent && el.dataset.ent.startsWith('fieldStudies')) updatePart4(); if (el.dataset.ent === 'actionPlan') updatePart5(); };
     root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches(SEL)) dispatch(e.target); });
     root.addEventListener('input', (e) => { if (e.target.matches(SEL) && !e.target.matches('select,input[type=radio],input[type=checkbox]')) dispatch(e.target); });
     root.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-chip]')) { e.preventDefault(); addChip(e.target.dataset.chip, e.target); } });
