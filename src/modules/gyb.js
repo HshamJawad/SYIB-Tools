@@ -40,7 +40,7 @@
     const s = stateOf(it);
     if (s === 'done') return `<span class="gyb-tag green">${X('مكتمل', 'Completed')}</span>`;
     if (s === 'inprogress') return `<span class="gyb-tag orange">${X('قيد العمل', 'In progress')}</span>`;
-    return it.phase <= 4 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
+    return it.phase <= 5 ? `<span class="gyb-tag">${X('لم يبدأ', 'Not started')}</span>` : `<span class="gyb-tag">${X('قريباً', 'Coming soon')}</span>`;
   };
 
   /* ---------- sections ---------- */
@@ -116,7 +116,7 @@
         ${fld(P1.prompts.why, ta('why', store.get('businessProfile.whySuits', ''), 4))}
         <p class="gyb-note">${X('هذه الإجابات مسودة تفكير وليست قراراً: ستقارن أفكارك وتختار لاحقاً في أجزاء الرحلة التالية.', 'These answers are a thinking draft, not a decision: you will compare and choose your ideas later in the next parts of the journey.')}</p>`) + `</div>` +
       `<div id="gyb-p1-d">` + card(X('4 · كيف تقوّي قدراتك؟', '4 · How to strengthen your abilities'), `${ul(P1.strengthen)}<p class="gyb-note">${esc(T(P1.strengthenNote))}</p>
-        <p>${statusTag(p.items.find((i) => i.id === 'act2'))}</p>`, 'good') + `</div>`;
+        <h4>${X('النشاط 2: خطة العمل', 'Activity 2: action plan')}</h4>${tagBox('act2', 'p1')}${apHtml()}`, 'good') + `</div>`;
   }
 
   function updatePart1() {
@@ -197,7 +197,7 @@
     const f = cfg.fields.map((d) => {
       const v = e[d.k] == null ? '' : String(e[d.k]);
       const inp = d.sel ? `<select class="gyb-ta" data-ent="${path}" data-i="${idx}" data-k="${d.k}">${opts(d.sel, v)}</select>`
-        : (d.r ? `<textarea class="gyb-ta" rows="${d.r}" data-ent="${path}" data-i="${idx}" data-k="${d.k}">${esc(v)}</textarea>` : `<input class="gyb-ta" type="${d.num ? 'number' : 'text'}"${d.num ? ' min="0" inputmode="numeric"' : ''} data-ent="${path}" data-i="${idx}" data-k="${d.k}" value="${esc(v)}">`);
+        : (d.r ? `<textarea class="gyb-ta" rows="${d.r}" data-ent="${path}" data-i="${idx}" data-k="${d.k}">${esc(v)}</textarea>` : `<input class="gyb-ta" type="${d.num ? 'number' : d.date ? 'date' : 'text'}"${d.num ? ' min="0" inputmode="numeric"' : ''} data-ent="${path}" data-i="${idx}" data-k="${d.k}" value="${esc(v)}">`);
       return fld(d.l, inp);
     }).join('');
     const acts = `<div class="gyb-actions">${cfg.idea ? btn('ent-idea', X('← إلى قائمة أفكاري', 'To my ideas list'), '', `data-path="${path}" data-i="${idx}"`) : ''}${btn('ent-del', X('حذف', 'Delete'), 'orange', `data-path="${path}" data-i="${idx}"`)}</div>`;
@@ -325,6 +325,7 @@
     const keys = path.split('.'); const top = keys[0];
     const root0 = store.get(top, null);
     const clone = JSON.parse(JSON.stringify(root0 == null ? (['ideas'].includes(top) ? [] : {}) : root0));
+    if (keys.length === 1) { const wrap = { [top]: clone }; mut(wrap, top); store.set(top, wrap[top]); return; }
     let o = clone; keys.slice(1, -1).forEach((k) => { if (o[k] == null) o[k] = {}; o = o[k]; });
     mut(o, keys[keys.length - 1]); store.set(top, clone);
   }
@@ -466,12 +467,94 @@
   }
   ACT_EXTRA['sl-toggle'] = (el) => toggleShortlist(el.dataset.id);
 
+  /* ---------- Part V: Your own business idea + shared action plan (Phase 5) ---------- */
+  const P5 = D.P5;
+  ENT['actionPlan'] = { fields: P5.planFields, add: D.B('+ أضف إجراءً', '+ Add an action'), title: (e, i) => e.action || X('إجراء ', 'Action ') + (i + 1), idea: null };
+  const profile = () => { const f = store.get('finalIdeaProfile', {}); return isO(f) ? f : {}; };
+  const apHtml = () => `<div class="gyb-actions">${btn('ap-fromcrit', X('اقترح من مجالات التحسين التي اخترتها', 'Suggest from the improvement areas I chose'))}</div>${entriesHtml('actionPlan')}`;
+
+  function selectIdea(id) {
+    const list = ideas();
+    list.forEach((i) => { if (i.status === 'selected' && i.id !== id) i.status = 'review'; });
+    const it = list.find((i) => i.id === id); if (it) it.status = 'selected';
+    saveIdeas(list); store.set('selectedIdeaId', id); setP5('ideaId', id);
+  }
+  function setP5(k, v) { const f = Object.assign({}, profile()); f[k] = v; store.set('finalIdeaProfile', f); }
+
+  function renderPart5(s) {
+    const p = s.part; const f = profile(); const list = ideas(); const sl = shortlist();
+    const sel = typeof f.ideaId === 'string' ? f.ideaId : '';
+    const ideaOpts = `<option value="">—</option>` + list.map((i) => `<option value="${i.id}"${sel === i.id ? ' selected' : ''}>${sl.includes(i.id) ? '★ ' : ''}${esc(ideaTitle(i))}</option>`).join('');
+    const und = strArr(f.undecided);
+    const fields = P5.fields.map((d) => fld(d.l, `<textarea class="gyb-ta" rows="${d.r}" data-p5="${d.k}">${esc(typeof f[d.k] === 'string' ? f[d.k] : '')}</textarea>`)).join('');
+    const typeSel = `<select class="gyb-ta" data-p5="type">${opts(P1.types.map((t) => [t.id, t.t]), f.type || '', '—')}</select>`;
+    const a13 = card(X('النشاط 13: ملخص فكرة مشروعي', 'Activity 13: summary of my business idea'),
+      `<p>${esc(T(P5.intro13))}</p>${tagBox('act13', 'p5')}
+       ${fld(D.B('فكرة مشروعي', 'My business idea'), `<select class="gyb-ta" data-p5="ideaId">${ideaOpts}</select>`)}
+       <div class="gyb-actions">${btn('p5-fill', X('عبّئ الحقول من وصف الفكرة', 'Fill fields from the idea description'))}</div>
+       ${fld(D.B('أو فكرة أخرى (مع بيان السبب)', 'Or another idea (with the reason)'), `<input class="gyb-ta" type="text" data-p5="otherIdea" value="${esc(typeof f.otherIdea === 'string' ? f.otherIdea : '')}">`)}
+       ${fld(D.B('لماذا هذه الفكرة الأخرى؟', 'Why this other idea?'), `<textarea class="gyb-ta" rows="2" data-p5="otherWhy">${esc(typeof f.otherWhy === 'string' ? f.otherWhy : '')}</textarea>`)}
+       <div class="gyb-grid two">${fld(D.B('نوع المشروع', 'Type of business'), typeSel)}${fld(D.B('مجال المشروع', 'Field of business'), `<input class="gyb-ta" type="text" data-p5="field" value="${esc(typeof f.field === 'string' ? f.field : '')}">`)}</div>${fields}`, 'accent');
+    const undecided = card(X('هل ما زلت مترددًا؟', 'Still undecided?'),
+      `<p>${esc(T(P5.undecidedIntro))}</p><div class="gyb-choices wrap">${P5.undecided.map((u) => `<label class="gyb-choice crit"><input type="checkbox" data-p5="und" value="${u.id}"${und.includes(u.id) ? ' checked' : ''}><span>${esc(T(u.t))}</span></label>`).join('')}</div>
+       ${fld(D.B('ملاحظات', 'Notes'), `<textarea class="gyb-ta" rows="2" data-p5="undecidedNotes">${esc(typeof f.undecidedNotes === 'string' ? f.undecidedNotes : '')}</textarea>`)}`);
+    const a14 = card(X('النشاط 14: خطة العمل الشخصية', 'Activity 14: personal action plan'), `<p>${esc(T(P5.planIntro))}</p>${tagBox('act14', 'p5')}${apHtml()}`, 'good');
+    return head(T(p.title), T(p.lead)) + jump([['gyb-p5-a', D.B('النشاط 13', 'Act. 13')], ['gyb-p5-b', D.B('متردد؟', 'Undecided?')], ['gyb-p5-c', D.B('النشاط 14', 'Act. 14')]]) +
+      `<div id="gyb-p5-a">${a13}</div><div id="gyb-p5-b">${undecided}${card('', `<p>${esc(T(P5.next))}</p>`, 'warn')}</div><div id="gyb-p5-c">${a14}</div>`;
+  }
+
+  function updatePart5() {
+    if (!root) return;
+    const f = profile(); const t = (v) => String(v == null ? '' : v).trim();
+    const plan = arrAt('actionPlan');
+    const chosen = t(f.ideaId) || t(f.otherIdea);
+    const need = ['type', 'field', 'offering', 'customers', 'needs', 'reasons', 'learning'];
+    const any13 = chosen || need.some((k) => t(f[k]));
+    const done13 = chosen && need.every((k) => t(f[k])) && (t(f.ideaId) || t(f.otherWhy));
+    const any14 = plan.length > 0;
+    const done14 = plan.some((e) => t(e.action) && t(e.when));
+    const prog = { act13: done13 ? 'done' : any13 ? 'inprogress' : '', act14: done14 ? 'done' : any14 ? 'inprogress' : '', act2: done14 ? 'done' : any14 ? 'inprogress' : '' };
+    ['p1', 'p5'].forEach((pid) => byId(pid).part.items.forEach((it) => {
+      if (!(it.id in prog)) return;
+      if (stateOf(it) !== prog[it.id]) store.set('progress.' + it.id, prog[it.id]);
+      root.querySelectorAll(`[data-o="${it.id}tag"]`).forEach((el) => { el.innerHTML = statusTag(it); });
+    }));
+  }
+  function onP5Input(el) {
+    if (!el.dataset.p5) return false;
+    const k = el.dataset.p5;
+    if (k === 'ideaId') { if (el.value) selectIdea(el.value); else setP5('ideaId', ''); }
+    else if (k === 'und') setP5('undecided', P5.undecided.map((u) => u.id).filter((id) => root.querySelector(`[data-p5="und"][value="${id}"]`).checked));
+    else setP5(k, el.value);
+    updatePart5(); return true;
+  }
+  Object.assign(ACT_EXTRA, {
+    'p5-fill': () => {
+      const f = profile(); const it = ideas().find((i) => i.id === f.ideaId);
+      if (!it) { window.alert(X('اختر فكرة من قائمتك أولاً.', 'Choose an idea from your list first.')); return; }
+      const e = isO(it.elements) ? it.elements : {};
+      const nf = Object.assign({}, f);
+      const put = (k, v) => { if (!String(nf[k] || '').trim() && String(v || '').trim()) nf[k] = v; };
+      put('type', it.type); put('field', it.field); put('offering', e.offering); put('customers', e.customers); put('needs', e.need);
+      store.set('finalIdeaProfile', nf); render(true);
+    },
+    'ap-fromcrit': () => {
+      const crit = strArr(store.get('readinessAssessment.criticalImprovementAreas', []));
+      if (!crit.length) { window.alert(X('لم تختر مجالات تحسين في الجزء الأول (النشاط 1) بعد.', 'You have not chosen improvement areas in Part I (Activity 1) yet.')); return; }
+      const plan = arrAt('actionPlan'); let n = 0;
+      crit.forEach((id) => { const a = P1.areas.find((x) => x.id === id); if (a && !plan.some((e) => e.area === id)) { plan.push({ area: id, reason: T(a.t), status: 'todo' }); n++; } });
+      if (n) store.set('actionPlan', plan);
+      render(true);
+    }
+  });
+
   function renderPart(s) {
     const p = s.part;
     if (p.id === 'p1') return renderPart1(s);
     if (p.id === 'p2') return renderPart2(s);
     if (p.id === 'p3') return renderPart3(s);
     if (p.id === 'p4') return renderPart4(s);
+    if (p.id === 'p5') return renderPart5(s);
     const items = p.items.map((it) => `<li class="gyb-item"><span class="gyb-tag blue">${esc(T(KIND[it.kind]))}</span><span class="gyb-item-t">${esc(T(it.title))}</span>${statusTag(it)}</li>`).join('');
     return head(T(p.title), T(p.lead)) +
       card(X('ما ستعمل عليه في هذا الجزء', 'What you will work on in this part'), `<ul class="gyb-items">${items}</ul>
@@ -538,6 +621,7 @@
     if (s.part && s.part.id === 'p1') updatePart1();
     if (s.part && (s.part.id === 'p2' || s.part.id === 'p3')) updatePartN();
     if (s.part && s.part.id === 'p4') updatePart4();
+    if (s.part && (s.part.id === 'p1' || s.part.id === 'p5')) updatePart5();
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   }
@@ -605,8 +689,8 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       const fn = ACT[b.dataset.act] || ACT_EXTRA[b.dataset.act]; if (fn) fn(b);
     });
-    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs],[data-p4]';
-    const dispatch = (el) => { if (onP4Input(el)) return; if (!onPartNInput(el)) onP1Input(el); if (el.dataset.ent && el.dataset.ent.startsWith('fieldStudies')) updatePart4(); };
+    const SEL = '[data-f],[data-ent],[data-idea],[data-bs],[data-sb],[data-bf],[data-obs],[data-p4],[data-p5]';
+    const dispatch = (el) => { if (onP5Input(el)) return; if (onP4Input(el)) return; if (!onPartNInput(el)) onP1Input(el); if (el.dataset.ent && el.dataset.ent.startsWith('fieldStudies')) updatePart4(); if (el.dataset.ent === 'actionPlan') updatePart5(); };
     root.addEventListener('change', (e) => { if (e.target.matches('[data-act-file="import"]')) onFile(e.target); else if (e.target.matches(SEL)) dispatch(e.target); });
     root.addEventListener('input', (e) => { if (e.target.matches(SEL) && !e.target.matches('select,input[type=radio],input[type=checkbox]')) dispatch(e.target); });
     root.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-chip]')) { e.preventDefault(); addChip(e.target.dataset.chip, e.target); } });
