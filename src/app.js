@@ -267,7 +267,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.13.0";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.14.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -288,7 +288,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.13.0";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.14.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -305,7 +305,7 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = assetUrl(src) + "?v=0.13.0";
+      script.src = assetUrl(src) + "?v=0.14.0";
       script.onload = resolve;
       script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
       document.body.appendChild(script);
@@ -330,7 +330,7 @@
       await ensureExternalScripts(def);
       const api = window[def.external.global];
       if (!host.querySelector(def.external.rootSelector)) api.mount(host);
-      api.open(sectionId || def.external.defaultSection);
+      api.open(sectionId || (typeof api.current === "function" && api.current()) || def.external.defaultSection);
     } catch (error) {
       console.error(def.id + " module loading failed:", error);
       host.innerHTML = '<div class="workspace-error"><strong>تعذر تحميل الوحدة</strong><p dir="ltr">' +

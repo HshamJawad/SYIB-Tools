@@ -827,7 +827,7 @@
     open(currentId);
   }
 
-  window.SIYBGyb = { mount, open, refresh: () => { buildNav(); render(true); }, sections: D.SECTIONS.map((s) => s.id) };
+  window.SIYBGyb = { mount, open, current: () => currentId, refresh: () => { buildNav(); render(true); }, sections: D.SECTIONS.map((s) => s.id) };
   window.addEventListener('siyb:languagechange', () => {
     if (!root) return;
     if (document.body.classList.contains('mode-gyb')) window.SIYBGyb.refresh(); else buildNav();
