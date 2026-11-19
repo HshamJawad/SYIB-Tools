@@ -7,9 +7,12 @@
 (() => {
   'use strict';
   const modules = [];
+  // Sidebar groups: modules with `group: '<id>'` are shown together under one heading (their own sub-menus are unchanged).
+  const groups = { iyb: { icon: '▣', title: { ar: 'حسّن مشروعك (IYB)', en: 'Improve Your Business (IYB)' } } };
   const registry = {
     register(def) { modules.push(def); modules.sort((a, b) => a.order - b.order); },
     list() { return modules.slice(); },
+    group(id) { return groups[id] || null; },
     get(id) { return modules.find((m) => m.id === id) || null; },
     byMode(mode) { return modules.find((m) => m.modes.includes(mode)) || null; }
   };
@@ -24,12 +27,12 @@
     }
   });
   registry.register({
-    id: 'costing', order: 2, icon: '▦',
+    id: 'costing', order: 2, icon: '▦', group: 'iyb',
     title: { ar: 'احتساب التكاليف', en: 'Cost Calculation' },
     modes: ['business', 'training'], defaultMode: 'business', navTemplate: 'tplCostingNav'
   });
   registry.register({
-    id: 'stock', order: 3, icon: '▤',
+    id: 'stock', order: 3, icon: '▤', group: 'iyb',
     title: { ar: 'المشتريات والمخزون', en: 'Purchasing & Stock' },
     modes: ['stock'],
     external: {

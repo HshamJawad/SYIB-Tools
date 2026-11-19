@@ -671,3 +671,17 @@ body.sidebar-collapsed .sidebar-tool-head{justify-content:center;padding:8px}
 body.sidebar-collapsed .sidebar-tool-head .global-nav-label,body.sidebar-collapsed .sidebar-tool-chevron{display:none}
 body.sidebar-collapsed .sidebar-tool-body{margin-inline-start:0;padding-inline-start:0;border:0}
 @media(max-width:620px){.topbar-tool-title{min-width:0;width:100%;font-size:12px;padding:4px 8px}}
+
+/* Sidebar group heading: "Improve Your Business (IYB)" wraps Costing and Purchasing & Stock (their sub-menus are unchanged) */
+.sidebar-group{margin:0 0 8px}
+.sidebar-group-head{display:flex;align-items:center;gap:11px;width:100%;min-height:50px;padding:9px 10px;border:1px solid #24A8E066;border-radius:12px;background:#24A8E014;color:#14323f;font:inherit;font-weight:800;text-align:start;cursor:pointer}
+.sidebar-group-head:hover{background:#24A8E02b}
+.sidebar-group.active .sidebar-group-head{border-color:#24A8E0}
+.sidebar-group-head .global-nav-label{flex:1;min-width:0}
+.sidebar-group-head[aria-expanded="true"] .sidebar-tool-chevron{transform:rotate(-135deg)}
+.sidebar-group-body{margin-top:6px;margin-inline-start:8px;padding-inline-start:6px;border-inline-start:3px solid #F48D0166}
+.sidebar-group-body[hidden]{display:none}
+.sidebar-group-body .sidebar-tool:last-child{margin-bottom:0}
+body.sidebar-collapsed .sidebar-group-head{justify-content:center;padding:8px}
+body.sidebar-collapsed .sidebar-group-head .global-nav-label,body.sidebar-collapsed .sidebar-group-head .sidebar-tool-chevron{display:none}
+body.sidebar-collapsed .sidebar-group-body{display:block!important;margin-inline-start:0;padding-inline-start:0;border:0}
