@@ -604,7 +604,7 @@
     kcSet(q.id, { checked: true, correct: kcCorrect(q, r.answer) });
     render(true);
   };
-  ACT_EXTRA['print'] = () => window.print();
+  ACT_EXTRA['print'] = () => { const el = root && root.querySelector('.gyb-report'); if (!el || !window.SIYBReportPdf) return; window.SIYBReportPdf.save({ root: el, title: X('تقرير توليد فكرة مشروعي (GYB)', 'My Generate Your Business Idea (GYB) report'), filename: 'GYB-report-' + new Date().toISOString().slice(0, 10) + '.pdf', lang: lang() }); };
 
   /* ----- consolidated report (FR-19): everything comes from saved learner data ----- */
   function renderReport(s) {
@@ -666,7 +666,7 @@
     const ks = kcStats(); const refl = KN.reflective.filter((x) => t((kcGet(x.id) || {}).answer));
     out.push(sec(X('نتائج اختبر معلوماتك', 'Knowledge check results'), `<p>${X(`أسئلة فُحصت: ${ks.checked} من ${ks.total} | صحيحة: ${ks.correct}`, `Questions checked: ${ks.checked} of ${ks.total} | correct: ${ks.correct}`)}</p>` + refl.map((x) => `<p><b>${esc(T(x.q))}</b><br>${esc(t(kcGet(x.id).answer))}</p>`).join(''), ks.checked || refl.length));
     const date = new Date().toLocaleDateString(lang() === 'en' ? 'en-GB' : 'ar-IQ');
-    return head(T(s.title), '') + `<div class="gyb-actions gyb-noprint">${btn('print', X('طباعة أو حفظ PDF', 'Print or save as PDF'), 'primary')}${btn('export', X('تصدير نسخة احتياطية JSON', 'Export JSON backup'))}</div>` +
+    return head(T(s.title), '') + `<div class="gyb-actions gyb-noprint">${btn('print', X('حفظ التقرير بصيغة PDF', 'Save report as PDF'), 'primary')}${btn('export', X('تصدير نسخة احتياطية JSON', 'Export JSON backup'))}</div>` +
       `<article class="gyb-report"><header class="gyb-rhead"><h2>${X('تقرير توليد فكرة مشروعي (GYB)', 'My Generate Your Business Idea (GYB) report')}</h2><p>${esc(date)}</p><p class="gyb-note">${X('يعرض هذا التقرير ما أدخلته أنت فقط. تقييم الجاهزية تأملي وليس تشخيصاً، ولا توجد درجات جدوى أو ترتيب تلقائي للأفكار.', 'This report shows only what you entered. The readiness assessment is reflective, not diagnostic, and there are no feasibility scores or automatic ranking of ideas.')}</p></header>${out.join('')}</article>`;
   }
 
@@ -686,7 +686,7 @@
   function renderPlaceholder(s) {
     const text = s.id === 'knowledge'
       ? X('أسئلة تدريبية بتغذية راجعة فورية تغطي جاهزية الرائد، والمجالات والأنواع، وعناصر الفكرة الخمسة، ومصادر الأفكار، والعصف الذهني، والغربلة، والدراسة الميدانية، وتحليل SWOT، واختيار الفكرة.', 'Practice questions with immediate feedback covering readiness, fields and types, the five elements of an idea, idea sources, brainstorming, screening, the field study, SWOT and final selection.')
-      : X('تقرير جاهز للطباعة أو الحفظ بصيغة PDF يجمع كل ما أدخلته: الجاهزية، والمجال والنوع، وقائمة الأفكار، والملاحظات، والقائمة المختصرة، وSWOT، والملف النهائي لفكرتك، وخطة العمل.', 'A print-ready report (or Save as PDF) that gathers everything you entered: readiness, field and type, ideas list, observations, shortlist, SWOT, your final idea profile and your action plan.');
+      : X('تقرير يُحفظ بصيغة PDF يجمع كل ما أدخلته: الجاهزية، والمجال والنوع، وقائمة الأفكار، والملاحظات، والقائمة المختصرة، وSWOT، والملف النهائي لفكرتك، وخطة العمل.', 'A print-ready report (or Save as PDF) that gathers everything you entered: readiness, field and type, ideas list, observations, shortlist, SWOT, your final idea profile and your action plan.');
     return head(T(s.title), '') + card(X('قريباً', 'Coming soon'), `<p>${esc(text)}</p><p class="gyb-note">${X('ستُضاف هذه الصفحة بعد اكتمال أجزاء الرحلة الخمسة.', 'This page will be added once the five parts of the journey are complete.')}</p>`, 'warn');
   }
 

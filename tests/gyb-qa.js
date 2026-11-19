@@ -81,7 +81,7 @@ const fillAll = async (pg, sel, text) => { const n = await pg.locator(sel).count
     await pg.click('[data-tool-head="stock"]'); await pg.waitForTimeout(1200);
     const ns = await G(pg, () => (window.SIYBStock && SIYBStock.sections ? SIYBStock.sections.length : 0));
     rec('B costing', 'Purchasing & Stock sections available', ns >= 10, String(ns));
-    let stockOk = true; const ids = await G(pg, () => SIYBStock.sections.map((s) => s.id));
+    let stockOk = true; const ids = await G(pg, () => SIYBStock.sections.map((s) => s.id || s));
     for (const id of ids) { await G(pg, (i) => SIYBStock.open(i), id); await pg.waitForTimeout(80); if (!(await G(pg, () => document.querySelector('#psRoot').innerText.length > 50))) stockOk = false; }
     rec('B costing', 'Every Purchasing & Stock section opens without error', stockOk && pg.errs.length === 0, pg.errs.slice(0, 2).join(' | '));
     rec('B costing', 'GYB export buttons hidden outside costing (no cross-talk)', true);
