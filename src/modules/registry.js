@@ -40,6 +40,15 @@
       scripts: ['src/modules/purchasing-stock-data.js', 'src/modules/purchasing-stock.js']
     }
   });
+  registry.register({
+    id: 'marketing', order: 4, icon: '◉', group: 'iyb',
+    title: { ar: 'التسويق', en: 'Marketing' },
+    modes: ['marketing'],
+    external: {
+      global: 'SIYBMarketing', rootSelector: '#mkRoot', bodyClass: 'mode-marketing', badge: 'MK', defaultSection: 'home',
+      scripts: ['src/modules/marketing-store.js', 'src/modules/marketing-data.js', 'src/modules/marketing.js']
+    }
+  });
 
   window.SIYBModules = registry;
 })();

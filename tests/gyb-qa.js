@@ -29,11 +29,11 @@ const fillAll = async (pg, sel, text) => { const n = await pg.locator(sel).count
     const pg = await newPage(browser, { width: 1280, height: 800 });
     await go(pg);
     const order = await G(pg, () => SIYBModules.list().map((m) => m.id));
-    rec('A shell', 'Sidebar order GYB, Costing, Stock', order.join() === 'gyb,costing,stock', order.join());
+    rec('A shell', 'Sidebar order GYB, Costing, Stock, Marketing', order.join() === 'gyb,costing,stock,marketing', order.join());
     const heads = await G(pg, () => [...document.querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead));
-    rec('A shell', 'Three tool heads rendered', heads.length === 3, heads.join());
+    rec('A shell', 'Four tool heads rendered', heads.length === 4, heads.join());
     const grp = await G(pg, () => { const g = document.querySelector('[data-group="iyb"]'); return g ? { tools: [...g.querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead), label: g.querySelector('.sidebar-group-head').innerText.trim(), gybInside: !!g.querySelector('[data-tool="gyb"]'), expandedAtStart: !g.querySelector('.sidebar-group-body').hidden } : null; });
-    rec('A shell', 'IYB group holds Costing and Stock only; GYB stays top-level', !!grp && grp.tools.join() === 'costing,stock' && !grp.gybInside, JSON.stringify(grp));
+    rec('A shell', 'IYB group holds Costing, Stock and Marketing; GYB stays top-level', !!grp && grp.tools.join() === 'costing,stock,marketing' && !grp.gybInside, JSON.stringify(grp));
     rec('A shell', 'IYB group is collapsed while GYB is active', !!grp && !grp.expandedAtStart);
     await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
     rec('A shell', 'Clicking the IYB heading expands it and shows both tools', await pg.locator('[data-tool-head="costing"]').isVisible() && await pg.locator('[data-tool-head="stock"]').isVisible());
