@@ -185,6 +185,7 @@
   function renderSidebarTools() {
     const nav = $("globalSidebarNav");
     nav.innerHTML = "";
+    const groupBodies = {};
     REG.list().forEach((m) => {
       const block = document.createElement("div");
       block.className = "sidebar-tool";
@@ -202,8 +203,29 @@
         group.dataset.navGroup = m.modes[0];
         body.appendChild(group);
       }
-      nav.appendChild(block);
+      if (m.group && REG.group(m.group)) {
+        if (!groupBodies[m.group]) {
+          const g = REG.group(m.group);
+          const wrap = document.createElement("div");
+          wrap.className = "sidebar-group";
+          wrap.dataset.group = m.group;
+          wrap.innerHTML =
+            '<button type="button" class="sidebar-group-head" data-group-head="' + m.group + '" aria-expanded="false">' +
+            '<span class="global-nav-icon">' + g.icon + '</span><span class="global-nav-label">' + g.title.ar + '</span>' +
+            '<span class="sidebar-tool-chevron" aria-hidden="true"></span></button>' +
+            '<div class="sidebar-group-body" hidden></div>';
+          nav.appendChild(wrap);
+          groupBodies[m.group] = wrap.querySelector(".sidebar-group-body");
+        }
+        groupBodies[m.group].appendChild(block);
+      } else nav.appendChild(block);
     });
+  }
+
+  function setGroupExpanded(groupEl, expanded) {
+    groupEl.querySelector(".sidebar-group-body").hidden = !expanded;
+    groupEl.querySelector(".sidebar-group-head").setAttribute("aria-expanded", String(expanded));
+    groupEl.classList.toggle("open", expanded);
   }
 
   function setToolExpanded(tool, expanded) {
@@ -219,6 +241,11 @@
       const on = el.dataset.tool === tool;
       el.classList.toggle("active", on);
       setToolExpanded(el.dataset.tool, on);
+    });
+    document.querySelectorAll(".sidebar-group").forEach((g) => {
+      const has = !!tool && !!g.querySelector('[data-tool="' + tool + '"]');
+      g.classList.toggle("active", has);
+      setGroupExpanded(g, has);
     });
     const name = $("topbarToolName");
     if (name) name.textContent = toolTitle(tool);
@@ -267,7 +294,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.15.0";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.16.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -288,7 +315,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.15.0";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.16.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -305,7 +332,7 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = assetUrl(src) + "?v=0.15.0";
+      script.src = assetUrl(src) + "?v=0.16.0";
       script.onload = resolve;
       script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
       document.body.appendChild(script);
@@ -437,6 +464,12 @@
   }
 
   $("globalSidebarNav").addEventListener("click", (event) => {
+    const gHead = event.target.closest(".sidebar-group-head");
+    if (gHead) {
+      const g = gHead.parentElement;
+      setGroupExpanded(g, g.querySelector(".sidebar-group-body").hidden);
+      return;
+    }
     const head = event.target.closest(".sidebar-tool-head");
     if (head) {
       const tool = head.dataset.toolHead;

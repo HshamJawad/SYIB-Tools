@@ -97,6 +97,7 @@ window.SIYB_UI_TEXT = {
   "2- انتقل بين الأمثلة والتمارين والأقسام": "2- Move between examples, exercises and sections",
   "عند اختيار أداة تنفتح قائمتها الفرعية. اختر المثال أو التمرين أو القسم الذي تريده، ويمكنك التبديل بين الأدوات في أي وقت.": "Choosing a tool opens its sub-menu. Pick the example, exercise or section you want, and switch between tools at any time.",
   "توليد فكرة مشروعك (GYB)": "Generate Your Business Idea (GYB)",
+  "حسّن مشروعك (IYB)": "Improve Your Business (IYB)",
   "وضع التدريب": "Training Mode",
   "المشتريات والمخزون": "Purchasing & Stock",
   "المشتريات وتدبير المخزون": "Purchasing & stock management",

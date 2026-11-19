@@ -32,12 +32,20 @@ const fillAll = async (pg, sel, text) => { const n = await pg.locator(sel).count
     rec('A shell', 'Sidebar order GYB, Costing, Stock', order.join() === 'gyb,costing,stock', order.join());
     const heads = await G(pg, () => [...document.querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead));
     rec('A shell', 'Three tool heads rendered', heads.length === 3, heads.join());
+    const grp = await G(pg, () => { const g = document.querySelector('[data-group="iyb"]'); return g ? { tools: [...g.querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead), label: g.querySelector('.sidebar-group-head').innerText.trim(), gybInside: !!g.querySelector('[data-tool="gyb"]'), expandedAtStart: !g.querySelector('.sidebar-group-body').hidden } : null; });
+    rec('A shell', 'IYB group holds Costing and Stock only; GYB stays top-level', !!grp && grp.tools.join() === 'costing,stock' && !grp.gybInside, JSON.stringify(grp));
+    rec('A shell', 'IYB group is collapsed while GYB is active', !!grp && !grp.expandedAtStart);
+    await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
+    rec('A shell', 'Clicking the IYB heading expands it and shows both tools', await pg.locator('[data-tool-head="costing"]').isVisible() && await pg.locator('[data-tool-head="stock"]').isVisible());
+    await pg.click('.sidebar-group-head'); await pg.waitForTimeout(150);
+    rec('A shell', 'Clicking again collapses it', !(await pg.locator('[data-tool-head="costing"]').isVisible()));
     await pg.click('[data-tool-head="gyb"]'); await pg.waitForTimeout(1100);
     await G(pg, () => SIYBGyb.open('p3')); await pg.waitForTimeout(200);
-    await pg.click('[data-tool-head="costing"]'); await pg.waitForTimeout(1200);
+    await pg.evaluate(() => document.querySelector('[data-tool-head="costing"]').click()); await pg.waitForTimeout(1200);
     const costVisible = await G(pg, () => !!document.querySelector('#costingModuleRoot') && document.body.classList.contains('mode-gyb') === false);
+    rec('A shell', 'Group auto-expands when a child tool is active', await G(pg, () => !document.querySelector('.sidebar-group-body').hidden));
     rec('A shell', 'Switch GYB to Costing hides GYB mode', costVisible);
-    await pg.click('[data-tool-head="stock"]'); await pg.waitForTimeout(1200);
+    await pg.evaluate(() => document.querySelector('[data-tool-head="stock"]').click()); await pg.waitForTimeout(1200);
     rec('A shell', 'Stock module mounts', await G(pg, () => document.body.classList.contains('mode-stock') && !!document.querySelector('#psRoot') && document.querySelector('#psRoot').children.length > 0));
     await pg.click('[data-tool-head="gyb"]'); await pg.waitForTimeout(800);
     rec('A shell', 'Returning to GYB restores independent navigation (still on Part III)', await G(pg, () => /gyb-p3/.test(document.querySelector('#gybRoot').innerHTML)));
@@ -51,7 +59,7 @@ const fillAll = async (pg, sel, text) => { const n = await pg.locator(sel).count
     await go(pg);
     const examples = await G(pg, () => [...document.querySelectorAll('[data-example][data-nav-item^="business-"]')].map((b) => b.dataset.example));
     rec('B costing', 'Costing examples listed', examples.length >= 5, examples.join());
-    await pg.click('[data-tool-head="costing"]'); await pg.waitForTimeout(1200);
+    await pg.evaluate(() => document.querySelector('[data-tool-head="costing"]').click()); await pg.waitForTimeout(1200);
     for (const ex of examples) {
       const btn = pg.locator(`[data-example="${ex}"][data-nav-item^="business-"]`).first();
       try {
@@ -78,7 +86,7 @@ const fillAll = async (pg, sel, text) => { const n = await pg.locator(sel).count
     await pg.locator('[data-example="textile"][data-nav-item^="business-"]').first().evaluate((b) => b.click()).catch(() => {}); await pg.waitForTimeout(900);
     rec('B costing', 'Export actions (PDF/Excel) available in costing mode', await G(pg, () => { const w = document.getElementById('globalExportActions'); return !!w && !w.hidden; }));
     // stock sections
-    await pg.click('[data-tool-head="stock"]'); await pg.waitForTimeout(1200);
+    await pg.evaluate(() => document.querySelector('[data-tool-head="stock"]').click()); await pg.waitForTimeout(1200);
     const ns = await G(pg, () => (window.SIYBStock && SIYBStock.sections ? SIYBStock.sections.length : 0));
     rec('B costing', 'Purchasing & Stock sections available', ns >= 10, String(ns));
     let stockOk = true; const ids = await G(pg, () => SIYBStock.sections.map((s) => s.id || s));
