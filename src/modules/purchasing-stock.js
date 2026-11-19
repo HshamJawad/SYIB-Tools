@@ -35,7 +35,7 @@
   const sel = (k, opts, cls = '') => `<select class="ps-sel ${cls}" data-k="${k}"><option value="">${X('— اختر —', '— choose —')}</option>${opts.map((o) => `<option value="${esc(o.v)}" ${String(sget(k)) === String(o.v) ? 'selected' : ''}>${esc(o.t)}</option>`).join('')}</select>`;
   const out = (id, v = '—') => `<span class="ps-num" data-o="${id}">${v}</span>`;
   const tw = (inner) => `<div class="ps-tablewrap"><table class="ps-table">${inner}</table></div>`;
-  const resetBar = (extra = '') => `<div class="ps-actions">${extra}${btn('reset', X('إعادة ضبط هذه الصفحة', 'Reset this page'))}${btn('print', X('طباعة / حفظ PDF', 'Print / Save as PDF'))}</div>`;
+  const resetBar = (extra = '') => `<div class="ps-actions">${extra}${btn('reset', X('إعادة ضبط هذه الصفحة', 'Reset this page'))}${btn('print', X('حفظ PDF', 'Save PDF'))}</div>`;
 
   function mcq(id, list) {
     const st = sget('mcq.' + id, {});
@@ -112,7 +112,7 @@
       card(X('كيف تستخدم هذه الوحدة في الورشة؟', 'How to use this module in the workshop'), ul([
         D.B('ميسّر: اعرض الصفحة واشرحها ثم دع المتدربين يجرّبون الأنشطة بأنفسهم.', 'Trainer: show a page and explain it, then let participants try the activities themselves.'),
         D.B('متدرب: أدخل أرقامك في الحقول؛ تُحسب الأرصدة والمجاميع تلقائياً، ثم اضغط «تحقق» حيث يوجد.', 'Participant: enter your numbers; balances and totals are calculated automatically, then press “Check” where available.'),
-        D.B('زر «إعادة ضبط هذه الصفحة» يمسح الصفحة لتبدأ مجموعة أخرى. و«طباعة» يحفظ الصفحة PDF.', 'The “Reset this page” button clears the page for the next group. “Print” saves the page as a PDF.'),
+        D.B('زر «إعادة ضبط هذه الصفحة» يمسح الصفحة لتبدأ مجموعة أخرى. و«حفظ PDF» يحفظ الصفحة ملف PDF.', 'The “Reset this page” button clears the page for the next group. “Save PDF” saves the page as a PDF file.'),
         D.B('الأمثلة الرقمية (المبالغ بالدرهم المغربي) مأخوذة من دليل الشراء وتدبير المخزون ضمن سلسلة «حسّن مشروعك».', 'The worked examples (amounts in Moroccan dirhams) come from the Purchasing and Stock Management manual of the Improve Your Business series.')
       ]), 'accent') +
       card(X('مصطلحات مفيدة', 'Useful business words'), `<div class="ps-grid two">${D.glossary.map((g) => `<div class="ps-mini"><b>${T(g.t)}</b>${T(g.d)}</div>`).join('')}</div>`) +
@@ -468,7 +468,7 @@
   const ACT = {
     go: (b) => open(b.dataset.id),
     reset: () => { (resetKeys[currentId] || []).forEach(del); render(true); },
-    print: () => window.print(),
+    print: () => { if (!window.SIYBReportPdf || !root) return; const h = root.querySelector('h2, h1'); window.SIYBReportPdf.save({ root, title: (h ? h.textContent.trim() : '') || X('المشتريات والمخزون', 'Purchasing and Stock'), filename: 'SIYB-stock-' + currentId + '-' + new Date().toISOString().slice(0, 10) + '.pdf', lang: lang() }); },
     toggle: (b) => { sset(b.dataset.k, !sget(b.dataset.k)); render(true); },
     step: (b) => { const i = Number(b.dataset.i); sset('step.open', sget('step.open', 0) === i ? 0 : i); render(true); },
     clscheck: () => { sset('cls.checked', true); render(true); },
