@@ -38,7 +38,7 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   rec('Navigation', 'Sub-menu has 9 items (overview + 8 cards)', subnav === 9, String(subnav));
   for (let i = 1; i <= 8; i++) {
     await pg.evaluate((n) => document.querySelectorAll('#mkRoot .mk-card')[n].click(), i - 1); await pg.waitForTimeout(150);
-    const ok = await pg.evaluate((n) => { const c = SIYBMarketing.current(); return c === 'c0' + n && !!document.querySelector('#mkRoot .mk-placeholder') && document.querySelector('[data-nav-item="marketing-c0' + n + '"]').classList.contains('active'); }, i);
+    const ok = await pg.evaluate((n) => { const c = SIYBMarketing.current(); return c === 'c0' + n && !!document.querySelector('#mkRoot .mk-panel') && (n === 8) === !!document.querySelector('#mkRoot .mk-placeholder') && document.querySelector('[data-nav-item="marketing-c0' + n + '"]').classList.contains('active'); }, i);
     rec('Navigation', `Card ${i} opens its view and highlights sub-menu`, ok);
     await pg.evaluate(() => document.querySelector('#mkRoot [data-id="home"]').click()); await pg.waitForTimeout(100);
     rec('Navigation', `Back from card ${i} returns to overview`, await pg.evaluate(() => SIYBMarketing.current() === 'home' && document.querySelectorAll('#mkRoot .mk-card').length === 8));
@@ -104,8 +104,8 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   rec('Console', 'main run: no console/page errors', pg.errs.length === 0, pg.errs.join(' | ').slice(0, 300));
   // PWA / offline
   const pw = await newPage(browser, { width: 1280, height: 800 }); await go(pw); await pw.waitForTimeout(2500);
-  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.17.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
-  rec('PWA', 'Cache v0.17.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
+  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.18.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
+  rec('PWA', 'Cache v0.18.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
   await pw.context().setOffline(true);
   await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1200);
