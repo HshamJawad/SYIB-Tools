@@ -82,3 +82,10 @@
 .mk-rm{width:44px;text-align:center}
 .mk-gl{padding:6px 0;border-bottom:1px solid #eef3f5}
 #glq{width:100%;max-width:420px;border:1px solid #b9c9d2;border-radius:8px;padding:8px 10px;font:inherit}
+
+/* Stage 4 */
+.mk-btn.danger{border-color:#F48D01;color:#111;background:#F48D0114}
+.mk-msg{margin-top:10px;min-height:1px}.mk-msg.ok,.mk-msg.bad{padding:8px 12px;border-radius:8px;border:1px solid}
+.mk-msg.ok{background:#A4CF0626;border-color:#A4CF06}.mk-msg.bad{background:#F48D0120;border-color:#F48D01}
+.mk-report{margin-top:14px;padding:14px;border:1px dashed #b9c9d2;border-radius:10px;background:#fff}
+.mk-report h2{font-size:18px}.mk-report h3{margin:16px 0 6px;font-size:15px}.mk-report h4{margin:10px 0 4px;font-size:14px}
