@@ -12,7 +12,8 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const NAV = [{ id: 'home', icon: '▥', title: D.B('لوحة البطاقات', 'Card overview') }]
-    .concat(D.CARDS.map((c) => ({ id: c.id, icon: c.icon, no: c.no, title: c.title })));
+    .concat(D.CARDS.map((c) => ({ id: c.id, icon: c.icon, no: c.no, title: c.title })))
+    .concat([{ id: 'data', icon: '⛁', title: D.B('البيانات والتقرير', 'Data & report') }]);
   const byId = (id) => NAV.find((s) => s.id === id) || NAV[0];
   const cardOf = (id) => D.CARDS.find((c) => c.id === id);
 
@@ -179,7 +180,7 @@
   function setHeading(s) {
     const t = $('workspaceTitle'), d = $('workspaceDescription'), n = $('workspaceBadgeNumber'), l = $('workspaceBadgeLabel');
     if (t) t.textContent = X('التسويق (IYB)', 'Marketing (IYB)');
-    if (d) d.textContent = s.id === 'home' ? X('ثماني بطاقات تغطي أجزاء الدليل التسعة بالترتيب', 'Eight cards covering the manual\'s nine Parts in order') : T(s.title);
+    if (d) d.textContent = s.id === 'data' ? X('نسخ احتياطي، استيراد، مسح، وتقرير PDF', 'Backup, import, erase and PDF report') : s.id === 'home' ? X('ثماني بطاقات تغطي أجزاء الدليل التسعة بالترتيب', 'Eight cards covering the manual\'s nine Parts in order') : T(s.title);
     if (n) n.textContent = s.no || 'MK';
     if (l) l.textContent = X('حسّن مشروعك · التسويق', 'Improve Your Business · Marketing');
   }
@@ -198,7 +199,7 @@
     }).join('');
     return `<h2>${X('التسويق — حسّن مشروعك (IYB)', 'Marketing — Improve Your Business (IYB)')}</h2>
       <p class="mk-lead">${X('اختر بطاقة لفتحها. تحدّد حالة كل بطاقة من عملك الفعلي فيها، لا من مجرد فتحها.', 'Choose a card to open it. A card\'s status reflects your actual work in it, not just opening it.')}</p>
-      ${storageNote()}<div class="mk-grid">${cards}</div>${notice()}`;
+      ${storageNote()}<div class="mk-grid">${cards}</div><p><button type="button" class="mk-btn" data-act="go" data-id="data">⛁ ${X('بياناتك: نسخ احتياطي وتقرير PDF', 'Your data: backup and PDF report')}</button></p>${notice()}`;
   }
 
   let gq = '';
@@ -240,6 +241,127 @@
     return h;
   }
 
+
+  /* ---------- Stage 4: data, backup, report ---------- */
+  const optText = (f, v) => { const o = (f.options || []).find((x) => x.v === v); return o ? T(o.t) : ''; };
+  function fieldText(f, val) {
+    if (f.type === 'note' || val == null) return '';
+    if (f.type === 'text' || f.type === 'area') return String(val).trim();
+    if (f.type === 'choice') return optText(f, val);
+    if (f.type === 'multi') return Object.keys(val || {}).filter((k) => val[k]).map((k) => optText(f, k)).filter(Boolean).join('; ');
+    if (f.type === 'table') {
+      const rows = f.rows ? f.rows.length : f.rowsN; const out = [];
+      for (let r = 0; r < rows; r++) {
+        const cells = f.cols.map((c, ci) => { const v = ((val || {})[r + '_' + ci] || '').trim(); return v ? T(c) + ': ' + v : ''; }).filter(Boolean);
+        if (cells.length) out.push((f.rows ? T(f.rows[r]) + ' — ' : (r + 1) + '. ') + cells.join(' | '));
+      }
+      return out;
+    }
+    return '';
+  }
+  function reportHtml() {
+    const lg = lang(); const now = new Date();
+    const date = now.toLocaleDateString(lg === 'en' ? 'en-GB' : 'ar-IQ');
+    const st = store.status();
+    let h = `<div class="mk-report"><h2>${X('تقرير تعلّم المتعلم — حسّن مشروعك (IYB): التسويق', 'Learner report — Improve Your Business (IYB): Marketing')}</h2>
+      <p>${X('تاريخ التقرير: ', 'Report date: ')}${esc(date)}</p>
+      <p><strong>${X('تنبيه: ', 'Notice: ')}</strong>${X('هذا سجل ذاتي لمتعلم أعدّته أداة رقمية. وهو ليس شهادة ولا يدل على إتمام معتمد من منظمة العمل الدولية، ولا يتضمن تقييماً لجدوى المشروع.', 'This is a learner\'s self-study record produced by a digital tool. It is not a certificate, does not indicate official ILO completion, and makes no assessment of business viability.')}</p>`;
+    // progress
+    const cards = D.CARDS.map((c) => [c.no + ' · ' + T(c.title), stLabel(statusOf(c.id))]);
+    const parts = []; ['c02', 'c03', 'c04', 'c05', 'c06', 'c07'].forEach((c) => partsOf(c).forEach((p) => parts.push([T(p.title), stLabel(partStatus(p))])));
+    const asm = Object.values(ASM()).sort((a, b) => a.no - b.no);
+    const done = asm.filter((a) => asmStatus(a.id) === 'done').length;
+    h += `<h3>${X('ملخص التقدم', 'Progress summary')}</h3><table><thead><tr><th>${X('البطاقة', 'Card')}</th><th>${X('الحالة', 'Status')}</th></tr></thead><tbody>${cards.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table>
+      <table><thead><tr><th>${X('جزء الدليل', 'Manual Part')}</th><th>${X('الحالة', 'Status')}</th></tr></thead><tbody>${parts.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table>
+      <p>${X('التقييمات المنجزة: ' + done + ' من ' + asm.length, 'Assessments completed: ' + done + ' / ' + asm.length)}</p>`;
+    // activities
+    let acts = '';
+    ['c02', 'c03', 'c04', 'c05', 'c06', 'c07'].forEach((c) => partsOf(c).forEach((p) => actsOf(p).forEach((a) => {
+      const stt = actStatus(a.id); if (stt === 'notstarted') return;
+      const resp = store.get('responses.' + a.id, {}) || {}; let items = '';
+      a.fields.forEach((f) => { const v = fieldText(f, resp[f.k]); if (!v || (Array.isArray(v) && !v.length)) return; const lab = f.label ? T(f.label) : ''; items += Array.isArray(v) ? v.map((x) => `<li>${lab ? esc(lab) + ': ' : ''}${esc(x)}</li>`).join('') : `<li>${lab ? esc(lab) + ': ' : ''}${esc(v)}</li>`; });
+      acts += `<h4>${esc(T(a.title))} — ${X('الجزء ', 'Part ')}${p.id} (${esc(stLabel(stt))})</h4>${items ? `<ul>${items}</ul>` : ''}`;
+    })));
+    h += `<h3>${X('الأنشطة', 'Activities')}</h3>${acts || `<p>${X('لا توجد أنشطة بدأها المتعلم بعد.', 'No activities started yet.')}</p>`}`;
+    // assessments
+    let as = '';
+    asm.forEach((a) => {
+      const stt = asmStatus(a.id); if (stt === 'notstarted') return;
+      const sub = stt === 'done'; const G = (k) => store.get('responses.' + a.id + '.' + k, ''); let li = ''; let ok = 0, tot = 0;
+      if (a.kind === 'cloze') { const bank = Object.fromEntries(a.bank.map((o) => [o.v, T(o.t)])); Object.keys(a.key).forEach((id) => { const v = G('b' + id); tot++; const good = v === a.key[id]; if (good) ok++; li += `<li>(${id}) ${esc(v ? bank[v] : '—')}${sub ? (good ? ' ✓' : ' ✗ → ' + esc(bank[a.key[id]])) : ''}</li>`; }); }
+      else if (a.kind === 'mcq') a.items.forEach((i) => { const v = G('q' + i.n); tot++; const good = v === i.correct; if (good) ok++; li += `<li>${i.n}. ${esc(v ? v + '. ' + optText(i, v) : '—')}${sub ? (good ? ' ✓' : ' ✗ → ' + i.correct) : ''}</li>`; });
+      else a.items.forEach((i) => { const v = String(G('o' + i.n)).trim(); li += `<li>${i.n}. ${esc(v || '—')}</li>`; });
+      as += `<h4>${esc(T(a.title))} — ${X('الجزء ', 'Part ')}${a.part} (${esc(stLabel(stt))})</h4>${sub && tot ? `<p>${X('مراجعة ذاتية (مطابقة لمفتاح الدليل): ' + ok + ' من ' + tot, 'Self-check (matches the manual\'s key): ' + ok + ' / ' + tot)}</p>` : ''}<ul>${li}</ul>`;
+    });
+    h += `<h3>${X('التقييمات', 'Assessments')}</h3>${as || `<p>${X('لا توجد تقييمات بدأها المتعلم بعد.', 'No assessments started yet.')}</p>`}`;
+    // CYH
+    const c8 = C8(); const cy = (c8 && c8.cyh) ? c8.cyh.tasks.map((t) => { const v = String(store.get('responses.cyh.t' + t.n, '')).trim(); return v ? `<li>${t.n}. ${esc(T(t.dim))}: ${esc(v)}</li>` : ''; }).join('') : '';
+    h += `<h3>${X('هل تستطيع المساعدة؟ – صالون الشعر', 'Can You Help? – Beauty Hair Salon')}</h3>${cy ? `<ul>${cy}</ul>` : `<p>${X('لا توجد إجابات بعد.', 'No answers yet.')}</p>`}`;
+    // action plan
+    const rows = apRows().filter(filled); const cols = c8 ? c8.plan.cols : [];
+    h += `<h3>${X('خطة العمل', 'Action Plan')}</h3>${rows.length ? `<table><thead><tr>${cols.map((c) => `<th>${esc(T(c.head))}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${cols.map((c) => `<td>${esc(r[c.k] || '')}</td>`).join('')}</tr>`).join('')}</tbody></table>` : `<p>${X('لم تُكتب خطة عمل بعد.', 'No action plan written yet.')}</p>`}`;
+    h += `<h3>${X('المصدر', 'Source')}</h3><p>${X('مبني على دليل «حسّن مشروعك – التسويق»، منظمة العمل الدولية (2015)، CC BY-SA 3.0 IGO. تعديل وترجمة غير رسميين لا تؤيدهما منظمة العمل الدولية.', 'Based on “Improve Your Business – Marketing”, International Labour Office (2015), CC BY-SA 3.0 IGO. Unofficial adaptation and translation, not endorsed by the ILO.')}</p></div>`;
+    return h;
+  }
+  const FILE_ERR = {
+    'invalid-json': D.B('الملف ليس بصيغة JSON صحيحة.', 'The file is not valid JSON.'),
+    'not-marketing-backup': D.B('هذا الملف ليس نسخة احتياطية لوحدة التسويق.', 'This file is not a Marketing module backup.'),
+    'unsupported-version': D.B('إصدار النسخة الاحتياطية غير مدعوم.', 'This backup version is not supported.'),
+    'invalid-structure': D.B('بنية الملف غير صالحة أو تالفة؛ لم يُغيَّر شيء.', 'The file structure is invalid or damaged; nothing was changed.'),
+    'too-large': D.B('الملف كبير جداً.', 'The file is too large.')
+  };
+  function renderData() {
+    const sts = store.status();
+    const saved = sts.available ? (sts.lastSaved ? `<div class="mk-notice" role="status">${X('آخر حفظ: ', 'Last saved: ')}${esc(new Date(sts.lastSaved).toLocaleString(lang() === 'en' ? 'en-GB' : 'ar-IQ'))}</div>` : `<div class="mk-notice" role="status">${X('لم يُحفظ شيء بعد. يبدأ الحفظ تلقائياً مع أول إدخال.', 'Nothing saved yet. Saving starts automatically with your first entry.')}</div>`) : '';
+    return `<div class="mk-actions"><button type="button" class="mk-btn" data-act="go" data-id="home">${lang() === 'ar' ? '→' : '←'} ${X('العودة إلى لوحة البطاقات', 'Back to card overview')}</button></div>
+      <section class="mk-panel"><h2>${X('بياناتك', 'Your data')}</h2>
+      <p>${X('تُحفظ إدخالاتك وتقدمك تلقائياً على هذا الجهاز فقط (في هذا المتصفح)، ولا تُرسَل إلى أي خادم، ومفصولة عن بيانات الوحدات الأخرى. صدّر نسخة احتياطية للاحتفاظ بها أو لنقلها إلى جهاز آخر.', 'Your entries and progress are saved automatically on this device only (in this browser), are never sent to a server, and are kept separate from the other modules\' data. Export a backup to keep it or move it to another device.')}</p>
+      ${storageNote()}${saved}
+      <div class="mk-act-foot"><button type="button" class="mk-btn primary" data-act="export">${X('تصدير نسخة احتياطية JSON', 'Export JSON backup')}</button><button type="button" class="mk-btn" data-act="import">${X('استيراد نسخة احتياطية', 'Import a backup')}</button><button type="button" class="mk-btn danger" data-act="reset">${X('مسح بيانات التسويق', 'Erase Marketing data')}</button></div>
+      <input type="file" accept="application/json,.json" data-file="import" hidden>
+      <div class="mk-msg" data-o="msg" role="status" aria-live="polite"></div></section>
+      <section class="mk-panel"><h2>${X('تقرير المتعلم', 'Learner report')}</h2>
+      <div class="mk-act-foot"><button type="button" class="mk-btn primary" data-act="pdf">${X('حفظ التقرير بصيغة PDF', 'Save report as PDF')}</button></div>
+      ${reportHtml()}</section>${notice()}`;
+  }
+  function msg(text, ok) { const m = root && root.querySelector('[data-o="msg"]'); if (m) { m.textContent = text; m.className = 'mk-msg ' + (ok ? 'ok' : 'bad'); } }
+  const DATA_ACT = {
+    export() {
+      const blob = new Blob([store.exportJson()], { type: 'application/json' }); const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'siyb-iyb-marketing-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      msg(X('تم تصدير النسخة الاحتياطية.', 'Backup exported.'), true);
+    },
+    import() { const f = root.querySelector('[data-file="import"]'); if (f) { f.value = ''; f.click(); } },
+    reset() {
+      if (!window.confirm(X('سيُمسح كل ما أدخلته في وحدة التسويق على هذا الجهاز ولا يمكن التراجع. هل تريد المتابعة؟ (بيانات الوحدات الأخرى لن تتأثر)', 'Everything you entered in the Marketing module on this device will be erased and this cannot be undone. Continue? (Other modules\' data is not affected.)'))) return;
+      const word = X('مسح', 'ERASE');
+      const typed = window.prompt(X('للتأكيد النهائي اكتب الكلمة: ', 'For final confirmation type the word: ') + word, '');
+      if (typed === null || typed.trim().toLowerCase() !== word.toLowerCase()) { msg(X('لم يتم المسح: لم تُكتب كلمة التأكيد.', 'Nothing erased: the confirmation word was not typed.'), false); return; }
+      store.reset(); currentId = 'home'; render(false); buildNav();
+    },
+    pdf() {
+      const el = root.querySelector('.mk-report'); if (!el || !window.SIYBReportPdf) { msg(X('تعذر إنشاء ملف PDF.', 'The PDF could not be created.'), false); return; }
+      window.SIYBReportPdf.save({ root: el, title: X('تقرير المتعلم — حسّن مشروعك (IYB): التسويق', 'Learner report — Improve Your Business (IYB): Marketing'), filename: 'IYB-Marketing-report-' + new Date().toISOString().slice(0, 10) + '.pdf', lang: lang() });
+    }
+  };
+  function onImportFile(input) {
+    const f = input.files && input.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const res = store.parseBackup(String(r.result));
+      if (!res.ok) { msg(T(FILE_ERR[res.error]) || X('تعذر الاستيراد.', 'Import failed.'), false); return; }
+      if (store.hasData()) {
+        const when = res.exportedAt ? new Date(res.exportedAt).toLocaleString(lang() === 'en' ? 'en-GB' : 'ar-IQ') : X('غير معروف', 'unknown');
+        if (!window.confirm(X('تحذير: سيحل محتوى النسخة الاحتياطية (بتاريخ ' + when + ') محل بيانات التسويق الحالية على هذا الجهاز. تُحفظ نسخة أمان من بياناتك الحالية على الجهاز قبل الاستبدال. هل تريد المتابعة؟', 'Warning: the backup (dated ' + when + ') will replace the current Marketing data on this device. A safety copy of your current data is kept on this device before replacing. Continue?'))) { msg(X('أُلغي الاستيراد ولم يتغير شيء.', 'Import cancelled; nothing was changed.'), false); return; }
+      }
+      if (store.applyBackup(res)) { currentId = 'data'; render(false); buildNav(); msg(X('تم استيراد النسخة الاحتياطية.', 'Backup imported.'), true); }
+      else msg(X('تعذر الاستيراد.', 'Import failed.'), false);
+    };
+    r.onerror = () => msg(X('تعذرت قراءة الملف.', 'The file could not be read.'), false);
+    r.readAsText(f);
+  }
+
   function renderCard(id) {
     const c = cardOf(id); const st = statusOf(id);
     const i = D.CARDS.indexOf(c); const p = D.CARDS[i - 1], n = D.CARDS[i + 1]; const ar = lang() === 'ar';
@@ -267,7 +389,7 @@
   function render(keepScroll) {
     if (!root) return;
     const s = byId(currentId); const y = window.scrollY;
-    root.innerHTML = s.id === 'home' ? renderHome() : renderCard(s.id);
+    root.innerHTML = s.id === 'home' ? renderHome() : s.id === 'data' ? renderData() : renderCard(s.id);
     setHeading(s);
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
@@ -287,6 +409,7 @@
     root = host.querySelector('#mkRoot');
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
+      if (DATA_ACT[b.dataset.act]) { DATA_ACT[b.dataset.act](); return; }
       if (b.dataset.act === 'go') { open(b.dataset.id); if (b.dataset.to) setTimeout(() => { const t = root.querySelector('#' + b.dataset.to); if (t) t.scrollIntoView({ block: 'start' }); }, 30); }
       else if (b.dataset.act === 'done') {
         const id = b.dataset.id; store.set('progress.activities.' + id, actStatus(id) === 'done' ? '' : 'done'); store.flush(); render(true);
@@ -309,6 +432,7 @@
     });
     root.addEventListener('change', (e) => {
       const el = e.target; if (!el.dataset) return;
+      if (el.dataset.file === 'import') { onImportFile(el); return; }
       if (el.dataset.f && el.tagName === 'SELECT') { store.set('responses.' + el.dataset.f + '.' + el.dataset.k, el.value); refreshBadges(); }
       else if (el.dataset.f && el.type === 'radio') { store.set('responses.' + el.dataset.f + '.' + el.dataset.k, el.value); refreshBadges(); }
       else if (el.dataset.f && el.dataset.multi) { store.set('responses.' + el.dataset.f + '.' + el.dataset.k + '.' + el.value, el.checked); refreshBadges(); }
