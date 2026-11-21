@@ -46,7 +46,7 @@
     modes: ['marketing'],
     external: {
       global: 'SIYBMarketing', rootSelector: '#mkRoot', bodyClass: 'mode-marketing', badge: 'MK', defaultSection: 'home',
-      scripts: ['src/modules/marketing-store.js', 'src/modules/marketing-data.js', 'src/modules/marketing.js']
+      scripts: ['src/modules/marketing-store.js', 'src/modules/marketing-data.js', 'src/modules/marketing-content-a.js', 'src/modules/marketing-content-b.js', 'src/modules/marketing-content-c.js', 'src/modules/marketing-content-d.js', 'src/modules/marketing.js']
     }
   });
 
