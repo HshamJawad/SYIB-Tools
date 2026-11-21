@@ -27,12 +27,12 @@ async function open(pg, card) {
   }
   rec('Content', 'All 23 source activities present, none renumbered', seen.length === 23 && seen.every((a, i) => a === 'act' + (i + 1)), seen.join());
   await pg.evaluate(() => SIYBMarketing.open('c08'));
-  rec('Content', 'Card 08 still a placeholder (Stage 3)', await pg.evaluate(() => !!document.querySelector('#mkRoot .mk-placeholder') && !document.querySelector('#mkRoot .mk-act')));
+  rec('Content', 'Card 08 now has Stage 3 content (no placeholder)', await pg.evaluate(() => !document.querySelector('#mkRoot .mk-placeholder') && !!document.getElementById('cyh')));
   const all = {};
   for (const c of ['c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07']) { await pg.evaluate((x) => SIYBMarketing.open(x), c); all[c] = await pg.evaluate(() => document.getElementById('mkRoot').innerText); }
   const alltxt = Object.values(all).join('\n');
-  rec('Scope', 'No assessment questions/answer-key sections rendered', !/ASSESSMENT\s*\d|ANSWERS TO ACTIVITIES|Answers to Activities/i.test(alltxt) && !/التقييم\s*\d+\s*$/m.test(alltxt));
-  rec('Scope', 'No "Can You Help" / Beauty Hair Salon exercise in cards 01-07', !/Can You Help|Beauty Hair Salon/i.test(alltxt));
+  rec('Scope', 'No raw "ANSWERS TO ACTIVITIES" section dumped into content (answers are gated)', !/ANSWERS TO ACTIVITIES|Answers to Activities/i.test(alltxt));
+  rec('Scope', 'Can You Help / Beauty Hair Salon only in Card 08, not in cards 01-07', !/Can You Help|Beauty Hair Salon|هل تستطيع المساعدة/i.test(alltxt));
   // ---- case studies/anchor content
   await pg.evaluate(() => SIYBMarketing.open('c02'));
   rec('Content', 'c02: Ann\'s restaurant (Sawadee) case + seven Ps table', await pg.evaluate(() => /Sawadee|ساوادي|سوادي/.test(document.getElementById('mkRoot').innerText) && document.querySelectorAll('#mkRoot .mk-table').length >= 1));
@@ -83,7 +83,9 @@ async function open(pg, card) {
   await pg.click('#act1 [data-act="done"]'); await pg.waitForTimeout(200);
   rec('Progress', 'Activity marked complete shows completed', (await pg.evaluate(() => document.querySelector('[data-st="act:act1"]').className)).includes('done'));
   await pg.locator('.mk-summary input[type=checkbox]').check(); await pg.waitForTimeout(300);
-  rec('Progress', 'Card 02 completed after activity + summary review', (await pg.evaluate(() => document.querySelector('[data-st="card:c02"]').className)).includes('done'));
+  rec('Progress', 'Card 02 NOT yet completed after activity + summary only (assessment pending)', !(await pg.evaluate(() => document.querySelector('[data-st="card:c02"]').className)).includes('done'));
+  await pg.click('#asmt1 [data-act="asm-submit"]'); await pg.waitForTimeout(300);
+  rec('Progress', 'Card 02 completed after activity + summary + assessment', (await pg.evaluate(() => document.querySelector('[data-st="card:c02"]').className)).includes('done'));
   await pg.evaluate(() => SIYBMarketing.open('c01'));
   await pg.locator('.mk-read input').check(); await pg.waitForTimeout(300);
   const ov = await pg.evaluate(() => ({ cards: document.querySelectorAll('.mk-overview .mk-two > div:first-child li').length, parts: document.querySelectorAll('.mk-overview .mk-two > div:last-child li').length, c01: document.querySelector('.mk-overview [data-st="card:c01"]').className, c02: document.querySelector('.mk-overview [data-st="card:c02"]').className }));
@@ -112,8 +114,8 @@ async function open(pg, card) {
   rec('Console', 'No console/page errors', errs.length === 0, errs.join(' | ').slice(0, 300));
   // offline
   const pw = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); await pw.goto(URL_); await pw.waitForTimeout(2500);
-  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.18.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
-  rec('PWA', 'Cache v0.18.0 holds all marketing content files', !!cache && ['marketing-content-a.js', 'marketing-content-b.js', 'marketing-content-c.js', 'marketing-content-d.js', 'marketing.js'].every((f) => cache.includes(f)), String(cache && cache.length));
+  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.19.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
+  rec('PWA', 'Cache v0.19.0 holds all marketing content files', !!cache && ['marketing-content-a.js', 'marketing-content-b.js', 'marketing-content-c.js', 'marketing-content-d.js', 'marketing.js'].every((f) => cache.includes(f)), String(cache && cache.length));
   await pw.context().setOffline(true); await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1000);
   await pw.evaluate(() => SIYBMarketing.open('c04')).catch(() => {}); await pw.waitForTimeout(300);

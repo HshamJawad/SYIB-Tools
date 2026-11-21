@@ -24,15 +24,22 @@
   const filled = (v) => (v && typeof v === 'object') ? Object.values(v).some(filled) : (v === true || (typeof v === 'string' && v.trim() !== ''));
   const partsOf = (cardId) => ((CONTENT()[cardId] || {}).parts || []);
   const actsOf = (part) => (part.blocks || []).filter((b) => b.t === 'activity');
-  const actStatus = (id) => (store.get('progress.activities.' + id, '') === 'done' ? 'done' : (filled(store.get('responses.' + id, null)) ? 'inprogress' : 'notstarted'));
+  const planFilled = () => (store.get('actionPlan', []) || []).some(filled);
+  const actStatus = (id) => (store.get('progress.activities.' + id, '') === 'done' ? 'done' : ((id === 'plan' ? planFilled() : filled(store.get('responses.' + id, null))) ? 'inprogress' : 'notstarted'));
+  const ASM = () => window.SIYB_MK_ASSESS || {};
+  const ACTANS = () => window.SIYB_MK_ACT_ANSWERS || {};
+  const asmOf = (partId) => Object.values(ASM()).find((a) => a.part === partId);
+  const asmStatus = (id) => (store.get('progress.assessments.' + id, '') === 'submitted' ? 'done' : (filled(store.get('responses.' + id, null)) ? 'inprogress' : 'notstarted'));
   const sumRead = (pid) => store.get('progress.parts.' + pid + '.summary', false) === true;
   function partStatus(p) {
     const st = actsOf(p).map((a) => actStatus(a.id)); const r = sumRead(p.id);
+    const am = asmOf(p.id); if (am) st.push(asmStatus(am.id));
     if (st.every((x) => x === 'done') && r) return 'done';
     return (r || st.some((x) => x !== 'notstarted')) ? 'inprogress' : 'notstarted';
   }
   function statusOf(id) {
     if (id === 'c01') return store.get('progress.cards.c01read', false) === true ? 'done' : 'notstarted';
+    if (id === 'c08') { const s2 = [actStatus('cyh'), actStatus('plan')]; return s2.every((x) => x === 'done') ? 'done' : (s2.some((x) => x !== 'notstarted') ? 'inprogress' : 'notstarted'); }
     const ps = partsOf(id); if (!ps.length) return 'notstarted';
     const st = ps.map(partStatus);
     if (st.every((x) => x === 'done')) return 'done';
@@ -43,6 +50,47 @@
   const srcTag = (b, part) => (b.src ? `<span class="mk-src">${X('المصدر: الجزء ' + (part.id || 'المدخل') + '، ص ', 'Source: Part ' + (part.id || 'Introduction') + ', p. ')}${esc(b.src)}</span>` : '');
   const appTag = () => `<span class="mk-apptag">${X('إرشاد التطبيق', 'App guidance')}</span>`;
   const para = (o) => `<p>${esc(T(o))}</p>`;
+
+
+  const revealed = (id) => store.get('progress.answers.' + id, false) === true;
+  const ansToggle = (id) => `<button type="button" class="mk-btn" data-act="ans" data-id="${id}" aria-expanded="${revealed(id)}">${revealed(id) ? X('إخفاء الإجابة النموذجية', 'Hide model answer') : X('عرض الإجابة النموذجية (بعد محاولتك)', 'Show model answer (after your attempt)')}</button>`;
+  const ansBox = (paras, src, part) => `<div class="mk-answer" role="note"><strong>${X('الإجابة النموذجية من الدليل', 'Model answer from the manual')}</strong> ${src ? `<span class="mk-src">${X('ص ', 'p. ')}${esc(src)}</span>` : ''}${paras.map((x) => `<p>${esc(T(x))}</p>`).join('')}</div>`;
+
+  function assessmentHtml(a, part) {
+    const sub = store.get('progress.assessments.' + a.id, '') === 'submitted'; const st = asmStatus(a.id);
+    const G = (k) => store.get('responses.' + a.id + '.' + k, '');
+    let body = ''; let score = '';
+    const lock = sub ? ' disabled' : '';
+    if (a.kind === 'cloze') {
+      const bank = Object.fromEntries(a.bank.map((o) => [o.v, T(o.t)]));
+      let ok = 0, tot = 0;
+      body = `<p class="mk-bank"><strong>${X('قائمة الكلمات: ', 'Word list: ')}</strong>${a.bank.map((o) => `<span class="mk-chip">${esc(T(o.t))}</span>`).join(' ')}</p>` +
+        a.story.map((para) => `<p>${esc(T(para)).replace(/\{(\d+[a-z]?)\}/g, (m, id) => {
+          const cur = G('b' + id); let cls = '', extra = '';
+          if (sub) { tot++; if (cur === a.key[id]) { ok++; cls = ' ok'; } else { cls = ' bad'; extra = `<span class="mk-key">✓ ${esc(bank[a.key[id]])}</span>`; } }
+          return `<span class="mk-blank${cls}"><span class="mk-blank-n">(${id})</span><select data-f="${a.id}" data-k="b${id}" aria-label="${esc(X('الفراغ ', 'Blank '))}${id}"${lock}><option value="">—</option>${a.bank.map((o) => `<option value="${o.v}"${cur === o.v ? ' selected' : ''}>${esc(T(o.t))}</option>`).join('')}</select>${extra}</span>`;
+        })}</p>`).join('');
+      if (sub) score = `${ok}/${tot}`;
+    } else if (a.kind === 'mcq') {
+      let ok = 0;
+      body = a.items.map((i) => {
+        const cur = G('q' + i.n); if (sub && cur === i.correct) ok++;
+        return `<fieldset class="mk-field mk-q"><legend class="mk-lab">${i.n}. ${esc(T(i.q))}</legend>${i.opts.map((o) => {
+          const cls = sub ? (o.v === i.correct ? ' ok' : (cur === o.v ? ' bad' : '')) : '';
+          return `<label class="mk-opt${cls}"><input type="radio" name="${a.id}_q${i.n}" value="${o.v}" data-f="${a.id}" data-k="q${i.n}" ${cur === o.v ? 'checked' : ''}${lock}> <span>${o.v}. ${esc(T(o.t))}${sub && o.v === i.correct ? ' ✓' : ''}</span></label>`;
+        }).join('')}</fieldset>`;
+      }).join('');
+      if (sub) score = `${ok}/${a.items.length}`;
+    } else {
+      body = (a.note ? `<p class="mk-fnote">${a.note.app ? appTag() + ' ' : ''}${esc(T(a.note))}</p>` : '') + a.items.map((i) => `<div class="mk-field"><label class="mk-lab" for="${a.id}_o${i.n}">${i.n}. ${esc(T(i.q))}</label><textarea id="${a.id}_o${i.n}" rows="5" data-f="${a.id}" data-k="o${i.n}"${lock}>${esc(G('o' + i.n))}</textarea></div>`).join('') +
+        (sub ? ansBox(a.model, a.modelSrc, part) : '');
+    }
+    const result = (sub && score) ? `<p class="mk-result" role="status"><strong>${X('مراجعة ذاتية: ', 'Self-check: ')}</strong>${X('الإجابات المطابقة لمفتاح الدليل: ', 'Answers matching the manual\'s key: ')}${score} <span class="mk-small">${X('(للمراجعة الذاتية فقط وليست درجة رسمية)', '(for self-review only, not an official grade)')}</span></p>` : '';
+    const btn = sub ? `<button type="button" class="mk-btn" data-act="asm-edit" data-id="${a.id}">${X('تعديل إجاباتي', 'Edit my answers')}</button>`
+      : `<button type="button" class="mk-btn primary" data-act="asm-submit" data-id="${a.id}">${a.kind === 'open' ? X('حفظ إجابتي وعرض الإجابة النموذجية', 'Save my answer and show the model answer') : X('تحقق من إجاباتي', 'Check my answers')}</button>`;
+    return `<section class="mk-asm" id="${a.id}" aria-labelledby="${a.id}_h"><div class="mk-act-head"><h4 id="${a.id}_h">${esc(T(a.title))}</h4>${badge('asm:' + a.id, st)}<span class="mk-src">${X('المصدر: الجزء ' + part.id + '، ص ', 'Source: Part ' + part.id + ', p. ')}${esc(a.src)}${a.answerSrc ? X(' · الإجابات ص ', ' · answers p. ') + esc(a.answerSrc) : ''}</span></div>
+      <p>${esc(T(a.intro))}</p>${body}<div class="mk-act-foot">${btn}</div>${result}</section>`;
+  }
 
   function field(act, f) {
     const id = act.id + '_' + f.k; const lab = f.label ? `<label class="mk-lab" for="${id}">${esc(T(f.label))}</label>` : '';
@@ -73,7 +121,7 @@
     const st = actStatus(b.id); const done = st === 'done';
     return `<section class="mk-act" id="${b.id}" aria-labelledby="${b.id}_h"><div class="mk-act-head"><h4 id="${b.id}_h">${esc(T(b.title))}</h4>${badge('act:' + b.id, st)}${srcTag(b, part)}</div>
       ${b.intro ? para(b.intro) : ''}${b.fields.map((f) => field(b, f)).join('')}
-      <div class="mk-act-foot"><button type="button" class="mk-btn${done ? '' : ' primary'}" data-act="done" data-id="${b.id}" aria-pressed="${done}">${done ? X('إلغاء علامة الإكمال', 'Unmark as complete') : X('وضع علامة: أنجزت هذا النشاط', 'Mark this activity as complete')}</button></div></section>`;
+      <div class="mk-act-foot"><button type="button" class="mk-btn${done ? '' : ' primary'}" data-act="done" data-id="${b.id}" aria-pressed="${done}">${done ? X('إلغاء علامة الإكمال', 'Unmark as complete') : X('وضع علامة: أنجزت هذا النشاط', 'Mark this activity as complete')}</button>${ACTANS()[b.id] ? ansToggle(b.id) : ''}</div>${ACTANS()[b.id] && revealed(b.id) ? ansBox(ACTANS()[b.id].paras, ACTANS()[b.id].src, part) : ''}</section>`;
   }
   function block(b, part) {
     switch (b.t) {
@@ -97,7 +145,7 @@
   }
   function renderPart(p, show) {
     const st = p.id ? partStatus(p) : null;
-    return `<section class="mk-part" id="part-${p.id || 'intro'}"><div class="mk-panel-head"><h3>${esc(T(p.title))}</h3>${st ? badge('part:' + p.id, st) : ''}</div>${p.blocks.map((b) => block(b, p)).join('')}</section>`;
+    return `<section class="mk-part" id="part-${p.id || 'intro'}"><div class="mk-panel-head"><h3>${esc(T(p.title))}</h3>${st ? badge('part:' + p.id, st) : ''}</div>${p.blocks.map((b) => block(b, p)).join('')}${p.id && asmOf(p.id) ? assessmentHtml(asmOf(p.id), p) : ''}</section>`;
   }
   const LICENCE = () => `<section class="mk-licence" aria-labelledby="mkLic"><h3 id="mkLic">${X('المصدر والترخيص', 'Source and licence')}</h3>
     <p>${X('هذه الوحدة أداة تعلّم رقمية مبنية على دليل «حسّن مشروعك (IYB) – التسويق» (منظمة العمل الدولية، 2015). المصدر: International Labour Office (ILO). النص الأصلي منشور بترخيص Creative Commons Attribution-ShareAlike 3.0 IGO (CC BY-SA 3.0 IGO)، ويُنسب إلى منظمة العمل الدولية بوصفها مالكة العمل الأصلي.', 'This module is a digital learning aid based on the manual “Improve Your Business (IYB) – Marketing” (International Labour Office, 2015). Source: International Labour Office (ILO). The original text is published under the Creative Commons Attribution-ShareAlike 3.0 IGO licence (CC BY-SA 3.0 IGO); the ILO is credited as owner of the original work.')}</p>
@@ -108,13 +156,13 @@
     const parts = []; ['c02', 'c03', 'c04', 'c05', 'c06', 'c07'].forEach((c) => partsOf(c).forEach((p) => parts.push({ p, c })));
     const cardsHtml = D.CARDS.map((c) => `<li><span>${c.no} · ${esc(T(c.title))}</span>${badge('card:' + c.id, statusOf(c.id))}</li>`).join('');
     const partsHtml = parts.map(({ p }) => `<li><span>${esc(T(p.title))}</span>${badge('part:' + p.id, partStatus(p))}</li>`).join('');
-    return `<section class="mk-overview"><h3>${X('نظرة على تقدمك', 'Your progress overview')}</h3><p class="mk-small">${X('تُحسب الحالة من عملك الفعلي (إدخال أو علامة إكمال أو مراجعة الملخص) لا من فتح البطاقة.', 'Status reflects your actual work (an entry, a completion mark or a reviewed summary), not just opening a card.')}</p><div class="mk-two"><div><h4>${X('البطاقات الثماني', 'The eight cards')}</h4><ul class="mk-plist">${cardsHtml}</ul></div><div><h4>${X('أجزاء الدليل التسعة', 'The nine Parts of the manual')}</h4><ul class="mk-plist">${partsHtml}</ul></div></div></section>`;
+    return `<section class="mk-overview"><h3>${X('نظرة على تقدمك', 'Your progress overview')}</h3><p class="mk-small">${X('تُحسب الحالة من عملك الفعلي (إدخال أو علامة إكمال أو مراجعة الملخص) لا من فتح البطاقة.', 'Status reflects your actual work (an entry, a completion mark or a reviewed summary), not just opening a card.')}</p><div class="mk-two"><div><h4>${X('البطاقات الثماني', 'The eight cards')}</h4><ul class="mk-plist">${cardsHtml}</ul></div><div><h4>${X('أجزاء الدليل التسعة', 'The nine Parts of the manual')}</h4><ul class="mk-plist">${partsHtml}</ul></div></div><p class="mk-small">${X('التقييمات المنجزة: ', 'Assessments completed: ')}${Object.keys(ASM()).filter((k) => asmStatus(k) === 'done').length} / ${Object.keys(ASM()).length}</p></section>`;
   }
   function refreshBadges() {
     if (!root) return;
     root.querySelectorAll('[data-st]').forEach((el) => {
       const [k, id] = el.dataset.st.split(':'); let st = 'notstarted';
-      if (k === 'act') st = actStatus(id); else if (k === 'card') st = statusOf(id);
+      if (k === 'act') st = actStatus(id); else if (k === 'asm') st = asmStatus(id); else if (k === 'card') st = statusOf(id);
       else { const p = ['c02', 'c03', 'c04', 'c05', 'c06', 'c07'].flatMap(partsOf).find((x) => x.id === id); if (p) st = partStatus(p); }
       el.className = 'mk-status ' + st; el.textContent = stLabel(st);
     });
@@ -152,12 +200,54 @@
       <p class="mk-lead">${X('اختر بطاقة لفتحها. تحدّد حالة كل بطاقة من عملك الفعلي فيها، لا من مجرد فتحها.', 'Choose a card to open it. A card\'s status reflects your actual work in it, not just opening it.')}</p>
       ${storageNote()}<div class="mk-grid">${cards}</div>${notice()}`;
   }
+
+  let gq = '';
+  const C8 = () => window.SIYB_MK_CARD8 || null;
+  const GL = () => window.SIYB_MK_GLOSSARY || [];
+  const fakePart = { id: '', title: D.B('', '') };
+  const apRows = () => { const a = store.get('actionPlan', []) || []; return Array.isArray(a) ? a : []; };
+  function glossaryList() {
+    const q = gq.trim().toLowerCase();
+    const items = GL().filter((g) => !q || (g.term.ar + ' ' + g.term.en + ' ' + T(g.def)).toLowerCase().includes(q));
+    return items.length ? items.map((g) => `<dl class="mk-def mk-gl"><dt>${esc(T(g.term))} <span class="mk-src">${X('ص ', 'p. ')}${esc(g.src)}</span></dt><dd>${esc(T(g.def))}</dd></dl>`).join('') : `<p class="mk-small">${X('لا توجد نتائج مطابقة.', 'No matching entries.')}</p>`;
+  }
+  function renderCard8Body() {
+    const c = C8(); if (!c) return '';
+    const y = c.cyh; const pl = c.plan; const G = (k) => store.get('responses.cyh.' + k, '');
+    const doneBtn = (id, labelOn, labelOff) => { const d = actStatus(id) === 'done'; return `<button type="button" class="mk-btn${d ? '' : ' primary'}" data-act="done" data-id="${id}" aria-pressed="${d}">${d ? labelOff : labelOn}</button>`; };
+    const rev = c.review;
+    let h = `<section class="mk-part" id="part-review"><div class="mk-panel-head"><h3>${esc(T(rev.title))}</h3><span class="mk-src">${X('المصدر: ص ', 'Source: p. ')}${esc(rev.src)}</span></div>${rev.paras.map(para).join('')}${(rev.bullets || []).length ? `<ul>${rev.bullets.map((i) => `<li>${esc(T(i))}</li>`).join('')}</ul>` : ''}${rev.quote ? `<blockquote class="mk-quote">${esc(T(rev.quote))}</blockquote>` : ''}</section>`;
+    // Can You Help
+    h += `<section class="mk-part mk-act" id="cyh"><div class="mk-act-head"><h3>${esc(T(y.title))}</h3>${badge('act:cyh', actStatus('cyh'))}<span class="mk-src">${X('المصدر: ص ', 'Source: p. ')}${esc(y.src)}</span></div>${y.story.map(para).join('')}${y.info.map((b) => block(b, fakePart)).join('')}${para(y.lead)}
+      ${y.tasks.map((t) => `<div class="mk-field"><label class="mk-lab" for="cyh_t${t.n}">${t.n}. ${esc(T(t.dim))}</label><p class="mk-small">${esc(T(t.q))}</p><textarea id="cyh_t${t.n}" rows="4" data-f="cyh" data-k="t${t.n}">${esc(G('t' + t.n))}</textarea></div>`).join('')}
+      <div class="mk-act-foot">${doneBtn('cyh', X('وضع علامة: أنجزت هذا التمرين', 'Mark this exercise as complete'), X('إلغاء علامة الإكمال', 'Unmark as complete'))}${ansToggle('cyh')}</div>
+      ${revealed('cyh') ? `<div class="mk-answer" role="note"><strong>${X('الإجابات النموذجية من الدليل', 'Model answers from the manual')}</strong> <span class="mk-src">${X('ص ', 'p. ')}${esc(y.modelSrc)}</span>${y.tasks.map((t) => `<h5 class="mk-h2">${t.n}. ${esc(T(t.dim))}</h5>${(y.model[t.n] || []).map(para).join('')}`).join('')}</div>` : ''}</section>`;
+    // Action plan
+    const rows = apRows(); const n = Math.max(4, rows.length);
+    let body = '';
+    for (let r = 0; r < n; r++) body += `<tr>${pl.cols.map((cl) => `<td><textarea rows="3" aria-label="${esc(T(cl.head))} ${r + 1}" data-ap="${r}" data-apk="${cl.k}">${esc(((rows[r] || {})[cl.k]) || '')}</textarea></td>`).join('')}<td class="mk-rm"><button type="button" class="mk-btn" data-act="ap-del" data-id="${r}" aria-label="${X('حذف الصف ', 'Delete row ')}${r + 1}">✕</button></td></tr>`;
+    h += `<section class="mk-part mk-act" id="plan"><div class="mk-act-head"><h3>${esc(T(pl.title))}</h3>${badge('act:plan', actStatus('plan'))}<span class="mk-src">${X('المصدر: ص ', 'Source: p. ')}${esc(pl.src)}</span></div>${pl.intro.map(para).join('')}
+      <h5 class="mk-h2">${X('مثال من الدليل', 'Example from the manual')}</h5><div class="mk-tablewrap"><table class="mk-table"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}</tr></thead><tbody><tr>${pl.cols.map((cl) => `<td>${esc(T(pl.example[cl.k]))}</td>`).join('')}</tr></tbody></table></div>
+      <ol>${pl.questions.map((q) => `<li>${esc(T(q))}</li>`).join('')}</ol><ul>${pl.tips.map((q) => `<li>${esc(T(q))}</li>`).join('')}</ul>
+      <h5 class="mk-h2">${X('خطتك', 'Your action plan')}</h5><div class="mk-tablewrap"><table class="mk-table mk-ftable"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="mk-act-foot"><button type="button" class="mk-btn" data-act="ap-add">${X('إضافة صف', 'Add a row')} <span class="mk-apptag">${X('إضافة من التطبيق', 'App feature')}</span></button>${doneBtn('plan', X('وضع علامة: أنجزت خطتي', 'Mark my plan as complete'), X('إلغاء علامة الإكمال', 'Unmark as complete'))}</div></section>`;
+    // Answers & review
+    const asm = Object.values(ASM()).sort((a, b) => a.no - b.no);
+    h += `<section class="mk-part" id="answers"><div class="mk-panel-head"><h3>${X('الإجابات ودعم المراجعة', 'Answers and review support')}</h3></div><p>${X('أنهِ كل تمرين قبل النظر إلى الإجابات؛ فأفضل طريقة للتعلّم أن تكمل التمرين أولاً. إن صعب عليك سؤال فاقرأ ذلك الجزء من الدليل مرة أخرى.', 'Finish each exercise before looking at the answers; the best way to learn is to attempt first. If a question is difficult, read that part of the manual again.')} <span class="mk-src">${X('المصدر: ص 89', 'Source: p. 89')}</span></p>
+      <ul class="mk-plist">${asm.map((a) => { const cd = D.CARDS.find((x) => x.id === a.card); return `<li><span>${esc(T(a.title))} · ${X('الجزء ', 'Part ')}${a.part}</span><span class="mk-rowact">${badge('asm:' + a.id, asmStatus(a.id))}<button type="button" class="mk-btn" data-act="go" data-id="${a.card}" data-to="${a.id}">${X('افتح الجزء', 'Open Part')}</button></span></li>`; }).join('')}</ul></section>`;
+    // Glossary
+    h += `<section class="mk-part" id="glossary"><div class="mk-panel-head"><h3>${X('كلمات تجارية مفيدة', 'Useful Business Words')}</h3></div><div class="mk-field"><label class="mk-lab" for="glq">${X('ابحث في القاموس', 'Search the glossary')}</label><input type="search" id="glq" data-gl="1" value="${esc(gq)}" autocomplete="off"></div><div id="glList">${glossaryList()}</div></section>`;
+    return h;
+  }
+
   function renderCard(id) {
     const c = cardOf(id); const st = statusOf(id);
     const i = D.CARDS.indexOf(c); const p = D.CARDS[i - 1], n = D.CARDS[i + 1]; const ar = lang() === 'ar';
     const parts = partsOf(id);
     let body;
-    if (id === 'c08' || !parts.length) {
+    if (id === 'c08' && C8()) {
+      body = `<nav class="mk-jump" aria-label="${X('أقسام البطاقة', 'Sections')}">${[['cyh', X('هل تستطيع المساعدة؟', 'Can You Help?')], ['plan', X('خطة العمل', 'Action Plan')], ['answers', X('الإجابات والمراجعة', 'Answers & review')], ['glossary', X('كلمات تجارية مفيدة', 'Useful Business Words')]].map(([t, l]) => `<a href="#${t}" data-act="jump" data-to="${t}">${esc(l)}</a>`).join('')}</nav>` + renderCard8Body();
+    } else if (!parts.length) {
       body = `<div class="mk-placeholder"><strong>${X('المحتوى قيد الإعداد', 'Content to be added')}</strong><p>${X('سيُضاف محتوى هذه البطاقة من الدليل في مرحلة لاحقة بعد اعتماد المصدر.', 'This card\'s content from the manual will be added in a later stage, once the source is approved.')}</p></div>`;
     } else {
       const jump = parts.length > 1 ? `<nav class="mk-jump" aria-label="${X('أجزاء البطاقة', 'Parts in this card')}">${parts.map((x) => `<a href="#part-${x.id}" data-act="jump" data-to="part-${x.id}">${esc(T(x.title))}</a>`).join('')}</nav>` : '';
@@ -197,19 +287,30 @@
     root = host.querySelector('#mkRoot');
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
-      if (b.dataset.act === 'go') open(b.dataset.id);
+      if (b.dataset.act === 'go') { open(b.dataset.id); if (b.dataset.to) setTimeout(() => { const t = root.querySelector('#' + b.dataset.to); if (t) t.scrollIntoView({ block: 'start' }); }, 30); }
       else if (b.dataset.act === 'done') {
         const id = b.dataset.id; store.set('progress.activities.' + id, actStatus(id) === 'done' ? '' : 'done'); store.flush(); render(true);
+      } else if (b.dataset.act === 'ans') { const id = b.dataset.id; store.set('progress.answers.' + id, !revealed(id)); store.flush(); render(true);
+      } else if (b.dataset.act === 'asm-submit') { store.set('progress.assessments.' + b.dataset.id, 'submitted'); store.flush(); render(true);
+      } else if (b.dataset.act === 'asm-edit') { store.set('progress.assessments.' + b.dataset.id, ''); store.flush(); render(true);
+      } else if (b.dataset.act === 'ap-add') { const a = apRows().slice(); while (a.length < 4) a.push({}); a.push({}); store.set('actionPlan', a); store.flush(); render(true);
+      } else if (b.dataset.act === 'ap-del') { const a = apRows().slice(); const i = +b.dataset.id; if (i < a.length) a.splice(i, 1); store.set('actionPlan', a); store.flush(); render(true);
       } else if (b.dataset.act === 'jump') { e.preventDefault(); const t = root.querySelector('#' + b.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     });
     root.addEventListener('input', (e) => {
-      const el = e.target; if (!el.dataset || !el.dataset.f || el.type === 'radio' || el.type === 'checkbox') return;
+      const el = e.target; if (el.dataset && el.dataset.gl) { gq = el.value; const l = root.querySelector('#glList'); if (l) { l.innerHTML = glossaryList(); if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(l); } return; }
+      if (el.dataset && el.dataset.ap !== undefined) {
+        const a = apRows().map((r) => Object.assign({}, r)); const i = +el.dataset.ap; while (a.length <= i) a.push({});
+        a[i][el.dataset.apk] = ascii(el.value); store.set('actionPlan', a); refreshBadges(); return;
+      }
+      if (!el.dataset || !el.dataset.f || el.type === 'radio' || el.type === 'checkbox') return;
       const path = 'responses.' + el.dataset.f + '.' + el.dataset.k + (el.dataset.cell ? '.' + el.dataset.cell : '');
       store.set(path, ascii(el.value)); refreshBadges();
     });
     root.addEventListener('change', (e) => {
       const el = e.target; if (!el.dataset) return;
-      if (el.dataset.f && el.type === 'radio') { store.set('responses.' + el.dataset.f + '.' + el.dataset.k, el.value); refreshBadges(); }
+      if (el.dataset.f && el.tagName === 'SELECT') { store.set('responses.' + el.dataset.f + '.' + el.dataset.k, el.value); refreshBadges(); }
+      else if (el.dataset.f && el.type === 'radio') { store.set('responses.' + el.dataset.f + '.' + el.dataset.k, el.value); refreshBadges(); }
       else if (el.dataset.f && el.dataset.multi) { store.set('responses.' + el.dataset.f + '.' + el.dataset.k + '.' + el.value, el.checked); refreshBadges(); }
       else if (el.dataset.sum) { store.set('progress.parts.' + el.dataset.sum + '.summary', el.checked); refreshBadges(); }
       else if (el.dataset.read) { store.set('progress.cards.c01read', el.checked); refreshBadges(); }
