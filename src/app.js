@@ -174,6 +174,7 @@
     const toggle = $("languageToggle");
     if (toggle) toggle.textContent = language === "ar" ? "EN" : "عربي";
     document.title = language === "ar" ? "أدوات ورش SIYB الرقمية" : "SIYB Digital Workshop Tools";
+    renderWelcomeModes();
     window.dispatchEvent(new CustomEvent("siyb:languagechange", { detail: { language } }));
   }
 
@@ -221,6 +222,40 @@
       } else nav.appendChild(block);
     });
   }
+
+  // Welcome page cards: generated from the registry (one card per sidebar top-level entry, sub-tools as chips).
+  function renderWelcomeModes() {
+    const host = $("welcomeGuideModes");
+    if (!host) return;
+    const L = language === "en" ? "en" : "ar";
+    const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const seen = {};
+    let html = "";
+    REG.list().forEach((m) => {
+      const g = m.group && REG.group(m.group);
+      if (g) {
+        if (seen[m.group]) return;
+        seen[m.group] = true;
+        const kids = REG.list().filter((k) => k.group === m.group);
+        html += '<div class="welcome-guide-mode welcome-guide-group"><strong><span aria-hidden="true">' + g.icon + '</span> ' + esc(g.title[L]) + '</strong>' +
+          (g.desc ? '<p>' + esc(g.desc[L]) + '</p>' : '') + '<ul class="welcome-guide-subs">' +
+          kids.map((k) => '<li><button type="button" class="welcome-guide-chip" data-welcome-tool="' + esc(k.id) + '">' + esc(k.title[L]) + '</button></li>').join("") +
+          '</ul></div>';
+      } else {
+        html += '<div class="welcome-guide-mode"><strong><span aria-hidden="true">' + m.icon + '</span> ' + esc(m.title[L]) + '</strong>' +
+          (m.desc ? '<p>' + esc(m.desc[L]) + '</p>' : '') +
+          '<ul class="welcome-guide-subs"><li><button type="button" class="welcome-guide-chip" data-welcome-tool="' + esc(m.id) + '">' + (L === "en" ? "Open" : "افتح") + '</button></li></ul></div>';
+      }
+    });
+    host.innerHTML = html;
+    refreshLocaleDigits(host);
+  }
+  document.addEventListener("click", (event) => {
+    const chip = event.target.closest && event.target.closest("[data-welcome-tool]");
+    if (!chip) return;
+    const def = REG.get(chip.dataset.welcomeTool);
+    if (def) activateMode(def.external ? def.modes[0] : def.defaultMode, null, null, { keepDrawer: true });
+  });
 
   function setGroupExpanded(groupEl, expanded) {
     groupEl.querySelector(".sidebar-group-body").hidden = !expanded;
@@ -294,7 +329,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.21.0";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.22.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -315,7 +350,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.21.0";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.22.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -332,7 +367,8 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = assetUrl(src) + "?v=0.21.0";
+      script.src = assetUrl(src) + "?v=0.22.0";
+      script.async = false; // download in parallel, execute in insertion order
       script.onload = resolve;
       script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
       document.body.appendChild(script);
@@ -342,7 +378,7 @@
     const ext = def.external;
     if (window[ext.global]) return;
     if (!externalScripts[def.id]) {
-      externalScripts[def.id] = ext.scripts.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+      externalScripts[def.id] = Promise.all(ext.scripts.map(loadScript))
         .catch((error) => { externalScripts[def.id] = null; throw error; });
     }
     await externalScripts[def.id];
@@ -397,7 +433,7 @@
 
     try {
       const htmlUrl = assetUrl("src/modules/business-costing.html");
-      const response = await fetch(htmlUrl, { cache: "no-store" });
+      const response = await fetch(htmlUrl + "?v=0.22.0");
       if (!response.ok) throw new Error("تعذر تحميل ملف HTML: " + response.status + " — " + htmlUrl);
 
       host.innerHTML = await response.text();
@@ -462,6 +498,23 @@
     translateUiTree($("workspaceTitle").parentElement);
     translateUiTree($("workspaceBadgeNumber").parentElement);
   }
+
+  // Warm module code before the click: on pointer-over/touch, and when the browser is idle.
+  function prewarm(def) {
+    if (!def) return;
+    if (def.external) ensureExternalScripts(def).catch(() => {});
+    else if (def.id === "costing") { ensureCostingScript().catch(() => {}); }
+  }
+  $("globalSidebarNav").addEventListener("pointerover", (event) => {
+    const head = event.target.closest && event.target.closest(".sidebar-tool-head");
+    if (head) prewarm(REG.get(head.dataset.toolHead));
+  });
+  $("globalSidebarNav").addEventListener("pointerdown", (event) => {
+    const head = event.target.closest && event.target.closest(".sidebar-tool-head");
+    if (head) prewarm(REG.get(head.dataset.toolHead));
+  });
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  window.addEventListener("load", () => idle(() => REG.list().forEach(prewarm)));
 
   $("globalSidebarNav").addEventListener("click", (event) => {
     const gHead = event.target.closest(".sidebar-group-head");
