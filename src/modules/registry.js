@@ -8,7 +8,7 @@
   'use strict';
   const modules = [];
   // Sidebar groups: modules with `group: '<id>'` are shown together under one heading (their own sub-menus are unchanged).
-  const groups = { iyb: { icon: '▣', title: { ar: 'حسّن مشروعك (IYB)', en: 'Improve Your Business (IYB)' } } };
+  const groups = { iyb: { icon: '▣', title: { ar: 'حسّن مشروعك (IYB)', en: 'Improve Your Business (IYB)' }, desc: { ar: 'أدوات إدارة المشروع القائم: التكاليف والمشتريات والمخزون والتسويق.', en: 'Tools for running an existing business: costs, purchasing and stock, marketing.' } } };
   const registry = {
     register(def) { modules.push(def); modules.sort((a, b) => a.order - b.order); },
     list() { return modules.slice(); },
@@ -19,6 +19,7 @@
 
   registry.register({
     id: 'gyb', order: 1, icon: '✦',
+    desc: { ar: 'أنشطة وتمارين لتوليد فكرة مشروعك وتقييمها واختيار الأنسب.', en: 'Activities and exercises to generate, assess and choose your business idea.' },
     title: { ar: 'توليد فكرة مشروعك (GYB)', en: 'Generate Your Business Idea (GYB)' },
     modes: ['gyb'],
     external: {
@@ -28,11 +29,13 @@
   });
   registry.register({
     id: 'costing', order: 2, icon: '▦', group: 'iyb',
+    desc: { ar: 'أدوات وأمثلة لاحتساب تكاليف مشروعك، وتمارين تطبيقية على خطوات الاحتساب.', en: 'Tools and examples to calculate your business costs, with practical exercises.' },
     title: { ar: 'احتساب التكاليف', en: 'Cost Calculation' },
     modes: ['business', 'training'], defaultMode: 'business', navTemplate: 'tplCostingNav'
   });
   registry.register({
     id: 'stock', order: 3, icon: '▤', group: 'iyb',
+    desc: { ar: 'خطوات الشراء وبطاقات المخزون والجرد وإدارة علاقات المزوّدين، مع أنشطة وتمارين.', en: 'Purchasing steps, stock cards, stocktaking and supplier relations, with activities.' },
     title: { ar: 'المشتريات والمخزون', en: 'Purchasing & Stock' },
     modes: ['stock'],
     external: {
@@ -42,6 +45,7 @@
   });
   registry.register({
     id: 'marketing', order: 4, icon: '◉', group: 'iyb',
+    desc: { ar: 'البطاقات الثماني للتسويق: السوق والمنافسون والمنتج والسعر والترويج وخطة التسويق.', en: 'The eight marketing cards: market, competitors, product, price, promotion and plan.' },
     title: { ar: 'التسويق', en: 'Marketing' },
     modes: ['marketing'],
     external: {
