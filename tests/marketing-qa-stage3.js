@@ -71,7 +71,7 @@ const ad = (x) => String(x).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.in
   await pg.fill('#cyh_t1', 'Customers want straight perms'); await pg.waitForTimeout(400);
   rec('Card08', 'Can You Help entry marks exercise in progress', await pg.evaluate(() => document.querySelector('[data-st="act:cyh"]').className.includes('inprogress')));
   await pg.click('#cyh [data-act="ans"]'); await pg.waitForTimeout(250);
-  rec('Card08', 'Can You Help model answers on request (10 items)', await pg.evaluate(() => document.querySelectorAll('#cyh .mk-answer h5').length === 10));
+  rec('Card08', 'Can You Help model answers on request (10 items)', await pg.evaluate(() => document.querySelectorAll("#cyh .mk-answer h4").length === 10));
   await pg.fill('#plan textarea[data-ap="0"][data-apk="what"]', 'Menu is boring'); await pg.fill('#plan textarea[data-ap="0"][data-apk="who"]', 'Me 123'); await pg.waitForTimeout(500);
   const ap = await pg.evaluate(() => { SIYBMarketingStore.flush(); return JSON.parse(localStorage.getItem('siyb.iyb.marketing.v1')).actionPlan; });
   rec('Card08', 'Action Plan saved as array of {what,how,who,when}', Array.isArray(ap) && ap[0].what === 'Menu is boring' && ap[0].who === 'Me 123', JSON.stringify(ap));
@@ -113,8 +113,8 @@ const ad = (x) => String(x).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.in
   }
   rec('Console', 'No console/page errors', errs.length === 0, errs.join(' | ').slice(0, 300));
   const pw = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); await pw.goto(URL_); await pw.waitForTimeout(2500);
-  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.20.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
-  rec('PWA', 'Cache v0.20.0 holds Stage 3 files', !!cache && ['marketing-assess-a.js', 'marketing-assess-b.js', 'marketing-card8.js', 'marketing-glossary.js'].every((f) => cache.includes(f)));
+  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.21.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
+  rec('PWA', 'Cache v0.21.0 holds Stage 3 files', !!cache && ['marketing-assess-a.js', 'marketing-assess-b.js', 'marketing-card8.js', 'marketing-glossary.js'].every((f) => cache.includes(f)));
   await pw.context().setOffline(true); await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1000);
   await pw.evaluate(() => SIYBMarketing.open('c08')).catch(() => {}); await pw.waitForTimeout(300);

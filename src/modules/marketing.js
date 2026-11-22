@@ -127,7 +127,7 @@
   function block(b, part) {
     switch (b.t) {
       case 'h': return `<h4 class="mk-h">${esc(T(b.title))}</h4>`;
-      case 'h2': return `<h5 class="mk-h2">${esc(T(b.title))}</h5>`;
+      case 'h2': { const lv = part === fakePart ? 4 : 5; return `<h${lv} class="mk-h2">${esc(T(b.title))}</h${lv}>`; }
       case 'p': return para(b.text);
       case 'ul': return `<ul>${b.items.map((i) => `<li>${esc(T(i))}</li>`).join('')}</ul>`;
       case 'ol': return `<ol>${b.items.map((i) => `<li>${esc(T(i))}</li>`).join('')}</ol>`;
@@ -222,15 +222,15 @@
     h += `<section class="mk-part mk-act" id="cyh"><div class="mk-act-head"><h3>${esc(T(y.title))}</h3>${badge('act:cyh', actStatus('cyh'))}<span class="mk-src">${X('المصدر: ص ', 'Source: p. ')}${esc(y.src)}</span></div>${y.story.map(para).join('')}${y.info.map((b) => block(b, fakePart)).join('')}${para(y.lead)}
       ${y.tasks.map((t) => `<div class="mk-field"><label class="mk-lab" for="cyh_t${t.n}">${t.n}. ${esc(T(t.dim))}</label><p class="mk-small">${esc(T(t.q))}</p><textarea id="cyh_t${t.n}" rows="4" data-f="cyh" data-k="t${t.n}">${esc(G('t' + t.n))}</textarea></div>`).join('')}
       <div class="mk-act-foot">${doneBtn('cyh', X('وضع علامة: أنجزت هذا التمرين', 'Mark this exercise as complete'), X('إلغاء علامة الإكمال', 'Unmark as complete'))}${ansToggle('cyh')}</div>
-      ${revealed('cyh') ? `<div class="mk-answer" role="note"><strong>${X('الإجابات النموذجية من الدليل', 'Model answers from the manual')}</strong> <span class="mk-src">${X('ص ', 'p. ')}${esc(y.modelSrc)}</span>${y.tasks.map((t) => `<h5 class="mk-h2">${t.n}. ${esc(T(t.dim))}</h5>${(y.model[t.n] || []).map(para).join('')}`).join('')}</div>` : ''}</section>`;
+      ${revealed('cyh') ? `<div class="mk-answer" role="note"><strong>${X('الإجابات النموذجية من الدليل', 'Model answers from the manual')}</strong> <span class="mk-src">${X('ص ', 'p. ')}${esc(y.modelSrc)}</span>${y.tasks.map((t) => `<h4 class="mk-h2">${t.n}. ${esc(T(t.dim))}</h4>${(y.model[t.n] || []).map(para).join('')}`).join('')}</div>` : ''}</section>`;
     // Action plan
     const rows = apRows(); const n = Math.max(4, rows.length);
     let body = '';
     for (let r = 0; r < n; r++) body += `<tr>${pl.cols.map((cl) => `<td><textarea rows="3" aria-label="${esc(T(cl.head))} ${r + 1}" data-ap="${r}" data-apk="${cl.k}">${esc(((rows[r] || {})[cl.k]) || '')}</textarea></td>`).join('')}<td class="mk-rm"><button type="button" class="mk-btn" data-act="ap-del" data-id="${r}" aria-label="${X('حذف الصف ', 'Delete row ')}${r + 1}">✕</button></td></tr>`;
     h += `<section class="mk-part mk-act" id="plan"><div class="mk-act-head"><h3>${esc(T(pl.title))}</h3>${badge('act:plan', actStatus('plan'))}<span class="mk-src">${X('المصدر: ص ', 'Source: p. ')}${esc(pl.src)}</span></div>${pl.intro.map(para).join('')}
-      <h5 class="mk-h2">${X('مثال من الدليل', 'Example from the manual')}</h5><div class="mk-tablewrap"><table class="mk-table"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}</tr></thead><tbody><tr>${pl.cols.map((cl) => `<td>${esc(T(pl.example[cl.k]))}</td>`).join('')}</tr></tbody></table></div>
+      <h4 class="mk-h2">${X('مثال من الدليل', 'Example from the manual')}</h4><div class="mk-tablewrap"><table class="mk-table"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}</tr></thead><tbody><tr>${pl.cols.map((cl) => `<td>${esc(T(pl.example[cl.k]))}</td>`).join('')}</tr></tbody></table></div>
       <ol>${pl.questions.map((q) => `<li>${esc(T(q))}</li>`).join('')}</ol><ul>${pl.tips.map((q) => `<li>${esc(T(q))}</li>`).join('')}</ul>
-      <h5 class="mk-h2">${X('خطتك', 'Your action plan')}</h5><div class="mk-tablewrap"><table class="mk-table mk-ftable"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody></table></div>
+      <h4 class="mk-h2">${X('خطتك', 'Your action plan')}</h4><div class="mk-tablewrap"><table class="mk-table mk-ftable"><thead><tr>${pl.cols.map((cl) => `<th scope="col">${esc(T(cl.head))}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody></table></div>
       <div class="mk-act-foot"><button type="button" class="mk-btn" data-act="ap-add">${X('إضافة صف', 'Add a row')} <span class="mk-apptag">${X('إضافة من التطبيق', 'App feature')}</span></button>${doneBtn('plan', X('وضع علامة: أنجزت خطتي', 'Mark my plan as complete'), X('إلغاء علامة الإكمال', 'Unmark as complete'))}</div></section>`;
     // Answers & review
     const asm = Object.values(ASM()).sort((a, b) => a.no - b.no);

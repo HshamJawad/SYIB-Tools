@@ -25,7 +25,7 @@
 .mk-actions,.mk-pager{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:12px 0}
 .mk-btn{border:1px solid #cfd9e0;background:#fff;color:#111;padding:8px 14px;border-radius:10px;font:700 13px Cairo,Arial,sans-serif;cursor:pointer}
 .mk-btn:hover{background:#f3f8fa}
-.mk-btn.primary{background:#24A8E0;border-color:#24A8E0;color:#fff}
+.mk-btn.primary{background:#24A8E0;border-color:#1b8fc0;color:#111}
 @media (max-width:600px){.mk-grid{grid-template-columns:1fr}.mk-card{min-height:0}}
 
 /* Stage 2: content */
