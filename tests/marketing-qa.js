@@ -20,10 +20,10 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   const pg = await newPage(browser, { width: 1280, height: 800 });
   await go(pg);
   const reg = await pg.evaluate(() => { const m = SIYBModules.get('marketing'); return { order: SIYBModules.list().map((x) => x.id).join(), group: m && m.group }; });
-  rec('Registry', 'Marketing registered 4th under IYB', reg.order === 'gyb,costing,stock,marketing' && reg.group === 'iyb', reg.order);
+  rec('Registry', 'Marketing registered 4th, followed by Planning, under IYB', reg.order === 'gyb,costing,stock,marketing,planning' && reg.group === 'iyb', reg.order);
   await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
   const iybOrder = await pg.evaluate(() => [...document.querySelector('[data-group="iyb"]').querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead).join());
-  rec('Sidebar', 'IYB order Costing, Stock, Marketing', iybOrder === 'costing,stock,marketing', iybOrder);
+  rec('Sidebar', 'IYB order Costing, Stock, Marketing, Planning', iybOrder === 'costing,stock,marketing,planning', iybOrder);
   await head(pg, 'marketing');
   const cards = await pg.evaluate(() => [...document.querySelectorAll('#mkRoot .mk-card')].map((c) => ({ no: c.querySelector('.mk-card-no').textContent, t: c.querySelector('.mk-card-title').textContent, d: c.querySelector('.mk-card-desc').textContent.length > 0, s: c.querySelector('.mk-status').textContent })));
   rec('Dashboard', 'Exactly eight cards', cards.length === 8, String(cards.length));
@@ -104,8 +104,8 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   rec('Console', 'main run: no console/page errors', pg.errs.length === 0, pg.errs.join(' | ').slice(0, 300));
   // PWA / offline
   const pw = await newPage(browser, { width: 1280, height: 800 }); await go(pw); await pw.waitForTimeout(2500);
-  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.22.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
-  rec('PWA', 'Cache v0.22.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
+  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.23.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
+  rec('PWA', 'Cache v0.23.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
   await pw.context().setOffline(true);
   await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1200);

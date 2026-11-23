@@ -54,5 +54,16 @@
     }
   });
 
+  registry.register({
+    id: 'planning', order: 5, icon: '▨', group: 'iyb',
+    desc: { ar: 'خمسة أجزاء وخمس خطط: التحليل والتوقع والمخاطر والمبيعات والإنتاج والأرباح والتدفق النقدي والقروض.', en: 'Five parts and five plans: analysis, forecasting, risk, sales, production, profit, cash flow and loans.' },
+    title: { ar: 'التخطيط لمشروعك', en: 'Planning for Your Business' },
+    modes: ['planning'],
+    external: {
+      global: 'SIYBPlanning', rootSelector: '#pypRoot', bodyClass: 'mode-planning', badge: 'PL', defaultSection: 'home',
+      scripts: ['src/modules/planning-store.js', 'src/modules/planning-data.js', 'src/modules/planning.js']
+    }
+  });
+
   window.SIYBModules = registry;
 })();
