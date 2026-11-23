@@ -74,7 +74,7 @@
     const ls = storage(); try { if (ls) ls.removeItem(KEY); } catch (_) { /* ignore */ }
   }
   window.addEventListener('pagehide', () => { if (timer) flush(); });
-  window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
 
   window.SIYBPlanningStore = {
     KEY, MODULE_ID, SCHEMA, get, set, reset, flush,

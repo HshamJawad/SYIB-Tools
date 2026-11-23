@@ -21,8 +21,29 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   await go(pg);
   const reg = await pg.evaluate(() => { const m = SIYBModules.get('planning'); return { order: SIYBModules.list().map((x) => x.id).join(), group: m && m.group, g: m && m.external.global }; });
   rec('Registry', 'Planning registered 5th under IYB', reg.order === 'gyb,costing,stock,marketing,planning' && reg.group === 'iyb' && reg.g === 'SIYBPlanning', reg.order);
-  const loaded0 = await pg.evaluate(() => typeof window.SIYBPlanning);
-  rec('Lazy loading', 'Planning scripts are not executed before preload/opening (or preloaded idle)', ['undefined', 'object'].includes(loaded0), loaded0);
+  // Lazy loading, deterministic: (1) not loaded at DOMContentLoaded; (2) with idle preload disabled and no hover it stays
+  // unloaded and requests nothing; (3) pointer-over the sidebar head loads it; (4) it is mounted only on opening.
+  {
+    const lz = await newPage(browser, { width: 1280, height: 800 });
+    const reqs = []; lz.on('request', (r) => { if (/\/planning[^/]*\.(js|css)/.test(r.url()) && /\.js/.test(r.url())) reqs.push(r.url().split('/').pop().split('?')[0]); });
+    await lz.addInitScript(() => { window.requestIdleCallback = () => 0; });
+    await lz.goto(URL_, { waitUntil: 'load' }); await lz.waitForTimeout(2200);
+    const a = await lz.evaluate(() => ({ g: typeof window.SIYBPlanning, s: typeof window.SIYBPlanningStore, root: !!document.querySelector('#pypRoot') }));
+    rec('Lazy loading', 'Without idle preload or hover Planning is NOT loaded and no planning script is requested', a.g === 'undefined' && a.s === 'undefined' && !a.root && reqs.length === 0, JSON.stringify(a) + ' reqs=' + reqs.join());
+    await lz.click('.sidebar-group-head'); await lz.waitForTimeout(200);
+    await lz.hover('[data-tool-head="planning"]'); await lz.waitForTimeout(1200);
+    const b = await lz.evaluate(() => ({ g: typeof window.SIYBPlanning, root: !!document.querySelector('#pypRoot'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
+    rec('Lazy loading', 'Hover preloads the scripts (3 files, each once) but does not mount the module', b.g === 'object' && !b.root && b.nav === 0 && reqs.length === 3 && new Set(reqs).size === 3, JSON.stringify(b) + ' reqs=' + reqs.join());
+    await lz.evaluate(() => document.querySelector('[data-tool-head="planning"]').click()); await lz.waitForTimeout(800);
+    const c = await lz.evaluate(() => ({ root: !!document.querySelector('#pypRoot .pyp-card'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
+    rec('Lazy loading', 'Opening mounts the module and builds its sub-menu without re-requesting scripts', c.root && c.nav === 8 && reqs.length === 3, JSON.stringify(c) + ' reqs=' + reqs.length);
+    await lz.context().close();
+    const ld = await newPage(browser, { width: 1280, height: 800 });
+    await ld.goto(URL_, { waitUntil: 'domcontentloaded' });
+    rec('Lazy loading', 'Not loaded at DOMContentLoaded', await ld.evaluate(() => typeof window.SIYBPlanning) === 'undefined');
+    await ld.waitForFunction(() => typeof window.SIYBPlanning === 'object', null, { timeout: 8000 }).then(() => rec('Lazy loading', 'Idle preload eventually loads it without mounting', true), () => rec('Lazy loading', 'Idle preload eventually loads it without mounting', false));
+    await ld.context().close();
+  }
   const welcome = await pg.evaluate(() => [...document.querySelectorAll('[data-welcome-tool]')].map((b) => b.dataset.welcomeTool).join());
   rec('Welcome', 'Welcome page lists Planning automatically', welcome.includes('planning'), welcome);
   await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
@@ -83,6 +104,35 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
     await head(pg, t); await pg.waitForTimeout(500);
     const ok = await pg.evaluate((x) => document.body.classList.contains('mode-' + x) && !document.body.classList.contains('mode-planning') && document.querySelector('#workspaceContent').children.length > 0, t);
     rec('Regression', t + ' still opens and Planning body class is cleared', ok);
+  }
+  // Costing and Training (two modes of the costing tool) – opened from the sidebar
+  await pg.setViewportSize({ width: 1280, height: 800 });
+  {
+    const open = await pg.evaluate(() => !!document.querySelector('[data-group="iyb"] .sidebar-group-body:not([hidden])')); if (!open) await pg.click('.sidebar-group-head');
+    await head(pg, 'costing'); await pg.waitForTimeout(700);
+    rec('Regression', 'Costing opens (not training mode) and Planning body class is cleared', await pg.evaluate(() => !document.body.classList.contains('mode-training') && !document.body.classList.contains('mode-planning') && !!document.querySelector('#costingModuleRoot') && document.querySelector('#costingModuleRoot').innerText.length > 100));
+    await pg.evaluate(() => { const b = document.querySelector('[data-nav-item^="training-"]'); if (b) b.click(); }); await pg.waitForTimeout(1200);
+    rec('Regression', 'Training opens (mode-training) with exercises and Planning body class is cleared', await pg.evaluate(() => document.body.classList.contains('mode-training') && !document.body.classList.contains('mode-planning') && document.querySelector('#trainingMount, #costingModuleRoot').innerText.length > 100));
+    await pg.evaluate(() => { const b = document.querySelector('[data-nav-item^="business-"]'); if (b) b.click(); }); await pg.waitForTimeout(800);
+    rec('Regression', 'Back to Costing from Training works', await pg.evaluate(() => !document.body.classList.contains('mode-training') && !!document.querySelector('#costingModuleRoot') && !document.querySelector('#trainingMount')));
+  }
+  // Pending changes are flushed when the page becomes hidden (document-level visibilitychange)
+  {
+    await head(pg, 'planning'); await pg.waitForTimeout(500);
+    const r = await pg.evaluate(async () => {
+      SIYBPlanningStore.flush(); const k = SIYBPlanningStore.KEY;
+      SIYBPlanningStore.set('businessProfile.__qaProbe', 'x1');
+      const before = JSON.parse(localStorage.getItem(k)).businessProfile.__qaProbe; // debounce pending, not yet stored
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+      document.dispatchEvent(new Event('visibilitychange'));
+      const after = JSON.parse(localStorage.getItem(k)).businessProfile.__qaProbe;
+      delete document.visibilityState;
+      SIYBPlanningStore.set('businessProfile.__qaProbe', undefined); SIYBPlanningStore.flush();
+      return { before, after };
+    });
+    rec('Persistence', 'Pending change is not yet stored, then flushed immediately on document visibilitychange (hidden)', r.before === undefined && r.after === 'x1', JSON.stringify(r));
+    const src = await pg.evaluate(() => fetch('./src/modules/planning-store.js').then((x) => x.text()));
+    rec('Persistence', 'visibilitychange listener is attached to document, not window', /document\.addEventListener\('visibilitychange'/.test(src) && !/window\.addEventListener\('visibilitychange'/.test(src));
   }
   rec('Console', 'No page errors', pg.errs.length === 0, pg.errs.slice(0, 2).join(' | '));
   await browser.close();
