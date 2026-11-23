@@ -26,8 +26,8 @@ const K = 'siyb.iyb.marketing.v1';
   // protected modules untouched
   const { execSync } = require('child_process');
   try {
-    const d = execSync('git diff 3324ace..HEAD --name-only -- src/modules/business-costing.js src/modules/business-costing-ui.js src/modules/training.js src/modules/purchasing-stock.js src/modules/purchasing-stock-ui.js src/modules/gyb.js src/modules/gyb-data.js src/modules/gyb-store.js src/modules/report-pdf.js src/modules/arabic-pdf.js styles/gyb.css styles/app-shell.css', { cwd: path.join(__dirname, '..') }).toString().trim();
-    rec('Regression', 'Protected files (Costing, Stock, GYB, report-pdf, shell CSS) byte-identical since pre-Marketing commit 3324ace', d === '', d);
+    const d = execSync('git diff 3324ace..HEAD --name-only -- src/modules/business-costing.js src/modules/business-costing-ui.js src/modules/training.js src/modules/purchasing-stock.js src/modules/purchasing-stock-ui.js src/modules/gyb.js src/modules/gyb-data.js src/modules/gyb-store.js src/modules/report-pdf.js src/modules/arabic-pdf.js styles/gyb.css', { cwd: path.join(__dirname, '..') }).toString().trim();
+    rec('Regression', 'Protected files (Costing, Stock, GYB, report-pdf; shell CSS excluded: intentionally changed by PR #36) byte-identical since pre-Marketing commit 3324ace', d === '', d);
   } catch (e) { rec('Regression', 'Protected-file diff vs 3324ace could not be run', false, String(e).slice(0, 100)); }
   const regs = fs.readFileSync(path.join(dir, 'registry.js'), 'utf8'); rec('Licence', 'No ILO/SIYB logo asset added (no image files in the Marketing change)', !execSync('git diff 3324ace..HEAD --name-only', { cwd: path.join(__dirname, '..') }).toString().split('\n').some((f) => /\.(png|jpe?g|svg|gif|webp|ico)$/i.test(f)));
 })();
@@ -150,7 +150,7 @@ const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
   const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => /^siyb-workshop-shell-v/.test(x)); const urls = (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); return { k, urls }; });
   const need = ['marketing.js', 'marketing-store.js', 'marketing-data.js', 'marketing-content-a.js', 'marketing-content-b.js', 'marketing-content-c.js', 'marketing-content-d.js', 'marketing-assess-a.js', 'marketing-assess-b.js', 'marketing-card8.js', 'marketing-glossary.js', 'marketing.css'];
   rec('PWA', `Cache ${cache.k} holds all ${need.length} Marketing assets`, need.every((f) => cache.urls.includes(f)), need.filter((f) => !cache.urls.includes(f)).join());
-  rec('PWA', 'Cache version is consistent (index.html, app.js, service-worker.js all 0.22.0 or the same version)', await (async () => { const v = (f) => (fs.readFileSync(path.join(__dirname, '..', f), 'utf8').match(/0\.\d+\.0/g) || []); const sets = ['index.html', 'src/app.js', 'service-worker.js'].map((f) => [...new Set(v(f))].join()); return new Set(sets).size === 1; })(), '');
+  rec('PWA', 'Cache version is consistent (index.html, app.js, service-worker.js all 0.23.0 or the same version)', await (async () => { const v = (f) => (fs.readFileSync(path.join(__dirname, '..', f), 'utf8').match(/0\.\d+\.0/g) || []); const sets = ['index.html', 'src/app.js', 'service-worker.js'].map((f) => [...new Set(v(f))].join()); return new Set(sets).size === 1; })(), '');
   await pw.context().setOffline(true); await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(900);
   const offl = []; for (const c of ['home', 'c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'data']) { await pw.evaluate((x) => SIYBMarketing.open(x), c).catch(() => {}); await pw.waitForTimeout(120); offl.push(await pw.evaluate(() => document.querySelectorAll('#mkRoot h2').length > 0).catch(() => false)); }
