@@ -98,3 +98,10 @@
 .pyp-forecast-tag{display:inline-block;padding:2px 10px;border-radius:999px;background:#F48D011f;border:1px solid #F48D0188;font-size:12px;font-weight:800}
 .pyp-fc-row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:8px}
 .pyp-fc-row label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:13px}
+/* Part IV – risk register */
+.pyp-optional{align-items:end;padding-top:8px;border-top:1px dashed #cfd9e0}
+.pyp-fcbox{border:1px dashed #24A8E088;border-radius:12px;padding:10px 12px;margin:0 0 12px;background:#f6fbfd}
+.pyp-fcbox h5{margin:0 0 4px}
+.pyp-fclist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.pyp-fclist li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.pyp-fclist li span{flex:1;min-width:160px}

@@ -42,3 +42,17 @@ Application guidance (labelled as such, not manual content): the forecasts regis
 Storage: records live in `externalForecasts` (array) inside `siyb.iyb.planning.v1`. The Planning store's path setter now also traverses arrays. The forecasts do not affect Part III progress (progress = Activities 4–5, Assessment 3 completed and checked, summary review).
 
 Tests: `tests/planning-qa-phase3.js` (41 checks). Earlier Planning suites updated for the new state: the script-count assertion now reads the registry, and the Phase 2 scope/dashboard assertions treat Part III as live.
+
+## Phase 4 – Part IV: Managing Risk (v0.26.0)
+Scope: Part IV learning view (printed pp. 37–42): what risk is, risk management (four steps, five questions), the four ways to respond (accept, transfer, reduce, avoid), Activity 6 with the risk-register form, the manual's closing note, summary and Assessment 4.
+
+Source verification (original PDF text compared with the code)
+- Activity 6 (p. 41): three questions and the form columns Risk, Likelihood, Frequency, Impact, Priority, Actions to take, in the manual's order. Likelihood, frequency, impact and priority are free text; no scale, score, matrix or classification is imposed.
+- Assessment 4 (p. 42): five true/false tick statements; key from p. 97 = F, F, T, F, T. The manual's explanations appear only after the learner checks. A check with nothing ticked is not counted as an attempt.
+- Part IV has no calculations; none were added.
+
+Application guidance (labelled as such): optional origin (internal/external) and response (accept/transfer/reduce/avoid) selectors on each risk, and a "From my forecasts (Part III)" box that creates a risk from a forecast. Each risk records `fromForecast` (the forecast id), so a forecast can be added once only; the forecast itself stays in Part III. Removing a risk (after confirmation) frees its forecast again.
+
+Storage: records live in `risks` (array) in `siyb.iyb.planning.v1` and are the single source the later plans will read (no duplicated entries). Progress: Activity 6 counts when saved text or a risk with text exists; Assessment 4 when completed and checked; summary when reviewed.
+
+Tests: `tests/planning-qa-phase4.js` (40 checks). Phase 2/3 suites updated for the new state (Part IV is now live; only Part V and end of manual are placeholders).

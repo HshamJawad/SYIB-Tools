@@ -43,13 +43,33 @@
       mcq('m1', B('التوقّع يخبرك …', 'A forecast tells you...'), mc3(B('بما يُرجَّح أن يحدث في المستقبل.', 'what is likely to happen in the future.'), B('بالربح الذي حققته العام الماضي.', 'what profit you made last year.'), B('عن الماضي.', 'about the past.')), 'a'),
       mcq('m2', B('عند توقّع التغيّرات في البيئة الخارجية …', 'When you forecast changes in the external environment...'), mc3(B('ركّز على التغيّرات الكبيرة.', 'focus on big changes.'), B('ركّز على التغيّرات التي قد تؤثر في مشروعك.', 'focus on changes that may affect your business.'), B('حاول تحديد كل التغيّرات الممكنة.', 'try to identify all possible changes.')), 'b'),
       mcq('m3', B('ينبغي أن تبني توقعك على …', 'You should base your forecast on...'), mc3(B('أمنياتك.', 'your wish.'), B('سجلاتك السابقة.', 'your past records.'), B('الحقائق.', 'facts.')), 'c')] }] };
+  const tick = (id, q, truth, why) => ({ id, type: 'tick', q, truth, why });
+  A.a4 = {
+    id: 'a4', no: 4, pg: '42', ansPg: '97',
+    intro: B('لقد أنهيت الجزء الرابع من هذا الدليل. أجرِ التمرين أدناه للتحقق من فهمك. أنهِ التمرين قبل مقارنة إجاباتك بالإجابات.', 'You have just completed Part IV of this manual. Do the exercise below to check your understanding. Finish the exercise before comparing your answers with the answers.'),
+    parts: [{ title: B('صح أم خطأ', 'True or False'), hint: B('ضع علامة أمام الجملة الصحيحة (يمكن أن تكون أكثر من جملة).', 'Tick the sentence that is true.'), items: [
+      tick('t1', B('إذا كان أداء مشروعك جيداً فاحتمال وقوع أحداث ذات أثر سلبي أقل، ولذلك ليس من الضروري أن يدير مشروعك المخاطر.', 'If your business is performing well, it is less likely that events will occur that have a negative impact and therefore, it is not necessary for your business to manage risks.'), false,
+        B('إدارة المخاطر ضرورية دائماً لأن الأحداث غير المواتية قد تقع في أي وقت وفي أي مشروع.', 'Managing risk is always necessary because unfavourable events can occur at any time in any business.')),
+      tick('t2', B('تساعد إدارة المخاطر مشروعك على تحديد كل المخاطر التي يتعرض لها الآن وفي المستقبل ليتمكن من تجنب كل المخاطر أو التخفيف منها.', 'Risk Management helps your business identify all the risks to which it is exposed now and in the future so that it can avoid or mitigate all the risks.'), false,
+        B('الغرض من إدارة المخاطر ليس تجنب كل المخاطر، بل ضمان أن تُتَّخذ المخاطر عن وعي بمعرفة كاملة وفهم واضح للاستجابات المناسبة.', 'The purpose of Risk Management is not to avoid all risks but to ensure that risks are consciously taken with a complete knowledge and clear understanding of the appropriate responses to take.')),
+      tick('t3', B('ينبغي أن تحصل المخاطر ذات الأثر الأكبر والاحتمال الأعلى على أعلى أولوية.', 'Risks with the greatest impact and the highest likelihood should get the highest priority.'), true,
+        B('ينبغي أن تعطي الأولوية للمخاطر الأشد خطورة على مشروعك.', 'You should prioritize the risks that are most dangerous to your business.')),
+      tick('t4', B('ينبغي للمشاريع أن تقبل المخاطر الأقل احتمالاً للوقوع.', 'Businesses should accept risks that are less likely to occur.'), false,
+        B('ليس من الحكمة قبول المخاطر ذات الأثر الكبير في مشروعك حتى لو كان احتمال وقوعها منخفضاً. والتقليل أو النقل استجابة أنسب.', 'It is not a good idea to accept risks which have a significant impact on your business even if the possibility of occurrence is low. Reducing or transferring will be a more appropriate response.')),
+      tick('t5', B('لتحديد الاستجابة المناسبة لخطر ما يجب تقييم احتمال وقوعه وأثره.', 'To determine the appropriate response to a risk, one must assess its likelihood and impact.'), true,
+        B('تذكّر أن تتبع الخطوات الأربع لعملية إدارة المخاطر ولا تتسرع في الاستجابة لخطر قبل إجراء التقييم.', 'Remember to follow the four steps of the Risk Management process and do not rush to respond to a risk before making an assessment.'))] }] };
   // Pure scoring helper (no DOM): answers = {itemId: value}; returns per-item correctness and totals.
   A.score = (assess, answers) => {
     const per = {}; let correct = 0; let total = 0; let answered = 0;
+    let anyTick = false; let ticks = 0;
     assess.parts.forEach((pt) => pt.items.forEach((it) => {
-      total++; const v = answers && answers[it.id]; if (v) answered++;
+      total++; const v = answers && answers[it.id];
+      if (it.type === 'tick') { ticks++; if (v === 'T') anyTick = true; per[it.id] = ((v === 'T') === it.truth) ? 'right' : 'wrong'; if (per[it.id] === 'right') correct++; return; }
+      if (v) answered++;
       per[it.id] = !v ? 'blank' : (v === it.key ? 'right' : 'wrong'); if (per[it.id] === 'right') correct++;
     }));
+    // Tick-box items: an unticked box is a valid answer ("false"), so the assessment counts as attempted once at least one box is ticked.
+    if (ticks) answered += anyTick ? ticks : 0;
     return { per, correct, total, answered };
   };
 })();

@@ -22,7 +22,7 @@
   function progressItems(part) {
     return (C[part] || []).filter((s) => s.activity || s.summary || s.assess).map((s) => ({
       id: s.id, kind: s.activity ? 'activity' : (s.summary ? 'summary' : 'assessment'),
-      done: s.activity ? hasText(s.activity.id) : (s.summary ? !!gv('progress.' + part + '.summary', false) : asDone(s.assess)) }));
+      done: s.activity ? (hasText(s.activity.id) || (s.activity.id === 'a6' && riskList().some((r) => String((r && r.risk) || '').trim()))) : (s.summary ? !!gv('progress.' + part + '.summary', false) : asDone(s.assess)) }));
   }
   function progress(part) { const it = progressItems(part); const done = it.filter((i) => i.done).length; return { done, total: it.length, pct: it.length ? Math.round((done / it.length) * 100) : 0 }; }
   const progBar = (part, cls) => { const p = progress(part); return `<span class="pyp-prog ${cls || ''}" data-pyp-prog="${part}"><span class="pyp-prog-bar" aria-hidden="true"><i style="width:${p.pct}%"></i></span><span class="pyp-prog-txt"><bdi>${p.done}/${p.total}</bdi> ${X('عناصر مكتملة', 'items completed')}</span></span>`; };
@@ -75,6 +75,11 @@
       <ol class="pyp-items">${pt.items.map((it) => {
         n++; const val = ans[it.id] || ''; const res = checked ? sc.per[it.id] : '';
         const fb = checked ? (res === 'right' ? `<span class="pyp-fb ok">✔ ${X('صحيح', 'Correct')}</span>` : `<span class="pyp-fb bad">✘ ${res === 'blank' ? X('لم تُجِب', 'Not answered') : X('غير صحيح', 'Not correct')} — ${X('الإجابة الصحيحة: ', 'Correct answer: ')}<strong>${esc(optText(it, it.key, pt.bank))}</strong></span>`) : '';
+        if (it.type === 'tick') {
+          const ticked = val === 'T';
+          const tfb = checked ? `<span class="pyp-fb ${res === 'right' ? 'ok' : 'bad'}">${res === 'right' ? '✔ ' + X('صحيح', 'Correct') : '✘ ' + X('غير صحيح', 'Not correct')} — <strong>${it.truth ? X('صحيحة: ', 'True: ') : X('خاطئة: ', 'False: ')}</strong>${esc(T(it.why))}</span>` : '';
+          return `<li class="pyp-item ${res}"><label class="pyp-opt"><input type="checkbox" value="T" data-kind="tick" data-aid="${aid}" data-item="${it.id}"${ticked ? ' checked' : ''}> <span>${esc(T(it.q))}</span></label> ${tfb}</li>`;
+        }
         if (it.type === 'word') {
           return `<li class="pyp-item ${res}"><label for="pyp-${aid}-${it.id}">${esc(T(it.q))}</label><select id="pyp-${aid}-${it.id}" class="pyp-sel" data-kind="ans" data-aid="${aid}" data-item="${it.id}"><option value="">—</option>${pt.bank.map((o) => `<option value="${o.v}"${val === o.v ? ' selected' : ''}>${esc(T(o.t))}</option>`).join('')}</select> ${fb}</li>`;
         }
@@ -167,6 +172,34 @@
       <p class="pyp-small">${X('توجد صلة بين هذه التوقعات والمخاطر في الجزء الرابع: ما قد يضرّ مشروعك سيُعالَج هناك.', 'These forecasts connect to the risks in Part IV: what could harm your business is handled there.')}</p></section>`;
   }
 
+  /* ---------- risk register (Activity 6 form; FR-09; Application guidance for optional helper fields; NO scoring) ---------- */
+  const R_ORIGIN = [['internal', B('داخلي', 'Internal')], ['external', B('خارجي', 'External')]];
+  const R_STRAT = [['accept', B('قبول', 'Accept')], ['transfer', B('نقل', 'Transfer')], ['reduce', B('تقليل', 'Reduce')], ['avoid', B('تجنب', 'Avoid')]];
+  const riskList = () => { const v = gv('risks', []); return Array.isArray(v) ? v : []; };
+  function riskCard(r, i) {
+    const k = (n) => 'risks.' + i + '.' + n;
+    const tx = (n, ar, en) => `<label class="pyp-q"><span>${X(ar, en)}</span><input class="pyp-txt" type="text" data-kind="txt" data-key="${k(n)}" value="${esc(r[n] || '')}"></label>`;
+    const sel = (n, ar, en, list) => `<label>${X(ar, en)}<select class="pyp-sel" data-kind="fsel" data-key="${k(n)}"><option value="">—</option>${list.map(([v, t]) => `<option value="${v}"${r[n] === v ? ' selected' : ''}>${esc(T(t))}</option>`).join('')}</select></label>`;
+    return `<div class="pyp-fc pyp-risk" id="pypRisk-${i}" role="group" aria-label="${X('خطر ', 'Risk ')}${i + 1}">
+      <div class="pyp-fc-head"><strong><bdi>${i + 1}</bdi>. ${X('خطر', 'Risk')}</strong>${r.fromForecast ? `<span class="pyp-forecast-tag">${X('من سجل توقعاتي', 'From my forecasts')}</span>` : ''}<button type="button" class="pyp-btn" data-act="risk-del" data-idx="${i}">${X('حذف', 'Remove')}</button></div>
+      <label class="pyp-q"><span>${X('الخطر', 'Risk')}</span><textarea class="pyp-ta" rows="2" data-kind="ta" data-key="${k('risk')}">${esc(r.risk || '')}</textarea></label>
+      <div class="pyp-fc-row">${tx('likelihood', 'الاحتمال (Likelihood)', 'Likelihood')}${tx('frequency', 'التكرار (Frequency)', 'Frequency')}${tx('impact', 'الأثر (Impact)', 'Impact')}${tx('priority', 'الأولوية (Priority)', 'Priority')}</div>
+      <label class="pyp-q"><span>${X('الإجراءات (Actions)', 'Actions')}</span><textarea class="pyp-ta" rows="3" data-kind="ta" data-key="${k('actions')}">${esc(r.actions || '')}</textarea></label>
+      <div class="pyp-fc-row pyp-optional"><span class="pyp-apptag">${X('اختياري — إرشاد التطبيق', 'Optional — application guidance')}</span>${sel('origin', 'مصدر الخطر (كما يعرّفه الدليل)', 'Where the risk arises (as the manual defines it)', R_ORIGIN)}${sel('strategy', 'طريقة الاستجابة (الطرق الأربع في الدليل)', 'Way of responding (the manual’s four ways)', R_STRAT)}</div></div>`;
+  }
+  function wsRisk() {
+    const list = riskList(); const fcs = fcList();
+    const linked = new Set(list.map((r) => r && r.fromForecast).filter(Boolean));
+    const fcLabel = (f, i) => (T(((FC_AREAS.find((a) => a[0] === f.area) || [])[1])) || X('توقّع ', 'Forecast ') + (i + 1)) + ': ' + (String(f.change || '').trim().slice(0, 70) || X('(بلا وصف)', '(no description)'));
+    const fcBox = fcs.length ? `<div class="pyp-fcbox"><h5>${X('من توقعاتي (الجزء الثالث)', 'From my forecasts (Part III)')}</h5><p class="pyp-small">${X('يطلب منك الدليل الرجوع إلى توقعاتك لتحديد المخاطر الخارجية. يمكنك تحويل توقع إلى خطر ثم إكمال حقوله، دون إدخال النص مرتين.', 'The manual asks you to refer to your forecasts to identify external risks. You can turn a forecast into a risk and complete its fields, without typing the text twice.')}</p>
+      <ul class="pyp-fclist">${fcs.map((f, i) => `<li><span>${esc(fcLabel(f, i))}</span> <button type="button" class="pyp-btn" data-act="risk-from-fc" data-fid="${esc(f.id)}"${linked.has(f.id) ? ' disabled' : ''}>${linked.has(f.id) ? X('أُضيف', 'Added') : X('أضف كخطر', 'Add as a risk')}</button></li>`).join('')}</ul></div>` : '';
+    return `<section class="pyp-panel pyp-ws pyp-riskws" id="pypRiskWs" aria-label="${X('سجل المخاطر', 'Risk register')}"><h4>${X('نموذج النشاط 6: سجل المخاطر', 'Activity 6 form: risk register')} ${appTag()}</h4>
+      <p class="pyp-small">${X('أعمدة النموذج كما في الدليل: الخطر، الاحتمال، التكرار، الأثر، الأولوية، الإجراءات. اكتب تقييمك بكلماتك؛ لا يفرض التطبيق مقياساً أو صيغة أو تصنيفاً.', 'The form columns are those of the manual: Risk, Likelihood, Frequency, Impact, Priority, Actions. Write your assessment in your own words; the app imposes no scale, formula or classification.')}</p>
+      <div class="pyp-important" role="note">${X('الدليل: «نعطي الأولوية للمخاطر الأكبر أثراً في مشروعنا.» وتذكّر أن الخطر قد يكون داخلياً (من تحليل مشروعك) أو خارجياً (من توقعاتك).', 'The manual: “We prioritize the risks that have the greatest impact on our business.” Remember a risk may be internal (from your Business Analysis) or external (from your forecasts).')}</div>
+      ${fcBox}<div id="pypRiskList">${list.length ? list.map(riskCard).join('') : `<p class="pyp-small">${X('لا توجد مخاطر مسجّلة بعد. اضغط «إضافة خطر».', 'No risks recorded yet. Press “Add a risk”.')}</p>`}</div>
+      <div class="pyp-actions"><button type="button" class="pyp-btn primary" data-act="risk-add">${X('إضافة خطر', 'Add a risk')}</button>${saved()}</div></section>`;
+  }
+
   /* ---------- calculations → DOM ---------- */
   function recalc(root) {
     const set = (name, text) => { const el = root.querySelector('[data-calc="' + name + '"]'); if (el) el.textContent = text; };
@@ -214,7 +247,7 @@
     if (s.summary) { const done = !!gv('progress.' + part + '.summary', false); return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}<div class="pyp-actions"><button type="button" class="pyp-btn ${done ? '' : 'primary'}" data-act="review" data-part="${part}" aria-pressed="${done}">${done ? '✔ ' + X('تمت مراجعة الملخص (اضغط للتراجع)', 'Summary reviewed (press to undo)') : X('أنهيت مراجعة الملخص', 'I have reviewed the summary')}</button></div></section>`; }
     return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}</section>${s.workspace ? ws(s.workspace) : ''}`;
   }
-  const ws = (k) => (k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : '');
+  const ws = (k) => (k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : k === 'risk' ? wsRisk() : '');
   function renderPart(part) {
     const secs = C[part]; const meta = D.SECTIONS.find((x) => x.id === part);
     const chips = secs.map((s) => `<button type="button" class="pyp-chip" data-act="jump" data-to="${s.activity ? 'pypEx-' + s.activity.id : s.assess ? 'pypAs-' + s.assess : 'pypSec-' + part + '-' + s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))}</button>`).join('');
@@ -241,8 +274,8 @@
         else store.flush();
         return;
       }
-      if (t.dataset && t.dataset.kind === 'ans') {
-        const k = 'assessments.' + t.dataset.aid; const st = gv(k, {}) || {}; const answers = Object.assign({}, st.answers || {}); answers[t.dataset.item] = t.value;
+      if (t.dataset && (t.dataset.kind === 'ans' || t.dataset.kind === 'tick')) {
+        const k = 'assessments.' + t.dataset.aid; const st = gv(k, {}) || {}; const answers = Object.assign({}, st.answers || {}); answers[t.dataset.item] = t.dataset.kind === 'tick' ? (t.checked ? 'T' : '') : t.value;
         const was = !!st.checked; store.set(k, { answers, checked: false, complete: false }); updateProgress(root);
         if (was) { const el = root.querySelector('#pypAs-' + t.dataset.aid); if (el) { el.outerHTML = assessHtml(t.dataset.aid); if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root); const nf = root.querySelector('#pypAs-' + t.dataset.aid + ' [data-item="' + t.dataset.item + '"]' + (t.type === 'radio' ? '[value="' + t.value + '"]' : '')); if (nf) nf.focus(); } }
       }
@@ -250,6 +283,20 @@
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return; const a = b.dataset.act;
       const swap = (id, html) => { const el = root.querySelector('#' + id); if (el) { el.outerHTML = html; if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root); } };
+      if (a === 'risk-add' || a === 'risk-from-fc') {
+        const list = riskList().slice(); const base = { id: 'r' + Date.now().toString(36) + list.length, risk: '', likelihood: '', frequency: '', impact: '', priority: '', actions: '', origin: '', strategy: '', fromForecast: '' };
+        if (a === 'risk-from-fc') { const f = fcList().find((x) => x.id === b.dataset.fid); if (!f || list.some((r) => r && r.fromForecast === f.id)) return; base.risk = String(f.change || ''); base.origin = 'external'; base.fromForecast = f.id; }
+        list.push(base); store.set('risks', list); store.flush(); ctx.rerender(true);
+        const f2 = root.querySelector('#pypRisk-' + (list.length - 1) + ' textarea'); if (f2) { f2.focus(); f2.scrollIntoView({ block: 'center' }); }
+        return;
+      }
+      if (a === 'risk-del') {
+        const i = Number(b.dataset.idx); const list = riskList().slice();
+        if (!window.confirm(X('حذف هذا الخطر؟', 'Remove this risk?'))) return;
+        list.splice(i, 1); store.set('risks', list); store.flush(); ctx.rerender(true);
+        const f = root.querySelector('[data-act="risk-add"]'); if (f) f.focus();
+        return;
+      }
       if (a === 'fc-add') {
         const list = fcList().slice(); list.push({ id: 'f' + Date.now().toString(36) + list.length, area: '', cat: '', change: '', evidence: '', effect: '', response: '' });
         store.set('externalForecasts', list); store.flush(); ctx.rerender(true);
@@ -270,7 +317,7 @@
       else if (a === 'jump') { const el = root.querySelector('#' + b.dataset.to); if (el) { el.scrollIntoView({ block: 'start' }); const f = el.querySelector('textarea,select,input,button,h3,h4'); if (f) { if (!f.hasAttribute('tabindex') && /^H/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); } } }
     });
   }
-  function findEx(id) { for (const part of ['p1', 'p2', 'p3']) for (const s of C[part]) { if (s.activity && s.activity.id === id) return exercise(id, s.activity.title, s.activity.qs, null, s.activity.no); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
+  function findEx(id) { for (const part of ['p1', 'p2', 'p3', 'p4']) for (const s of C[part]) { if (s.activity && s.activity.id === id) return exercise(id, s.activity.title, s.activity.qs, null, s.activity.no); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
 
   window.SIYBPlanningLearn = { renderPart, bind, recalc, progress, progBar, updateProgress, isLive: (id) => !!C[id], MONTHS };
 })();

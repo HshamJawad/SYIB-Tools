@@ -29,7 +29,7 @@ window.SIYB_PYP_DATA = (() => {
         B('تغيّرات قد تؤثر في مبيعاتك وتسويقك', 'Changes that may impact your sales and marketing'),
         B('تغيّرات قد تؤثر في إنتاجك وتكاليفك', 'Changes that may impact your production and costs')],
       activities: '4–5', assessment: '3' },
-    { id: 'p4', no: 'IV', icon: '◬', phase: 4, page: '37',
+    { id: 'p4', live: true, no: 'IV', icon: '◬', phase: 4, page: '37',
       title: B('إدارة المخاطر', 'Managing Risk'),
       topics: [
         B('ما هي المخاطر؟', 'What is risk?'), B('ما هي إدارة المخاطر؟', 'What is Risk Management?'),
