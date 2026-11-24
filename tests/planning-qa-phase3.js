@@ -91,7 +91,7 @@ const stripInputs = (sel) => `(() => { const c = document.querySelector('${sel}'
   for (const [w, h] of [[375, 700], [768, 900], [1280, 800]]) { await pg.setViewportSize({ width: w, height: h }); await pg.waitForTimeout(250); await open(pg, 'p3'); rec('Responsive', `No page-level horizontal overflow, p3 at ${w}`, await pg.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1)); }
   await pg.setViewportSize({ width: 1280, height: 800 });
   // scope, isolation, regression
-  rec('Scope', 'Parts IV–V and end-of-manual remain placeholders (no inputs)', await (async () => { for (const x of ['p4', 'p5', 'end']) { await open(pg, x); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
+  rec('Scope', 'Part V and end-of-manual remain placeholders (no inputs)', await (async () => { for (const x of ['p5', 'end']) { await open(pg, x); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
   const keys = await pg.evaluate(() => Object.keys(localStorage).sort().join()); rec('Storage', 'Only siyb.iyb.planning.v1 added to localStorage', keys.split(',').filter((k) => !before.split(',').includes(k) && k !== 'siyb-language').join() === 'siyb.iyb.planning.v1', keys);
   const sc = await pg.evaluate(() => { const d = JSON.parse(localStorage.getItem('siyb.iyb.planning.v1')); return { m: d.moduleId, v: d.schemaVersion, keys: ['businessAnalysis', 'risks', 'plans', 'actionPlan', 'objectives'].every((k) => k in d) }; });
   rec('Storage', 'moduleId iyb-planning, schema 1, other model keys intact', sc.m === 'iyb-planning' && sc.v === 1 && sc.keys);
