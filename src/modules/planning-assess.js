@@ -1,5 +1,5 @@
 /* IYB Planning – Assessments 1 and 2 (Phase 2). Questions, options and the answer key are transcribed from the
-   original manual (Assessment 1 p.12–13, Assessment 2 p.26–27; answers p.97). Option values are LETTERS (a/b/c, A–F) so
+   original manual (Assessment 1 p.12–13, Assessment 2 p.26–27, Assessment 3 p.36; answers p.97). Option values are LETTERS (a/b/c, A–F) so
    Arabic-Indic digit conversion can never alter them. Answers are revealed only after the learner checks. */
 (() => {
   const B = (ar, en) => ({ ar, en });
@@ -36,6 +36,13 @@
       mcq('m3', B('لمعرفة هل تغيّر تكلفتك جيد أم سيئ ينبغي أن …', 'To find out if a change in your cost is good or bad, you should...'), mc3(B('تقارن التكلفة لكل وحدة.', 'compare the cost per item.'), B('تنظر إلى مبيعاتك لأن التكلفة تتناسب دائماً مع المبيعات.', 'look at your sales as the cost is always proportional to sales.'), B('زيادات التكلفة سيئة دائماً.', 'cost increases are always bad.')), 'a'),
       mcq('m4', B('الغرض من تحليل المشروع هو …', 'The purpose of a Business Analysis is...'), mc3(B('وضع خطط للتحسين.', 'to make plans for improvement.'), B('فهم كيف كان أداء مشروعك في الماضي.', 'to understand how your business performed in the past.'), B('كلا الإجابتين أعلاه صحيحة.', 'both of the above are correct.')), 'c'),
       mcq('m5', B('عند إجراء تحليل المشروع تستخدم …', 'When doing a Business Analysis, you use...'), mc3(B('سجلات مشروعك للعام الماضي.', 'your business records from last year.'), B('سجلات مشروعك لهذا العام.', 'your business records from this year.'), B('سجلاتك السابقة.', 'your past records.')), 'c')] }] };
+  A.a3 = {
+    id: 'a3', no: 3, pg: '36', ansPg: '97',
+    intro: B('لقد أنهيت الجزء الثالث من هذا الدليل. جرّب التمرين أدناه للتحقق من فهمك. أنهِ التمرين قبل مقارنة إجاباتك بالإجابات.', 'You have just completed Part III of this manual. Try the exercise below to check your understanding. Finish the exercise before comparing your answers with the answers.'),
+    parts: [{ title: B('أي إجابة صحيحة؟', 'Which one is correct?'), hint: B('ضع دائرة حول النهاية الصحيحة أو الأفضل لكل جملة.', 'Circle the correct or best ending for each sentence.'), items: [
+      mcq('m1', B('التوقّع يخبرك …', 'A forecast tells you...'), mc3(B('بما يُرجَّح أن يحدث في المستقبل.', 'what is likely to happen in the future.'), B('بالربح الذي حققته العام الماضي.', 'what profit you made last year.'), B('عن الماضي.', 'about the past.')), 'a'),
+      mcq('m2', B('عند توقّع التغيّرات في البيئة الخارجية …', 'When you forecast changes in the external environment...'), mc3(B('ركّز على التغيّرات الكبيرة.', 'focus on big changes.'), B('ركّز على التغيّرات التي قد تؤثر في مشروعك.', 'focus on changes that may affect your business.'), B('حاول تحديد كل التغيّرات الممكنة.', 'try to identify all possible changes.')), 'b'),
+      mcq('m3', B('ينبغي أن تبني توقعك على …', 'You should base your forecast on...'), mc3(B('أمنياتك.', 'your wish.'), B('سجلاتك السابقة.', 'your past records.'), B('الحقائق.', 'facts.')), 'c')] }] };
   // Pure scoring helper (no DOM): answers = {itemId: value}; returns per-item correctness and totals.
   A.score = (assess, answers) => {
     const per = {}; let correct = 0; let total = 0; let answered = 0;

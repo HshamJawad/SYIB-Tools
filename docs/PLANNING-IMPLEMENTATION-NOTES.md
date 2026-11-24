@@ -28,3 +28,17 @@ Source verification (original PDF, 113 pages, text extracted with pdftotext and 
 - Progress counts saved work (activity text, completed + checked assessment, summary review), not merely opening a section.
 
 Arabic remains a PRELIMINARY translation. Tests: `tests/planning-calc.test.js` (calculations), `tests/planning-qa.js` (foundation), `tests/planning-qa-phase2.js` (Parts I–II).
+
+## Phase 3 – Part III: Forecasting Changes in the External Environment (v0.25.0)
+Scope: Part III learning view (printed pp. 29–36), Activities 4 and 5, Assessment 3, the manual's summary, and an application-guidance register of external-change forecasts (FR-08). Parts IV–V, end-of-manual material, JSON import/export and PDF remain for later phases.
+
+Source verification (original PDF text compared with the code)
+- Activity 4 (p. 32) and Activity 5 (p. 34) prompts, the reflection questions before each list of examples, the lists of changes (customers, competitors, alternative products, economy, regulations and policies; supply of raw materials, new technologies, skills supply, economy, regulations and policies), the question lists, Juma's forecasts, the realism note ("base your answer on facts, not on wishes and dreams") and the summary are transcribed from the PDF.
+- Assessment 3 (p. 36): three multiple-choice questions; key from p. 97 = 1a, 2b, 3c.
+- The manual's Part III has no calculations or tables; none were added.
+
+Application guidance (labelled as such, not manual content): the forecasts register. Each record stores the business area (sales and marketing, or production and costs), the type of change (the manual's example categories plus "other"), the expected change, the facts it rests on, the expected effect and a possible response, and is tagged "estimate about the future — not a fact". No live data, no AI-generated forecasts, no scoring.
+
+Storage: records live in `externalForecasts` (array) inside `siyb.iyb.planning.v1`. The Planning store's path setter now also traverses arrays. The forecasts do not affect Part III progress (progress = Activities 4–5, Assessment 3 completed and checked, summary review).
+
+Tests: `tests/planning-qa-phase3.js` (41 checks). Earlier Planning suites updated for the new state: the script-count assertion now reads the registry, and the Phase 2 scope/dashboard assertions treat Part III as live.
