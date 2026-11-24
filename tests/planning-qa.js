@@ -33,10 +33,10 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
     await lz.click('.sidebar-group-head'); await lz.waitForTimeout(200);
     await lz.hover('[data-tool-head="planning"]'); await lz.waitForTimeout(1200);
     const b = await lz.evaluate(() => ({ g: typeof window.SIYBPlanning, root: !!document.querySelector('#pypRoot'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
-    rec('Lazy loading', 'Hover preloads the scripts (3 files, each once) but does not mount the module', b.g === 'object' && !b.root && b.nav === 0 && reqs.length === 3 && new Set(reqs).size === 3, JSON.stringify(b) + ' reqs=' + reqs.join());
+    rec('Lazy loading', 'Hover preloads the scripts (8 files, each once) but does not mount the module', b.g === 'object' && !b.root && b.nav === 0 && reqs.length === 8 && new Set(reqs).size === 8, JSON.stringify(b) + ' reqs=' + reqs.join());
     await lz.evaluate(() => document.querySelector('[data-tool-head="planning"]').click()); await lz.waitForTimeout(800);
     const c = await lz.evaluate(() => ({ root: !!document.querySelector('#pypRoot .pyp-card'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
-    rec('Lazy loading', 'Opening mounts the module and builds its sub-menu without re-requesting scripts', c.root && c.nav === 8 && reqs.length === 3, JSON.stringify(c) + ' reqs=' + reqs.length);
+    rec('Lazy loading', 'Opening mounts the module and builds its sub-menu without re-requesting scripts', c.root && c.nav === 8 && reqs.length === 8, JSON.stringify(c) + ' reqs=' + reqs.length);
     await lz.context().close();
     const ld = await newPage(browser, { width: 1280, height: 800 });
     await ld.goto(URL_, { waitUntil: 'domcontentloaded' });

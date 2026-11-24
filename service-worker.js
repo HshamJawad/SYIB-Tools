@@ -1,4 +1,4 @@
-const CACHE_NAME = "siyb-workshop-shell-v0.23.1";
+const CACHE_NAME = "siyb-workshop-shell-v0.24.0";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -34,6 +34,11 @@ const APP_SHELL = [
   "./src/modules/marketing.js",
   "./src/modules/planning-store.js",
   "./src/modules/planning-data.js",
+  "./src/modules/planning-calc.js",
+  "./src/modules/planning-assess.js",
+  "./src/modules/planning-content-a.js",
+  "./src/modules/planning-content-b.js",
+  "./src/modules/planning-learn.js",
   "./src/modules/planning.js",
   "./src/modules/arabic-pdf.js",
   "./src/modules/report-pdf.js",
@@ -63,7 +68,7 @@ self.addEventListener("activate", (event) => {
   );
   self.clients.claim();
   self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.23.1" }));
+    clients.forEach((client) => client.postMessage({ type: "SIYB_APP_UPDATED", version: "0.24.0" }));
   });
 });
 
@@ -103,7 +108,7 @@ self.addEventListener("fetch", (event) => {
   })());
 });
 
-// Release note: v0.23.1 update flow is ready for the Pages deployment.
+// Release note: v0.24.0 update flow is ready for the Pages deployment.
 // The update is activated only after an explicit user action in the app banner.
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SIYB_SKIP_WAITING") self.skipWaiting();

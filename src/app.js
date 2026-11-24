@@ -329,7 +329,7 @@
     if (!costingScriptPromise) {
       costingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.23.1";
+        script.src = assetUrl("src/modules/business-costing.js") + "?v=0.24.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -350,7 +350,7 @@
     if (!trainingScriptPromise) {
       trainingScriptPromise = new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = assetUrl("src/modules/training.js") + "?v=0.23.1";
+        script.src = assetUrl("src/modules/training.js") + "?v=0.24.0";
         script.onload = resolve;
         script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
         document.body.appendChild(script);
@@ -367,7 +367,7 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = assetUrl(src) + "?v=0.23.1";
+      script.src = assetUrl(src) + "?v=0.24.0";
       script.async = false; // download in parallel, execute in insertion order
       script.onload = resolve;
       script.onerror = () => reject(new Error("تعذر تحميل ملف JavaScript: " + script.src));
@@ -433,7 +433,7 @@
 
     try {
       const htmlUrl = assetUrl("src/modules/business-costing.html");
-      const response = await fetch(htmlUrl + "?v=0.23.1");
+      const response = await fetch(htmlUrl + "?v=0.24.0");
       if (!response.ok) throw new Error("تعذر تحميل ملف HTML: " + response.status + " — " + htmlUrl);
 
       host.innerHTML = await response.text();
