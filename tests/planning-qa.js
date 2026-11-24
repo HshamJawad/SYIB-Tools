@@ -25,6 +25,7 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   // unloaded and requests nothing; (3) pointer-over the sidebar head loads it; (4) it is mounted only on opening.
   {
     const lz = await newPage(browser, { width: 1280, height: 800 });
+    const NSC = await (async () => { const t = await newPage(browser, { width: 800, height: 600 }); await t.goto(URL_); const n = await t.evaluate(() => SIYBModules.get('planning').external.scripts.length); await t.context().close(); return n; })();
     const reqs = []; lz.on('request', (r) => { if (/\/planning[^/]*\.(js|css)/.test(r.url()) && /\.js/.test(r.url())) reqs.push(r.url().split('/').pop().split('?')[0]); });
     await lz.addInitScript(() => { window.requestIdleCallback = () => 0; });
     await lz.goto(URL_, { waitUntil: 'load' }); await lz.waitForTimeout(2200);
@@ -33,10 +34,10 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
     await lz.click('.sidebar-group-head'); await lz.waitForTimeout(200);
     await lz.hover('[data-tool-head="planning"]'); await lz.waitForTimeout(1200);
     const b = await lz.evaluate(() => ({ g: typeof window.SIYBPlanning, root: !!document.querySelector('#pypRoot'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
-    rec('Lazy loading', 'Hover preloads the scripts (8 files, each once) but does not mount the module', b.g === 'object' && !b.root && b.nav === 0 && reqs.length === 8 && new Set(reqs).size === 8, JSON.stringify(b) + ' reqs=' + reqs.join());
+    rec('Lazy loading', 'Hover preloads all registered scripts (each once) but does not mount the module', b.g === 'object' && !b.root && b.nav === 0 && reqs.length === NSC && new Set(reqs).size === NSC && NSC >= 9, JSON.stringify(b) + ' reqs=' + reqs.join());
     await lz.evaluate(() => document.querySelector('[data-tool-head="planning"]').click()); await lz.waitForTimeout(800);
     const c = await lz.evaluate(() => ({ root: !!document.querySelector('#pypRoot .pyp-card'), nav: document.querySelectorAll('[data-nav-group="planning"] [data-nav-item]').length }));
-    rec('Lazy loading', 'Opening mounts the module and builds its sub-menu without re-requesting scripts', c.root && c.nav === 8 && reqs.length === 8, JSON.stringify(c) + ' reqs=' + reqs.length);
+    rec('Lazy loading', 'Opening mounts the module and builds its sub-menu without re-requesting scripts', c.root && c.nav === 8 && reqs.length === NSC, JSON.stringify(c) + ' reqs=' + reqs.length);
     await lz.context().close();
     const ld = await newPage(browser, { width: 1280, height: 800 });
     await ld.goto(URL_, { waitUntil: 'domcontentloaded' });

@@ -22,7 +22,7 @@ window.SIYB_PYP_DATA = (() => {
         B('تحليل الربح', 'Analyse your profit'),
         B('لكل تحليل ثلاث خطوات: الحصول على بيانات سابقة، ومقارنة سجلاتك، وإيجاد الأسباب', 'Each analysis has three steps: get past data, compare your records, find reasons')],
       activities: '2–3', assessment: '2' },
-    { id: 'p3', no: 'III', icon: '◐', phase: 3, page: '29',
+    { id: 'p3', live: true, no: 'III', icon: '◐', phase: 3, page: '29',
       title: B('توقّع التغيّرات في البيئة الخارجية', 'Forecasting Changes in the External Environment'),
       topics: [
         B('ما هو التوقّع؟', 'What is a forecast?'),

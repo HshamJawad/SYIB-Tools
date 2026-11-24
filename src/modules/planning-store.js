@@ -65,7 +65,7 @@
     const keys = String(path).split('.');
     if (keys.some((k) => BAD.includes(k))) return;
     let o = ensure();
-    keys.slice(0, -1).forEach((k) => { if (!isObj(o[k])) o[k] = {}; o = o[k]; });
+    keys.slice(0, -1).forEach((k) => { if (!isObj(o[k]) && !Array.isArray(o[k])) o[k] = {}; o = o[k]; });
     o[keys[keys.length - 1]] = value;
     clearTimeout(timer); timer = setTimeout(flush, 350);
   };

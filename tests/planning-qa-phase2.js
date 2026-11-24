@@ -16,7 +16,7 @@ async function answer(pg, aid, map) { for (const [it, v] of Object.entries(map))
   await pg.click('.sidebar-group-head'); await pg.evaluate(() => document.querySelector('[data-tool-head="planning"]').click()); await pg.waitForTimeout(900);
   // ---- structure / fidelity
   const home = await pg.evaluate(() => document.querySelector('#pypRoot').innerText);
-  rec('Dashboard', 'Parts I and II show progress; Parts III–V show later-phase status', (await pg.$$('#pypRoot .pyp-card [data-pyp-prog]')).length === 2 && /المرحلة 3/.test(ad(home)) && /المرحلة 5/.test(ad(home)));
+  rec('Dashboard', 'Parts I–III show progress; Parts IV–V show later-phase status', (await pg.$$('#pypRoot .pyp-card [data-pyp-prog]')).length === 3 && /المرحلة 4/.test(ad(home)) && /المرحلة 5/.test(ad(home)));
   await open(pg, 'p1');
   const p1 = await pg.evaluate(() => ({ ids: [...document.querySelectorAll('#pypRoot [id^="pypSec-p1-"],#pypRoot [id^="pypEx-"],#pypRoot [id^="pypAs-"]')].map((e) => e.id).join(), txt: document.querySelector('#pypRoot').innerText, tags: document.querySelectorAll('#pypRoot .pyp-srcpg').length }));
   rec('Part I', 'All Part I sections present in manual order (intro, 1–3, Activity 1, 4, 5, summary, Assessment 1)', p1.ids === 'pypSec-p1-intro,pypSec-p1-t1,pypSec-p1-t2,pypEx-st1,pypEx-st2,pypSec-p1-t3,pypEx-a1,pypSec-p1-t4,pypSec-p1-t5,pypSec-p1-sum,pypAs-a1', p1.ids);
@@ -84,7 +84,7 @@ async function answer(pg, aid, map) { for (const [it, v] of Object.entries(map))
   rec('Progress', 'Part II 3/4 before summary review', /3\/4/.test(ad(await pg.evaluate(() => document.querySelector('[data-pyp-prog="p2"]').innerText))));
   await pg.evaluate(() => document.querySelector('[data-act="review"][data-part="p2"]').click()); await pg.waitForTimeout(300);
   rec('Progress', 'Part II 4/4 after summary review; dashboard shows both parts complete', /4\/4/.test(ad(await pg.evaluate(() => document.querySelector('[data-pyp-prog="p2"]').innerText))));
-  await open(pg, 'home'); rec('Dashboard', 'Dashboard progress bars are 100%', await pg.evaluate(() => [...document.querySelectorAll('#pypRoot .pyp-card .pyp-prog-bar i')].every((i) => i.style.width === '100%')));
+  await open(pg, 'home'); rec('Dashboard', 'Dashboard progress bars of Parts I and II are 100%', await pg.evaluate(() => [...document.querySelectorAll('#pypRoot .pyp-card [data-pyp-prog="p1"] .pyp-prog-bar i,#pypRoot .pyp-card [data-pyp-prog="p2"] .pyp-prog-bar i')].every((i) => i.style.width === '100%')));
   // ---- language switch keeps data and focus; English has no Arabic UI text
   await open(pg, 'p2'); await pg.focus('[data-key="activities.a2.q0"]'); await pg.keyboard.press('Control+End'); await pg.keyboard.type(' +more');
   await pg.evaluate(() => document.querySelector('#languageToggle').click()); /* programmatic click keeps focus in the field, as a keyboard shortcut would */ await pg.waitForTimeout(500);
@@ -106,7 +106,7 @@ async function answer(pg, aid, map) { for (const [it, v] of Object.entries(map))
   for (const [w, h] of [[375, 700], [768, 900], [1280, 800]]) { await pg.setViewportSize({ width: w, height: h }); await pg.waitForTimeout(250); for (const s of ['p1', 'p2']) { await open(pg, s); rec('Responsive', `No page-level horizontal overflow, ${s} at ${w}`, await pg.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1)); } }
   // ---- scope / isolation / regression
   await pg.setViewportSize({ width: 1280, height: 800 });
-  rec('Scope', 'Parts III–V and end-of-manual remain placeholders (no inputs)', await (async () => { for (const s of ['p3', 'p4', 'p5', 'end']) { await open(pg, s); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
+  rec('Scope', 'Parts IV–V and end-of-manual remain placeholders (no inputs)', await (async () => { for (const s of ['p4', 'p5', 'end']) { await open(pg, s); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
   const keys = await pg.evaluate(() => Object.keys(localStorage).sort().join()); rec('Storage', 'Only siyb.iyb.planning.v1 added to localStorage', keys.split(',').filter((k) => !before.split(',').includes(k) && k !== 'siyb-language').join() === 'siyb.iyb.planning.v1', keys);
   for (const t of ['marketing', 'stock', 'costing']) { const o = await pg.evaluate(() => !!document.querySelector('[data-group="iyb"] .sidebar-group-body:not([hidden])')); if (!o) await pg.click('.sidebar-group-head'); await pg.evaluate((x) => document.querySelector(`[data-tool-head="${x}"]`).click(), t); await pg.waitForTimeout(700); rec('Regression', t + ' still opens', await pg.evaluate((x) => (x === 'costing' ? (!document.body.classList.contains('mode-training') && document.querySelector('#costingModuleRoot').innerText.length > 100) : document.body.classList.contains('mode-' + x)) && !document.body.classList.contains('mode-planning'), t)); }
   rec('Console', 'No page errors', errs.length === 0, errs.slice(0, 2).join(' | '));

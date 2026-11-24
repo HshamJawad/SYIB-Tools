@@ -91,3 +91,10 @@
 .pyp-unitrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
 .pyp-unitrow .pyp-txt{width:120px}
 @media (max-width:600px){.pyp-prog-bar,.pyp-prog.big .pyp-prog-bar{width:90px}.pyp-chips{gap:4px}}
+/* Part III – external-change forecasts register */
+.pyp-fc{border:1px solid #dce8ec;border-radius:12px;padding:12px;margin:0 0 12px;background:#fbfdfe}
+.pyp-fc-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+.pyp-fc-head strong{flex:1;min-width:120px}
+.pyp-forecast-tag{display:inline-block;padding:2px 10px;border-radius:999px;background:#F48D011f;border:1px solid #F48D0188;font-size:12px;font-weight:800}
+.pyp-fc-row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:8px}
+.pyp-fc-row label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:13px}

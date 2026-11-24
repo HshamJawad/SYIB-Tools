@@ -137,6 +137,36 @@
       stepHead(3, 'ابحث عن الأسباب', 'Find reasons') + area(base + '.reasons_gp', X('لماذا تغيّر إجمالي الربح؟', 'Why did the Gross Profit change?')) + area(base + '.reasons_np', X('لماذا تغيّر صافي الربح؟', 'Why did the Net Profit change?')) + '</section>';
   }
 
+  /* ---------- external-change forecasts workspace (FR-08; Application guidance; forecasts are assumptions, not facts) ---------- */
+  const FC_CATS = {
+    sales: [['customers', B('الزبائن: تغيّر الطلب أو السلوك الشرائي', 'Customers: change in demand or buying behaviour')], ['competitors', B('المنافسون', 'Competitors')], ['alternatives', B('المنتجات البديلة', 'Alternative products')], ['economy', B('الاقتصاد', 'Economy')], ['regulations', B('اللوائح والسياسات', 'Regulations and policies')], ['other', B('أخرى', 'Other')]],
+    costs: [['supply', B('توريد المواد الخام والعمالة الماهرة', 'Supply of raw materials and skilled labour')], ['technology', B('التقنيات الجديدة', 'New technologies')], ['economy', B('الاقتصاد', 'Economy')], ['regulations', B('اللوائح والسياسات', 'Regulations and policies')], ['other', B('أخرى', 'Other')]]
+  };
+  const FC_AREAS = [['sales', B('المبيعات والتسويق', 'Sales and marketing')], ['costs', B('الإنتاج والتكاليف', 'Production and costs')]];
+  const fcList = () => { const v = gv('externalForecasts', []); return Array.isArray(v) ? v : []; };
+  function fcCard(f, i) {
+    const k = (n) => 'externalForecasts.' + i + '.' + n;
+    const cats = FC_CATS[f.area] || [];
+    const ta = (n, ar, en) => `<label class="pyp-q"><span>${X(ar, en)}</span><textarea class="pyp-ta" rows="3" data-kind="ta" data-key="${k(n)}">${esc(f[n] || '')}</textarea></label>`;
+    return `<div class="pyp-fc" id="pypFc-${i}" role="group" aria-label="${X('توقع ', 'Forecast ')}${i + 1}">
+      <div class="pyp-fc-head"><strong><bdi>${i + 1}</bdi>. ${X('توقّع', 'Forecast')}</strong><span class="pyp-forecast-tag">${X('تقدير مستقبلي — ليس حقيقة', 'Estimate about the future — not a fact')}</span>
+      <button type="button" class="pyp-btn" data-act="fc-del" data-idx="${i}">${X('حذف', 'Remove')}</button></div>
+      <div class="pyp-fc-row"><label>${X('المجال المتأثر', 'Business area affected')}<select class="pyp-sel" data-kind="fsel" data-key="${k('area')}"><option value="">—</option>${FC_AREAS.map(([v, n]) => `<option value="${v}"${f.area === v ? ' selected' : ''}>${esc(T(n))}</option>`).join('')}</select></label>
+      <label>${X('نوع التغيّر', 'Type of change')}<select class="pyp-sel" data-kind="fsel" data-key="${k('cat')}"${cats.length ? '' : ' disabled'}><option value="">—</option>${cats.map(([v, n]) => `<option value="${v}"${f.cat === v ? ' selected' : ''}>${esc(T(n))}</option>`).join('')}</select></label></div>
+      ${ta('change', 'ما التغيّر الذي تتوقعه؟', 'What change do you expect?')}
+      ${ta('evidence', 'ما الوقائع التي يستند إليها توقعك؟ (حقائق لا أمنيات)', 'What facts is this forecast based on? (facts, not wishes)')}
+      ${ta('effect', 'ما أثره المتوقع في مبيعاتك أو تسويقك أو إنتاجك أو تكاليفك؟', 'What effect may it have on your sales, marketing, production or costs?')}
+      ${ta('response', 'ما الذي يمكن أن يفعله مشروعك استجابةً لذلك؟', 'What could your business do about it?')}</div>`;
+  }
+  function wsForecast() {
+    const list = fcList();
+    return `<section class="pyp-panel pyp-ws pyp-fcws" id="pypFcWs" aria-label="${X('سجل التوقعات', 'Forecast register')}">
+      <div class="pyp-important" role="note">${X('هذه توقعات واعتبارها افتراضات: ليست حقائق ولا نتائج مضمونة، وتُراجَع عندما تتوفر معلومات جديدة.', 'These are forecasts and should be treated as assumptions: they are not facts or guaranteed outcomes, and should be reviewed when new information is available.')}</div>
+      <div id="pypFcList">${list.length ? list.map(fcCard).join('') : `<p class="pyp-small">${X('لا توجد توقعات مسجّلة بعد. اضغط «إضافة توقّع».', 'No forecasts recorded yet. Press “Add a forecast”.')}</p>`}</div>
+      <div class="pyp-actions"><button type="button" class="pyp-btn primary" data-act="fc-add">${X('إضافة توقّع', 'Add a forecast')}</button>${saved()}</div>
+      <p class="pyp-small">${X('توجد صلة بين هذه التوقعات والمخاطر في الجزء الرابع: ما قد يضرّ مشروعك سيُعالَج هناك.', 'These forecasts connect to the risks in Part IV: what could harm your business is handled there.')}</p></section>`;
+  }
+
   /* ---------- calculations → DOM ---------- */
   function recalc(root) {
     const set = (name, text) => { const el = root.querySelector('[data-calc="' + name + '"]'); if (el) el.textContent = text; };
@@ -184,7 +214,7 @@
     if (s.summary) { const done = !!gv('progress.' + part + '.summary', false); return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}<div class="pyp-actions"><button type="button" class="pyp-btn ${done ? '' : 'primary'}" data-act="review" data-part="${part}" aria-pressed="${done}">${done ? '✔ ' + X('تمت مراجعة الملخص (اضغط للتراجع)', 'Summary reviewed (press to undo)') : X('أنهيت مراجعة الملخص', 'I have reviewed the summary')}</button></div></section>`; }
     return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}</section>${s.workspace ? ws(s.workspace) : ''}`;
   }
-  const ws = (k) => (k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : '');
+  const ws = (k) => (k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : '');
   function renderPart(part) {
     const secs = C[part]; const meta = D.SECTIONS.find((x) => x.id === part);
     const chips = secs.map((s) => `<button type="button" class="pyp-chip" data-act="jump" data-to="${s.activity ? 'pypEx-' + s.activity.id : s.assess ? 'pypAs-' + s.assess : 'pypSec-' + part + '-' + s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))}</button>`).join('');
@@ -204,7 +234,14 @@
       const sv = t.closest('section') && t.closest('section').querySelector('[data-saved]'); if (sv) sv.textContent = X('✓ تم الحفظ تلقائياً', '✓ Saved automatically');
     });
     root.addEventListener('change', (e) => {
-      const t = e.target; if (t.dataset && t.dataset.kind === 'ans') {
+      const t = e.target;
+      if (t.dataset && t.dataset.kind === 'fsel') {
+        store.set(t.dataset.key, t.value);
+        if (/\.area$/.test(t.dataset.key)) { const i = t.dataset.key.split('.')[1]; store.set('externalForecasts.' + i + '.cat', ''); store.flush(); ctx.rerender(true); const nf = root.querySelector('[data-key="' + t.dataset.key + '"]'); if (nf) nf.focus({ preventScroll: true }); }
+        else store.flush();
+        return;
+      }
+      if (t.dataset && t.dataset.kind === 'ans') {
         const k = 'assessments.' + t.dataset.aid; const st = gv(k, {}) || {}; const answers = Object.assign({}, st.answers || {}); answers[t.dataset.item] = t.value;
         const was = !!st.checked; store.set(k, { answers, checked: false, complete: false }); updateProgress(root);
         if (was) { const el = root.querySelector('#pypAs-' + t.dataset.aid); if (el) { el.outerHTML = assessHtml(t.dataset.aid); if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root); const nf = root.querySelector('#pypAs-' + t.dataset.aid + ' [data-item="' + t.dataset.item + '"]' + (t.type === 'radio' ? '[value="' + t.value + '"]' : '')); if (nf) nf.focus(); } }
@@ -213,6 +250,19 @@
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return; const a = b.dataset.act;
       const swap = (id, html) => { const el = root.querySelector('#' + id); if (el) { el.outerHTML = html; if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root); } };
+      if (a === 'fc-add') {
+        const list = fcList().slice(); list.push({ id: 'f' + Date.now().toString(36) + list.length, area: '', cat: '', change: '', evidence: '', effect: '', response: '' });
+        store.set('externalForecasts', list); store.flush(); ctx.rerender(true);
+        const f = root.querySelector('#pypFc-' + (list.length - 1) + ' select'); if (f) { f.focus(); f.scrollIntoView({ block: 'center' }); }
+        return;
+      }
+      if (a === 'fc-del') {
+        const i = Number(b.dataset.idx); const list = fcList().slice();
+        if (!window.confirm(X('حذف هذا التوقّع؟', 'Remove this forecast?'))) return;
+        list.splice(i, 1); store.set('externalForecasts', list); store.flush(); ctx.rerender(true);
+        const f = root.querySelector('[data-act="fc-add"]'); if (f) f.focus();
+        return;
+      }
       if (a === 'reveal') { revealed[b.dataset.id] = !revealed[b.dataset.id]; const sec = findEx(b.dataset.id); if (sec) swap('pypEx-' + b.dataset.id, sec); const nb = root.querySelector('#pypEx-' + b.dataset.id + ' [data-act="reveal"]'); if (nb) nb.focus(); }
       else if (a === 'check') { const aid = b.dataset.aid; const st = gv('assessments.' + aid, {}) || {}; const sc = AS.score(AS[aid], st.answers || {}); store.set('assessments.' + aid, { answers: st.answers || {}, checked: true, complete: sc.answered === sc.total, correct: sc.correct, total: sc.total, answered: sc.answered }); store.flush(); swap('pypAs-' + aid, assessHtml(aid)); updateProgress(root); const r = root.querySelector('#pypAs-' + aid + ' .pyp-result'); if (r) r.scrollIntoView({ block: 'nearest' }); }
       else if (a === 'retry') { const aid = b.dataset.aid; store.set('assessments.' + aid, { answers: {}, checked: false, complete: false }); store.flush(); swap('pypAs-' + aid, assessHtml(aid)); updateProgress(root); }
@@ -220,7 +270,7 @@
       else if (a === 'jump') { const el = root.querySelector('#' + b.dataset.to); if (el) { el.scrollIntoView({ block: 'start' }); const f = el.querySelector('textarea,select,input,button,h3,h4'); if (f) { if (!f.hasAttribute('tabindex') && /^H/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); } } }
     });
   }
-  function findEx(id) { for (const part of ['p1', 'p2']) for (const s of C[part]) { if (s.activity && s.activity.id === id) return exercise(id, s.activity.title, s.activity.qs, null, s.activity.no); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
+  function findEx(id) { for (const part of ['p1', 'p2', 'p3']) for (const s of C[part]) { if (s.activity && s.activity.id === id) return exercise(id, s.activity.title, s.activity.qs, null, s.activity.no); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
 
   window.SIYBPlanningLearn = { renderPart, bind, recalc, progress, progBar, updateProgress, isLive: (id) => !!C[id], MONTHS };
 })();
