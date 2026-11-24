@@ -111,7 +111,7 @@ const K = 'siyb.iyb.marketing.v1';
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(900);
   await pw.evaluate(() => SIYBMarketing.open('data')).catch(() => {}); await pw.waitForTimeout(300);
   rec('PWA', 'Offline: data page and report render; export works', await (async () => { try { const ok = await pw.evaluate(() => !!document.querySelector('.mk-report') && !!document.querySelector('[data-act="export"]')); const [d] = await Promise.all([pw.waitForEvent('download', { timeout: 5000 }), pw.click('[data-act="export"]')]); return ok && !!d; } catch (_) { return false; } })());
-  rec('PWA', 'Cache v0.23.0 present', await pw.evaluate(async () => (await caches.keys()).some((k) => k.includes('v0.23.0'))).catch(() => false));
+  rec('PWA', 'Cache v0.24.0 present', await pw.evaluate(async () => (await caches.keys()).some((k) => k.includes('v0.24.0'))).catch(() => false));
   await browser.close();
   results.forEach((r) => console.log(r.p ? 'PASS ' : 'FAIL ', `[${r.a}]`, r.n, !r.p && r.note ? ' — ' + r.note : ''));
   const f = results.filter((r) => !r.p).length; console.log(`\nPASSED ${results.length - f}  FAILED ${f}`); process.exit(f ? 1 : 0);

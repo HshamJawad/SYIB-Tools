@@ -5,6 +5,7 @@
   'use strict';
   const D = window.SIYB_PYP_DATA;
   const store = window.SIYBPlanningStore;
+  const L = window.SIYBPlanningLearn;
   const $ = (id) => document.getElementById(id);
   const lang = () => (document.documentElement.lang === 'en' ? 'en' : 'ar');
   const T = (o) => (o && typeof o === 'object' ? (o[lang()] ?? '') : (o ?? ''));
@@ -16,7 +17,7 @@
   let root = null; let currentId = null;
 
   const later = (s) => X('المحتوى في المرحلة ' + s.phase + ' من التطوير', 'Content arrives in development phase ' + s.phase);
-  const pill = (s) => `<span class="pyp-status">${esc(later(s))}</span>`;
+  const pill = (s) => (s.live ? L.progBar(s.id, '') : `<span class="pyp-status">${esc(later(s))}</span>`);
   const appTag = () => `<span class="pyp-apptag">${X('إرشاد التطبيق', 'Application guidance')}</span>`;
 
   const credit = () => `<section class="pyp-panel pyp-credit" aria-labelledby="pypCreditH"><h3 id="pypCreditH">${X('المصدر والترخيص', 'Source and licence')}</h3>
@@ -57,14 +58,18 @@
       ${storageNote()}${prelim()}${edu()}
       <div class="pyp-grid">${cards}</div>
       <section class="pyp-panel" aria-labelledby="pypPlansH"><h3 id="pypPlansH">${X('الخطط الخمس في الدليل', 'The five plans in the manual')}</h3><ol class="pyp-plans">${plans}</ol>
-        <p class="pyp-small">${X('تُنفَّذ أدوات الخطط الخمس في المرحلة 5 من التطوير، وفق تسلسل الدليل.', 'The tools for the five plans arrive in development phase 5, following the manual’s sequence.')}</p></section>
+        <p class="pyp-small">${X('الجزءان الأول والثاني متاحان الآن؛ وتُنفَّذ أدوات الخطط الخمس في المرحلة 5 من التطوير، وفق تسلسل الدليل.', 'Parts I and II are available now; the tools for the five plans arrive in development phase 5, following the manual’s sequence.')}</p></section>
       ${credit()}`;
   }
 
+  const pager = (p, n, ar) => `<div class="pyp-pager">${p ? `<button type="button" class="pyp-btn" data-act="go" data-id="${p.id}">${ar ? '→ ' : '← '}${esc(T(p.title))}</button>` : '<span></span>'}${n ? `<button type="button" class="pyp-btn primary" data-act="go" data-id="${n.id}">${esc(T(n.title))} ${ar ? '←' : '→'}</button>` : '<span></span>'}</div>`;
   function renderSection(id) {
     const s = byId(id); const ar = lang() === 'ar';
     const i = NAV.findIndex((x) => x.id === id); const p = NAV[i - 1], n = NAV[i + 1];
     let body;
+    if (s.live) {
+      return L.renderPart(s.id) + credit() + pager(p, n, ar);
+    }
     if (s.id === 'data') {
       body = `<p>${X('النسخ الاحتياطي والاستيراد ومسح البيانات وتقرير PDF ستتوفر في المرحلة 7.', 'Backup, import, erase and the PDF report will be available in phase 7.')}</p>
         <p class="pyp-small">${X('مفتاح التخزين المعزول لهذه الوحدة: ', 'This module’s isolated storage key: ')}<code dir="ltr">${esc(store.KEY)}</code></p>`;
@@ -83,10 +88,15 @@
   function render(keepScroll) {
     if (!root) return;
     const s = byId(currentId); const y = window.scrollY;
+    const ae = document.activeElement; const fk = keepScroll && ae && root.contains(ae) && ae.dataset && ae.dataset.key ? ae.dataset.key : null;
+    const sel = fk && typeof ae.selectionStart === 'number' ? [ae.selectionStart, ae.selectionEnd] : null;
+    store.flush();
     root.innerHTML = s.id === 'home' ? renderHome() : renderSection(s.id);
     setHeading(s);
+    L.recalc(root);
     if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root);
     if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    if (fk) { const el = root.querySelector('[data-key="' + fk + '"]'); if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) { try { el.setSelectionRange(sel[0], sel[1]); } catch (_) { /* ignore */ } } } }
   }
   function open(id) {
     currentId = byId(id).id;
@@ -105,6 +115,7 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       if (b.dataset.act === 'go') open(b.dataset.id);
     });
+    L.bind(root, { rerender: (k) => render(k) });
     if (!currentId) { const last = store.get('lastSection', 'home'); currentId = NAV.some((s) => s.id === last) ? last : 'home'; }
     buildNav();
     open(currentId);

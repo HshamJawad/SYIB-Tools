@@ -7,7 +7,7 @@
 window.SIYB_PYP_DATA = (() => {
   const B = (ar, en) => ({ ar, en });
   const SECTIONS = [
-    { id: 'p1', no: 'I', icon: '◎', phase: 2, page: '01',
+    { id: 'p1', live: true, no: 'I', icon: '◎', phase: 2, page: '01',
       title: B('التخطيط للمستقبل', 'Planning for the Future'),
       topics: [
         B('ما هو التخطيط؟', 'What is planning?'), B('هل التخطيط ضروري؟', 'Is planning necessary?'),
@@ -15,7 +15,7 @@ window.SIYB_PYP_DATA = (() => {
         B('خطط مفيدة: المبيعات والتسويق، الإنتاج والتكاليف، الأرباح، التدفق النقدي، الحصول على قرض', 'Useful plans: Sales and Marketing, Production and Cost, Profit, Cash Flow, Loan Access'),
         B('نصائح لإعداد خطة', 'Tips for making a plan')],
       activities: '1', assessment: '1' },
-    { id: 'p2', no: 'II', icon: '◈', phase: 2, page: '15',
+    { id: 'p2', live: true, no: 'II', icon: '◈', phase: 2, page: '15',
       title: B('إجراء تحليل لمشروعك', 'Doing a Business Analysis'),
       topics: [
         B('تحليل المبيعات والتسويق', 'Analyse your sales and marketing'), B('تحليل الإنتاج والتكاليف', 'Analyse your production and costs'),
@@ -59,5 +59,9 @@ window.SIYB_PYP_DATA = (() => {
     B('خطة المبيعات والتسويق', 'Sales and Marketing Plan'), B('خطة الإنتاج والتكاليف', 'Production and Cost Plan'),
     B('خطة الأرباح', 'Profit Plan'), B('خطة التدفق النقدي', 'Cash Flow Plan'), B('خطة الحصول على قرض', 'Loan Access Plan')
   ];
-  return { B, SECTIONS, PLANS };
+  const SEVENPS = [
+    { k: 'product', t: B('المنتج (Product)', 'Product') }, { k: 'price', t: B('السعر (Price)', 'Price') }, { k: 'place', t: B('المكان (Place)', 'Place') },
+    { k: 'promotion', t: B('الترويج (Promotion)', 'Promotion') }, { k: 'people', t: B('الأشخاص (People)', 'People') },
+    { k: 'process', t: B('العملية (Process)', 'Process') }, { k: 'physical', t: B('الدليل المادي (Physical Evidence)', 'Physical Evidence') }];
+  return { B, SECTIONS, PLANS, SEVENPS };
 })();
