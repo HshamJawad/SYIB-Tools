@@ -1,0 +1,37 @@
+/* IYB Record Keeping module (mode "recordkeeping"). Scoped under .rk-root; every class is rk-prefixed. Palette shared with IYB modules: #24A8E0 / #F48D01 / #A4CF06. */
+.rk-root{color:#111;font-size:14px;line-height:1.7}
+.rk-root *{box-sizing:border-box}
+.rk-root h2{margin:0 0 6px;font-size:19px;font-weight:850;color:#111}
+.rk-root h3{margin:0 0 8px;font-size:16px;font-weight:850;color:#111}
+.rk-root p{margin:0 0 10px}
+.rk-lead{font-size:14px}
+.rk-small{font-size:12px;color:#2a4656}
+.rk-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:14px 0}
+.rk-card{display:flex;flex-direction:column;gap:8px;text-align:start;background:#fff;border:1px solid #dce8ec;border-radius:14px;padding:16px;cursor:pointer;font:inherit;color:#111;box-shadow:0 2px 8px rgba(20,55,73,.05)}
+.rk-card:hover{box-shadow:0 4px 14px rgba(20,55,73,.12)}
+.rk-card:focus-visible,.rk-btn:focus-visible{outline:3px solid #24A8E066;outline-offset:2px}
+.rk-card-top{display:flex;align-items:center;justify-content:space-between}
+.rk-card-no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;border-radius:10px;background:#24A8E01f;border:1px solid #24A8E066;font-weight:850}
+.rk-card-icon{font-size:22px;color:#F48D01}
+.rk-card-title{font-size:16px;font-weight:850}
+.rk-card-desc{font-size:13px;color:#2a4656;flex:1}
+.rk-status{align-self:flex-start;display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid #cfd9e0;background:#f3f8fa;color:#111}
+.rk-panel{background:#fff;border:1px solid #dce8ec;border-radius:14px;padding:16px;margin:0 0 16px;box-shadow:0 2px 8px rgba(20,55,73,.05)}
+.rk-panel-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.rk-panel-head h2{margin:0;flex:1;min-width:180px}
+.rk-placeholder{padding:14px;border:2px dashed #cfd9e0;border-radius:12px;background:#f9fbfc}
+.rk-notice{margin:12px 0;padding:9px 12px;border-radius:10px;background:#f3f8fa;border:1px dashed #24A8E088;font-size:13px}
+.rk-notice.warn{background:#F48D011a;border-color:#F48D0188}
+.rk-apptag{display:inline-block;padding:1px 8px;border-radius:999px;background:#F48D011f;border:1px solid #F48D0188;font-size:11px;font-weight:800}
+.rk-actions,.rk-pager{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:12px 0}
+.rk-btn{border:1px solid #cfd9e0;background:#fff;color:#111;padding:8px 14px;border-radius:10px;font:700 13px Cairo,Arial,sans-serif;cursor:pointer}
+.rk-forms{margin:0 0 10px;padding-inline-start:26px}
+.rk-meta{font-size:13px}
+.rk-nav-no{font-weight:850}
+.rk-root .rk-lead{overflow-wrap:anywhere}
+.rk-btn:hover{background:#f3f8fa}
+.rk-btn.primary{background:#24A8E0;border-color:#1b8fc0;color:#111}
+.rk-topics{margin:0 0 10px;padding-inline-start:22px}
+.rk-credit p{font-size:13px}
+.rk-root code{font-size:12px;background:#f3f8fa;padding:1px 6px;border-radius:6px}
+@media (max-width:600px){.rk-grid{grid-template-columns:1fr}.rk-card{min-height:0}}

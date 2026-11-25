@@ -11,7 +11,7 @@ async function newPage(browser, vp) {
   pg.on('console', (m) => { if (m.type() === 'error') pg.errs.push(m.text()); });
   return pg;
 }
-const go = async (pg) => { await pg.goto(URL_); await pg.waitForTimeout(900); };
+const go = async (pg) => { await pg.goto(URL_); await pg.waitForTimeout(2500); };
 const head = async (pg, id) => { await pg.evaluate((t) => document.querySelector(`[data-tool-head="${t}"]`).click(), id); await pg.waitForTimeout(1000); };
 const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem('siyb-language', x); }, l); };
 
@@ -20,10 +20,10 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   const pg = await newPage(browser, { width: 1280, height: 800 });
   await go(pg);
   const reg = await pg.evaluate(() => { const m = SIYBModules.get('marketing'); return { order: SIYBModules.list().map((x) => x.id).join(), group: m && m.group }; });
-  rec('Registry', 'Marketing registered 4th, followed by Planning, under IYB', reg.order === 'gyb,costing,stock,marketing,planning' && reg.group === 'iyb', reg.order);
+  rec('Registry', 'Marketing registered 4th, followed by Planning, under IYB', reg.order === 'gyb,costing,stock,marketing,planning,recordkeeping' && reg.group === 'iyb', reg.order);
   await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
   const iybOrder = await pg.evaluate(() => [...document.querySelector('[data-group="iyb"]').querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead).join());
-  rec('Sidebar', 'IYB order Costing, Stock, Marketing, Planning', iybOrder === 'costing,stock,marketing,planning', iybOrder);
+  rec('Sidebar', 'IYB order Costing, Stock, Marketing, Planning', iybOrder === 'costing,stock,marketing,planning,recordkeeping', iybOrder);
   await head(pg, 'marketing');
   const cards = await pg.evaluate(() => [...document.querySelectorAll('#mkRoot .mk-card')].map((c) => ({ no: c.querySelector('.mk-card-no').textContent, t: c.querySelector('.mk-card-title').textContent, d: c.querySelector('.mk-card-desc').textContent.length > 0, s: c.querySelector('.mk-status').textContent })));
   rec('Dashboard', 'Exactly eight cards', cards.length === 8, String(cards.length));
@@ -51,7 +51,7 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   const ids = ['languageToggle', 'languageButton'];
   const sw = await pg.evaluate(() => { const b = document.querySelector('[data-language-toggle],#languageToggle,[data-lang-toggle],button[data-lang]'); return b ? (b.id || b.className) : null; });
   await pg.evaluate(() => { localStorage.setItem('siyb-language', 'en'); });
-  await pg.reload(); await pg.waitForTimeout(900);
+  await pg.reload(); await pg.waitForTimeout(2500);
   await pg.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()); await pg.waitForTimeout(1000);
   const en = await pg.evaluate(() => ({ dir: document.documentElement.dir, lang: document.documentElement.lang, t: [...document.querySelectorAll('#mkRoot .mk-card-title')].map((x) => x.textContent), st: document.querySelector('.mk-status').textContent }));
   rec('Language', 'English: LTR + titles per FRS', en.dir === 'ltr' && en.lang === 'en' && en.t.join('|') === 'Introduction & Progress|Marketing & the Power of Customers|Positioning Your Product|Product & Price|Place & Promotion|People & Processes|Physical Evidence|Assessment & Action Plan', en.t.join('|'));
@@ -67,17 +67,17 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   await pg.evaluate(() => SIYBMarketing.open('c04')); await pg.waitForTimeout(600);
   const st = await pg.evaluate(() => { const d = JSON.parse(localStorage.getItem('siyb.iyb.marketing.v1') || 'null'); return d && { m: d.moduleId, v: d.schemaVersion, keys: Object.keys(d).sort().join(), last: d.lastCard }; });
   rec('Storage', 'Namespaced key siyb.iyb.marketing.v1 with FRS shape', !!st && st.m === 'marketing' && st.v === 1 && ['actionPlan', 'language', 'moduleId', 'progress', 'responses', 'schemaVersion', 'updatedAt'].every((k) => st.keys.includes(k)), JSON.stringify(st));
-  await pg.reload(); await pg.waitForTimeout(900);
+  await pg.reload(); await pg.waitForTimeout(2500);
   await pg.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()); await pg.waitForTimeout(1000);
   rec('Storage', 'Last card restored after reload', await pg.evaluate(() => SIYBMarketing.current() === 'c04'));
   rec('Storage', 'Other modules\' keys untouched (no gyb/costing keys created by Marketing)', await pg.evaluate(() => !localStorage.getItem('siyb.gyb.v1')));
   await pg.evaluate(() => localStorage.setItem('siyb.iyb.marketing.v1', '{bad'));
-  const pg2 = await pg.context().newPage(); await pg2.goto(URL_); await pg2.waitForTimeout(900);
+  const pg2 = await pg.context().newPage(); await pg2.goto(URL_); await pg2.waitForTimeout(2500);
   await pg2.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()); await pg2.waitForTimeout(1000);
   rec('Storage', 'Corrupt data: starts fresh and keeps a .unreadable copy', await pg2.evaluate(() => SIYBMarketing.current() === 'home' && localStorage.getItem('siyb.iyb.marketing.v1.unreadable') === '{bad'));
   const pg3 = await newPage(browser, { width: 1280, height: 800 });
   await pg3.addInitScript(() => { Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } }); });
-  await pg3.goto(URL_); await pg3.waitForTimeout(900);
+  await pg3.goto(URL_); await pg3.waitForTimeout(2500);
   await pg3.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()); await pg3.waitForTimeout(1000);
   rec('Storage', 'localStorage blocked: module still works + notice shown', await pg3.evaluate(() => document.querySelectorAll('#mkRoot .mk-card').length === 8 && !!document.querySelector('#mkRoot .mk-notice.warn')));
   // sibling modules
@@ -104,8 +104,8 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   rec('Console', 'main run: no console/page errors', pg.errs.length === 0, pg.errs.join(' | ').slice(0, 300));
   // PWA / offline
   const pw = await newPage(browser, { width: 1280, height: 800 }); await go(pw); await pw.waitForTimeout(2500);
-  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.28.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
-  rec('PWA', 'Cache v0.28.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
+  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.29.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
+  rec('PWA', 'Cache v0.29.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
   await pw.context().setOffline(true);
   await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1200);

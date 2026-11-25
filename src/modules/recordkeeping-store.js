@@ -1,0 +1,66 @@
+/* IYB Record Keeping data store – isolated, namespaced local persistence (Phase 1 foundation).
+   - One key only: siyb.iyb.recordkeeping.v1 (never touches other modules' data or the language key).
+   - Offline-first: localStorage; if unavailable the module keeps working in memory (status() reports it).
+   - Non-destructive: unreadable stored data is copied to siyb.iyb.recordkeeping.v1.unreadable before starting fresh.
+   - Phase 1 stores NO records, transactions or learner answers – only the schema header and the last visited section.
+   - JSON import/export arrives in Phase 7. */
+(() => {
+  'use strict';
+  const KEY = 'siyb.iyb.recordkeeping.v1';
+  const MODULE_ID = 'recordkeeping';
+  const SCHEMA = 1;
+  const nowIso = () => new Date().toISOString();
+  const blank = () => ({ schemaVersion: SCHEMA, moduleId: MODULE_ID, language: null, lastSection: 'home', updatedAt: nowIso() });
+  const isObj = (o) => o !== null && typeof o === 'object' && !Array.isArray(o);
+  const storage = () => { try { return window.localStorage; } catch (_) { return null; } };
+  let data = null; let available = true; let timer = null; let lastSaved = null;
+
+  function load() {
+    const ls = storage();
+    if (!ls) { available = false; data = blank(); return data; }
+    let raw = null;
+    try { raw = ls.getItem(KEY); } catch (_) { available = false; data = blank(); return data; }
+    if (!raw) { data = blank(); return data; }
+    try {
+      const p = JSON.parse(raw);
+      if (!isObj(p) || p.moduleId !== MODULE_ID || typeof p.schemaVersion !== 'number' || p.schemaVersion > SCHEMA) throw new Error('shape');
+      data = Object.assign(blank(), p);
+      lastSaved = typeof p.updatedAt === 'string' ? p.updatedAt : null;
+    } catch (_) {
+      try { ls.setItem(KEY + '.unreadable', raw); } catch (__) { /* keep going */ }
+      data = blank();
+    }
+    return data;
+  }
+  const ensure = () => data || load();
+  function flush() {
+    clearTimeout(timer); timer = null;
+    const d = ensure(); d.updatedAt = nowIso(); d.language = (document.documentElement.lang === 'en') ? 'en' : 'ar';
+    const ls = storage();
+    if (!ls) { available = false; return false; }
+    try { ls.setItem(KEY, JSON.stringify(d)); available = true; lastSaved = d.updatedAt; } catch (_) { available = false; return false; }
+    return true;
+  }
+  const BAD = ['__proto__', 'constructor', 'prototype'];
+  const get = (path, def) => {
+    let o = ensure();
+    for (const k of String(path).split('.')) { if (o == null || BAD.includes(k)) return def; o = o[k]; }
+    return o === undefined ? def : o;
+  };
+  const set = (path, value) => {
+    const keys = String(path).split('.');
+    if (keys.some((k) => BAD.includes(k))) return;
+    let o = ensure();
+    keys.slice(0, -1).forEach((k) => { if (!isObj(o[k]) && !Array.isArray(o[k])) o[k] = {}; o = o[k]; });
+    o[keys[keys.length - 1]] = value;
+    clearTimeout(timer); timer = setTimeout(flush, 350);
+  };
+  function reset() {
+    clearTimeout(timer); timer = null; data = blank(); lastSaved = null;
+    const ls = storage(); try { if (ls) ls.removeItem(KEY); } catch (_) { /* ignore */ }
+  }
+  window.addEventListener('pagehide', () => { if (timer) flush(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
+
+  window.SIYBRecordKeepingStore = { KEY, MODULE_ID, SCHEMA, get, set, reset, flush, status() { ensure(); return { available, lastSaved }; } };
+})();
