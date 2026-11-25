@@ -114,8 +114,8 @@ async function open(pg, card) {
   rec('Console', 'No console/page errors', errs.length === 0, errs.join(' | ').slice(0, 300));
   // offline
   const pw = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); await pw.goto(URL_); await pw.waitForTimeout(2500);
-  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.26.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
-  rec('PWA', 'Cache v0.26.0 holds all marketing content files', !!cache && ['marketing-content-a.js', 'marketing-content-b.js', 'marketing-content-c.js', 'marketing-content-d.js', 'marketing.js'].every((f) => cache.includes(f)), String(cache && cache.length));
+  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.27.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
+  rec('PWA', 'Cache v0.27.0 holds all marketing content files', !!cache && ['marketing-content-a.js', 'marketing-content-b.js', 'marketing-content-c.js', 'marketing-content-d.js', 'marketing.js'].every((f) => cache.includes(f)), String(cache && cache.length));
   await pw.context().setOffline(true); await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1000);
   await pw.evaluate(() => SIYBMarketing.open('c04')).catch(() => {}); await pw.waitForTimeout(300);

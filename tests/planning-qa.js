@@ -64,8 +64,8 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   rec('Attribution', 'No ILO/SIYB logo images in module', await pg.evaluate(() => document.querySelectorAll('#pypRoot img,#pypRoot svg').length === 0));
   rec('Scope', 'No inputs, activities or assessments in Phase 1', await pg.evaluate(() => document.querySelectorAll('#pypRoot input,#pypRoot textarea,#pypRoot select').length === 0));
   await pg.evaluate(() => document.querySelectorAll('#pypRoot .pyp-card')[4].click()); await pg.waitForTimeout(200);
-  const p5 = await pg.evaluate(() => ({ cur: SIYBPlanning.current(), h: document.querySelector('#pypRoot h2').textContent, items: document.querySelectorAll('#pypRoot .pyp-topics li').length, meta: document.querySelector('#pypRoot .pyp-meta').textContent }));
-  rec('Section view', 'Part V shows 7 TOC topics and Activities 7–20 / Assessment 5', p5.cur === 'p5' && p5.items === 7 && /7–20/.test(ad(p5.meta)) && /5/.test(ad(p5.meta)), JSON.stringify(p5));
+  const p5 = await pg.evaluate(() => ({ cur: SIYBPlanning.current(), ex: document.querySelectorAll('#pypRoot [id^="pypEx-a"]').length, as: !!document.querySelector('#pypAs-a5') }));
+  rec('Section view', 'Part V (live since Phase 5) shows Activities 7–20 and Assessment 5', p5.cur === 'p5' && p5.ex === 14 && p5.as, JSON.stringify(p5));
   const acts = await pg.evaluate(() => SIYB_PYP_DATA.SECTIONS.filter((s) => s.activities).map((s) => s.id + ':' + s.activities + '/' + s.assessment).join());
   rec('Source fidelity', 'Activity/assessment mapping 1 | 2–3 | 4–5 | 6 | 7–20', acts === 'p1:1/1,p2:2–3/2,p3:4–5/3,p4:6/4,p5:7–20/5', acts);
   // storage isolation

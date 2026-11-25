@@ -35,7 +35,7 @@ window.SIYB_PYP_DATA = (() => {
         B('ما هي المخاطر؟', 'What is risk?'), B('ما هي إدارة المخاطر؟', 'What is Risk Management?'),
         B('مراحل عملية إدارة المخاطر', 'Stages in the Risk Management process'), B('استراتيجيات إدارة المخاطر', 'Risk Management strategies')],
       activities: '6', assessment: '4' },
-    { id: 'p5', no: 'V', icon: '▣', phase: 5, page: '43',
+    { id: 'p5', live: true, no: 'V', icon: '▣', phase: 5, page: '43',
       title: B('إعداد الخطط', 'Making Plans'),
       topics: [
         B('تحديد أهداف المشروع', 'Set business objectives'),

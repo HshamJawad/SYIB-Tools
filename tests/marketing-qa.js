@@ -104,8 +104,8 @@ const lang = async (pg, l) => { await pg.evaluate((x) => { localStorage.setItem(
   rec('Console', 'main run: no console/page errors', pg.errs.length === 0, pg.errs.join(' | ').slice(0, 300));
   // PWA / offline
   const pw = await newPage(browser, { width: 1280, height: 800 }); await go(pw); await pw.waitForTimeout(2500);
-  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.26.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
-  rec('PWA', 'Cache v0.26.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
+  const swr = await pw.evaluate(async () => { const keys = await caches.keys(); const c = keys.find((k) => k.includes('v0.27.0')); if (!c) return { keys }; const reqs = await (await caches.open(c)).keys(); return { c, files: reqs.map((r) => r.url).filter((u) => /marketing/.test(u)).map((u) => u.split('/').pop()) }; });
+  rec('PWA', 'Cache v0.27.0 holds the 4 Marketing files', !!swr.c && ['marketing.css','marketing-store.js','marketing-data.js','marketing.js'].every((f) => swr.files.includes(f)), JSON.stringify(swr));
   await pw.context().setOffline(true);
   await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1200);
