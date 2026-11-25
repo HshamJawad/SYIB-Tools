@@ -105,3 +105,12 @@
 .pyp-fclist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
 .pyp-fclist li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
 .pyp-fclist li span{flex:1;min-width:160px}
+.pyp-root .pyp-facts{margin:6px 0 10px;padding-inline-start:1.2em}
+.pyp-root .pyp-riskref{margin:4px 0 8px;padding-inline-start:1.2em}
+.pyp-root .pyp-unitcap{font-weight:400;font-size:.9em;opacity:.85}
+.pyp-root .pyp-cf-total th,.pyp-root .pyp-cf-total td{font-weight:700;background:#f1f7fa}
+.pyp-root .pyp-plan .pyp-table td[data-calc]{white-space:nowrap}
+.pyp-root .pyp-answer ol{margin:6px 0 0;padding-inline-start:1.2em}
+.pyp-root .pyp-ro{background:#f3f6f8;color:inherit;resize:none}
+.pyp-root .pyp-riskref{list-style:none;padding:0}
+.pyp-root .pyp-riskref li{margin:0 0 6px}

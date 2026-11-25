@@ -43,7 +43,7 @@ Storage: records live in `externalForecasts` (array) inside `siyb.iyb.planning.v
 
 Tests: `tests/planning-qa-phase3.js` (41 checks). Earlier Planning suites updated for the new state: the script-count assertion now reads the registry, and the Phase 2 scope/dashboard assertions treat Part III as live.
 
-## Phase 4 – Part IV: Managing Risk (v0.26.0)
+## Phase 4 – Part IV: Managing Risk (v0.27.0)
 Scope: Part IV learning view (printed pp. 37–42): what risk is, risk management (four steps, five questions), the four ways to respond (accept, transfer, reduce, avoid), Activity 6 with the risk-register form, the manual's closing note, summary and Assessment 4.
 
 Source verification (original PDF text compared with the code)
@@ -56,3 +56,16 @@ Application guidance (labelled as such): optional origin (internal/external) and
 Storage: records live in `risks` (array) in `siyb.iyb.planning.v1` and are the single source the later plans will read (no duplicated entries). Progress: Activity 6 counts when saved text or a risk with text exists; Assessment 4 when completed and checked; summary when reviewed.
 
 Tests: `tests/planning-qa-phase4.js` (40 checks). Phase 2/3 suites updated for the new state (Part IV is now live; only Part V and end of manual are placeholders).
+
+## Phase 5 – Part V: Making plans (v0.27.0)
+Scope: Part V learning view (printed pp. 43–85): objectives, Risk Management in planning, Sales and Marketing Plan, Production and Cost Plan, Profit Plan, Cash Flow Plan, Loan Access Plan, Activities 7–20, summary and Assessment 5. Content in `planning-content-e.js` / `-f.js`; workspaces in `planning-plans.js` (registered into the learning engine); calculations in `planning-calc.js`.
+
+Source verification (original PDF): all Plastic Solutions (Juma) tables were checked against the PDF text (sales 113,325; materials 61,560; labour 15,840; overhead 30,880; gross 35,925; net 5,045; cash flow closing 7,884 / 6,202 / (4,097); loan interest flat 320 and reduced balance 180). Assessment 5 key (p. 97) = b c a c a a b c. Answers to Activities 12, 19 and 20 (pp. 86–87) are hidden until the learner asks; no answer keys or scoring were invented.
+
+Application guidance (labelled in the UI): objectives list; product names/count; "apply January value to all months", "use my sales quantity" and "copy from my forecasts" helpers (explicit, one-off, editable); the read-only link to the Part IV risk register plus a note per plan; the loan helper (both interest methods, optional addition of instalments to Cash Flow line 10); shortage flags (text, not colour only). Forecasts are labelled as assumptions, nothing predicts or recommends borrowing. The printed Activity 13/18 forms show 6 and 3 months; the app offers 12 because the manual says plans may cover a quarter, six months or a year.
+
+Storage (single key): `objectives`, `plans.nProducts`, `plans.productNames.*`, `plans.salesMarketing.fc.*`, `plans.productionCost.{prodQty,matItem,oh,ohN,lab,waste}`, `plans.practice.a12`, `plans.cashFlow.*`, `plans.loanAccess.*`, `plans.unit`. Cost, profit and cash lines are computed from these, never re-entered.
+
+Known app-wide behaviour (not changed): the shell's UI translator rewrites some English dictionary words typed into inputs/textareas while Arabic is active (display only; stored text is intact).
+
+Tests: `tests/planning-qa-phase5.js` (54 checks, including the full Juma scenario). Earlier suites updated: only the end of the manual remains a placeholder.

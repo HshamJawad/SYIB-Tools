@@ -13,6 +13,7 @@
   const gv = (path, def) => store.get(path, def);
   const MONTHS = [B('كانون الثاني', 'January'), B('شباط', 'February'), B('آذار', 'March'), B('نيسان', 'April'), B('أيار', 'May'), B('حزيران', 'June'), B('تموز', 'July'), B('آب', 'August'), B('أيلول', 'September'), B('تشرين الأول', 'October'), B('تشرين الثاني', 'November'), B('كانون الأول', 'December')];
   const revealed = {};
+  const reg = { ws: {}, recalc: [], click: [], done: {}, exExtra: {} };
   const srcTag = (pg) => (pg ? `<span class="pyp-srcpg">${X('المصدر: الدليل، ص ', 'Source: manual, p. ')}<bdi>${esc(pg)}</bdi></span>` : '');
   const appTag = () => `<span class="pyp-apptag">${X('إرشاد التطبيق', 'Application guidance')}</span>`;
 
@@ -22,7 +23,7 @@
   function progressItems(part) {
     return (C[part] || []).filter((s) => s.activity || s.summary || s.assess).map((s) => ({
       id: s.id, kind: s.activity ? 'activity' : (s.summary ? 'summary' : 'assessment'),
-      done: s.activity ? (hasText(s.activity.id) || (s.activity.id === 'a6' && riskList().some((r) => String((r && r.risk) || '').trim()))) : (s.summary ? !!gv('progress.' + part + '.summary', false) : asDone(s.assess)) }));
+      done: s.activity ? (hasText(s.activity.id) || (reg.done[s.activity.id] ? !!reg.done[s.activity.id]() : false) || (s.activity.id === 'a6' && riskList().some((r) => String((r && r.risk) || '').trim()))) : (s.summary ? !!gv('progress.' + part + '.summary', false) : asDone(s.assess)) }));
   }
   function progress(part) { const it = progressItems(part); const done = it.filter((i) => i.done).length; return { done, total: it.length, pct: it.length ? Math.round((done / it.length) * 100) : 0 }; }
   const progBar = (part, cls) => { const p = progress(part); return `<span class="pyp-prog ${cls || ''}" data-pyp-prog="${part}"><span class="pyp-prog-bar" aria-hidden="true"><i style="width:${p.pct}%"></i></span><span class="pyp-prog-txt"><bdi>${p.done}/${p.total}</bdi> ${X('عناصر مكتملة', 'items completed')}</span></span>`; };
@@ -55,13 +56,15 @@
     const v = gv('activities.' + id, {}) || {};
     return qs.map((q, i) => `<label class="pyp-q"><span>${esc(T(q))}</span><textarea class="pyp-ta" rows="3" data-kind="ta" data-key="activities.${id}.q${i}">${esc(v['q' + i] || '')}</textarea></label>`).join('');
   }
-  function exercise(id, title, qs, ans, no, pg) {
+  function exercise(id, title, qs, ans, no, pg, extra) {
+    extra = extra || {};
     const open = !!revealed[id];
     return `<section class="pyp-panel pyp-ex" id="pypEx-${id}" aria-labelledby="pypExH-${id}">
       <h4 id="pypExH-${id}">${srcTag(pg)} ${no ? `<span class="pyp-card-no">${X('نشاط ', 'Activity ')}<bdi>${no}</bdi></span> ` : ''}${esc(T(title))}</h4>
-      ${taGroup(id, qs)}${saved()}
-      ${ans ? `<div class="pyp-actions"><button type="button" class="pyp-btn" data-act="reveal" data-id="${id}" aria-expanded="${open}">${open ? X('إخفاء إجابة الدليل', 'Hide the manual’s answer') : X('عرض الإجابة المقترحة في الدليل (جرّب أولاً)', 'Show the manual’s suggested answer (try first)')}</button></div>
-      ${open ? `<div class="pyp-answer" role="note"><strong>${X('إجابة الدليل: ', 'Manual’s answer: ')}</strong>${esc(T(ans))}</div>` : ''}` : ''}
+      ${extra.intro ? `<p>${esc(T(extra.intro))}</p>` : ''}${extra.facts ? `<ul class="pyp-facts">${extra.facts.map((f) => `<li>${esc(T(f))}</li>`).join('')}</ul>` : ''}
+      ${taGroup(id, qs)}${qs.length ? saved() : ''}
+      ${(ans || extra.hasAns) ? `<div class="pyp-actions"><button type="button" class="pyp-btn" data-act="reveal" data-id="${id}" aria-expanded="${open}">${open ? X('إخفاء إجابة الدليل', 'Hide the manual’s answer') : X('عرض الإجابة المقترحة في الدليل (جرّب أولاً)', 'Show the manual’s suggested answer (try first)')}</button></div>
+      ${open ? `<div class="pyp-answer" role="note"><strong>${X('إجابة الدليل: ', 'Manual’s answer: ')}</strong>${Array.isArray(ans) ? `<ol>${ans.map((a) => `<li>${esc(T(a))}</li>`).join('')}</ol>` : (ans ? esc(T(ans)) : '')}${extra.ansHtml ? extra.ansHtml() : ''}</div>` : ''}` : ''}
     </section>`;
   }
 
@@ -201,7 +204,8 @@
   }
 
   /* ---------- calculations → DOM ---------- */
-  function recalc(root) {
+  function recalc(root) { recalcCore(root); reg.recalc.forEach((f) => f(root)); }
+  function recalcCore(root) {
     const set = (name, text) => { const el = root.querySelector('[data-calc="' + name + '"]'); if (el) el.textContent = text; };
     ['salesMarketing', 'productionCosts', 'profit'].forEach((ws) => { const u = String(gv('businessAnalysis.' + ws + '.unit', '') || ''); const wsEl = root.querySelector('[data-key="businessAnalysis.' + ws + '.unit"]'); if (wsEl) wsEl.closest('.pyp-ws').querySelectorAll('.pyp-unit').forEach((e) => { e.textContent = u ? '(' + u + ')' : ''; }); });
     const dp = (c) => (c ? [calc.fmt(c.diff, { minus: true }), c.pct === null ? '' : calc.fmt(c.pct, { minus: true, dec: 2 }) + '%'] : ['', '']);
@@ -242,12 +246,12 @@
   /* ---------- part page ---------- */
   function section(part, s) {
     const head = `<h3 id="pypS-${part}-${s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))} ${srcTag(s.pg)}</h3>`;
-    if (s.activity) return exercise(s.activity.id, s.activity.title, s.activity.qs, null, s.activity.no, s.pg) + (s.workspace ? ws(s.workspace) : '');
+    if (s.activity) return exFromSection(s) + (s.workspace ? ws(s.workspace) : '');
     if (s.assess) return assessHtml(s.assess);
     if (s.summary) { const done = !!gv('progress.' + part + '.summary', false); return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}<div class="pyp-actions"><button type="button" class="pyp-btn ${done ? '' : 'primary'}" data-act="review" data-part="${part}" aria-pressed="${done}">${done ? '✔ ' + X('تمت مراجعة الملخص (اضغط للتراجع)', 'Summary reviewed (press to undo)') : X('أنهيت مراجعة الملخص', 'I have reviewed the summary')}</button></div></section>`; }
     return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}</section>${s.workspace ? ws(s.workspace) : ''}`;
   }
-  const ws = (k) => (k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : k === 'risk' ? wsRisk() : '');
+  const ws = (k) => (reg.ws[k] ? reg.ws[k]() : k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : k === 'risk' ? wsRisk() : '');
   function renderPart(part) {
     const secs = C[part]; const meta = D.SECTIONS.find((x) => x.id === part);
     const chips = secs.map((s) => `<button type="button" class="pyp-chip" data-act="jump" data-to="${s.activity ? 'pypEx-' + s.activity.id : s.assess ? 'pypAs-' + s.assess : 'pypSec-' + part + '-' + s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))}</button>`).join('');
@@ -282,6 +286,7 @@
     });
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return; const a = b.dataset.act;
+      for (const h of reg.click) { if (h(a, b, ctx, root)) return; }
       const swap = (id, html) => { const el = root.querySelector('#' + id); if (el) { el.outerHTML = html; if (window.SIYBRefreshLocaleDigits) window.SIYBRefreshLocaleDigits(root); } };
       if (a === 'risk-add' || a === 'risk-from-fc') {
         const list = riskList().slice(); const base = { id: 'r' + Date.now().toString(36) + list.length, risk: '', likelihood: '', frequency: '', impact: '', priority: '', actions: '', origin: '', strategy: '', fromForecast: '' };
@@ -317,7 +322,8 @@
       else if (a === 'jump') { const el = root.querySelector('#' + b.dataset.to); if (el) { el.scrollIntoView({ block: 'start' }); const f = el.querySelector('textarea,select,input,button,h3,h4'); if (f) { if (!f.hasAttribute('tabindex') && /^H/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); } } }
     });
   }
-  function findEx(id) { for (const part of ['p1', 'p2', 'p3', 'p4']) for (const s of C[part]) { if (s.activity && s.activity.id === id) return exercise(id, s.activity.title, s.activity.qs, null, s.activity.no); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
+  function exFromSection(s) { const a = s.activity; const ex = reg.exExtra[a.id] || {}; return exercise(a.id, a.title, a.qs, a.ans || null, a.no, s.pg, { intro: a.intro, facts: a.facts, hasAns: !!ex.ansHtml, ansHtml: ex.ansHtml }); }
+  function findEx(id) { for (const part of ['p1', 'p2', 'p3', 'p4', 'p5']) for (const s of C[part] || []) { if (s.activity && s.activity.id === id) return exFromSection(s); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
 
-  window.SIYBPlanningLearn = { renderPart, bind, recalc, progress, progBar, updateProgress, isLive: (id) => !!C[id], MONTHS };
+  window.SIYBPlanningLearn = { _h: { X, T, esc, gv, store, calc, B, MONTHS, appTag, saved, srcTag, inp, txt, area, revealed, riskList, fcList, updateProgress }, register: (o) => { Object.assign(reg.ws, o.ws || {}); if (o.recalc) reg.recalc.push(o.recalc); if (o.click) reg.click.push(o.click); Object.assign(reg.done, o.done || {}); Object.assign(reg.exExtra, o.exExtra || {}); }, renderPart, bind, recalc, progress, progBar, updateProgress, isLive: (id) => !!C[id], MONTHS };
 })();
