@@ -61,7 +61,7 @@
     modes: ['planning'],
     external: {
       global: 'SIYBPlanning', rootSelector: '#pypRoot', bodyClass: 'mode-planning', badge: 'PL', defaultSection: 'home',
-      scripts: ['src/modules/planning-store.js', 'src/modules/planning-data.js', 'src/modules/planning-calc.js', 'src/modules/planning-assess.js', 'src/modules/planning-content-a.js', 'src/modules/planning-content-b.js', 'src/modules/planning-content-c.js', 'src/modules/planning-content-d.js', 'src/modules/planning-content-e.js', 'src/modules/planning-content-f.js', 'src/modules/planning-learn.js', 'src/modules/planning-plans.js', 'src/modules/planning.js']
+      scripts: ['src/modules/planning-store.js', 'src/modules/planning-data.js', 'src/modules/planning-calc.js', 'src/modules/planning-assess.js', 'src/modules/planning-content-a.js', 'src/modules/planning-content-b.js', 'src/modules/planning-content-c.js', 'src/modules/planning-content-d.js', 'src/modules/planning-content-e.js', 'src/modules/planning-content-f.js', 'src/modules/planning-content-g.js', 'src/modules/planning-learn.js', 'src/modules/planning-plans.js', 'src/modules/planning-cases.js', 'src/modules/planning.js']
     }
   });
 

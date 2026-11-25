@@ -46,7 +46,7 @@ window.SIYB_PYP_DATA = (() => {
         B('إعداد خطة التدفق النقدي (ص 68)', 'Make a Cash Flow Plan (p. 68)'),
         B('إعداد خطة الحصول على قرض (ص 78)', 'Make a Loan Access Plan (p. 78)')],
       activities: '7–20', assessment: '5' },
-    { id: 'end', no: '✔', icon: '✔', phase: 6, page: '89',
+    { id: 'end', live: true, no: '✔', icon: '✔', phase: 6, page: '89',
       title: B('نهاية الدليل: المراجعة وخطة العمل', 'End of the manual: Review & Action Plan'),
       topics: [
         B('ماذا تعلّمت في هذا الدليل؟', 'What Did You Learn in This Manual?'), B('هل تستطيع المساعدة؟', 'Can You Help?'),

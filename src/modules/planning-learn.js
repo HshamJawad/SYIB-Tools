@@ -245,7 +245,7 @@
 
   /* ---------- part page ---------- */
   function section(part, s) {
-    const head = `<h3 id="pypS-${part}-${s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))} ${srcTag(s.pg)}</h3>`;
+    const head = `<h3 id="pypS-${part}-${s.id}">${esc(T(s.title || (s.activity && (s.activity.no ? B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no) : s.activity.title))))} ${srcTag(s.pg)}</h3>`;
     if (s.activity) return exFromSection(s) + (s.workspace ? ws(s.workspace) : '');
     if (s.assess) return assessHtml(s.assess);
     if (s.summary) { const done = !!gv('progress.' + part + '.summary', false); return `<section class="pyp-panel" id="pypSec-${part}-${s.id}" aria-labelledby="pypS-${part}-${s.id}">${head}${s.blocks.map(block).join('')}<div class="pyp-actions"><button type="button" class="pyp-btn ${done ? '' : 'primary'}" data-act="review" data-part="${part}" aria-pressed="${done}">${done ? '✔ ' + X('تمت مراجعة الملخص (اضغط للتراجع)', 'Summary reviewed (press to undo)') : X('أنهيت مراجعة الملخص', 'I have reviewed the summary')}</button></div></section>`; }
@@ -254,8 +254,8 @@
   const ws = (k) => (reg.ws[k] ? reg.ws[k]() : k === 'sales' ? wsSales() : k === 'costs' ? wsCosts() : k === 'profit' ? wsProfit() : k === 'forecast' ? wsForecast() : k === 'risk' ? wsRisk() : '');
   function renderPart(part) {
     const secs = C[part]; const meta = D.SECTIONS.find((x) => x.id === part);
-    const chips = secs.map((s) => `<button type="button" class="pyp-chip" data-act="jump" data-to="${s.activity ? 'pypEx-' + s.activity.id : s.assess ? 'pypAs-' + s.assess : 'pypSec-' + part + '-' + s.id}">${esc(T(s.title || (s.activity && B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no))))}</button>`).join('');
-    return `<section class="pyp-panel"><div class="pyp-panel-head"><span class="pyp-card-no">${meta.no}</span><h2>${X('الجزء ', 'Part ')}${meta.no}: ${esc(T(meta.title))}</h2></div>
+    const chips = secs.map((s) => `<button type="button" class="pyp-chip" data-act="jump" data-to="${s.activity ? 'pypEx-' + s.activity.id : s.assess ? 'pypAs-' + s.assess : 'pypSec-' + part + '-' + s.id}">${esc(T(s.title || (s.activity && (s.activity.no ? B('نشاط ' + s.activity.no, 'Activity ' + s.activity.no) : s.activity.title))))}</button>`).join('');
+    return `<section class="pyp-panel"><div class="pyp-panel-head"><span class="pyp-card-no">${meta.no}</span><h2>${part === 'end' ? '' : X('الجزء ', 'Part ') + meta.no + ': '}${esc(T(meta.title))}</h2></div>
       ${progBar(part, 'big')}<nav class="pyp-chips" aria-label="${X('محتويات الجزء', 'Part contents')}">${chips}</nav>
       <p class="pyp-small">${X('المحتوى مقتبس من الدليل ومكيَّف؛ الأقسام المعلَّمة «إرشاد التطبيق» من إضافة التطبيق.', 'Content is adapted from the manual; sections marked “Application guidance” are added by this app.')}</p></section>
       ${secs.map((s) => section(part, s)).join('')}`;
@@ -323,7 +323,7 @@
     });
   }
   function exFromSection(s) { const a = s.activity; const ex = reg.exExtra[a.id] || {}; return exercise(a.id, a.title, a.qs, a.ans || null, a.no, s.pg, { intro: a.intro, facts: a.facts, hasAns: !!ex.ansHtml, ansHtml: ex.ansHtml }); }
-  function findEx(id) { for (const part of ['p1', 'p2', 'p3', 'p4', 'p5']) for (const s of C[part] || []) { if (s.activity && s.activity.id === id) return exFromSection(s); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
+  function findEx(id) { for (const part of ['p1', 'p2', 'p3', 'p4', 'p5', 'end']) for (const s of C[part] || []) { if (s.activity && s.activity.id === id) return exFromSection(s); for (const b of s.blocks || []) if (b.t === 'ex' && b.id === id) return exercise(b.id, b.title, b.qs, b.ans, null); } return ''; }
 
   window.SIYBPlanningLearn = { _h: { X, T, esc, gv, store, calc, B, MONTHS, appTag, saved, srcTag, inp, txt, area, revealed, riskList, fcList, updateProgress }, register: (o) => { Object.assign(reg.ws, o.ws || {}); if (o.recalc) reg.recalc.push(o.recalc); if (o.click) reg.click.push(o.click); Object.assign(reg.done, o.done || {}); Object.assign(reg.exExtra, o.exExtra || {}); }, renderPart, bind, recalc, progress, progBar, updateProgress, isLive: (id) => !!C[id], MONTHS };
 })();

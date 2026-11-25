@@ -16,7 +16,7 @@ async function answer(pg, aid, map) { for (const [it, v] of Object.entries(map))
   await pg.click('.sidebar-group-head'); await pg.evaluate(() => document.querySelector('[data-tool-head="planning"]').click()); await pg.waitForTimeout(900);
   // ---- structure / fidelity
   const home = await pg.evaluate(() => document.querySelector('#pypRoot').innerText);
-  rec('Dashboard', 'Parts I–V show progress', (await pg.$$('#pypRoot .pyp-card [data-pyp-prog]')).length === 5);
+  rec('Dashboard', 'All live parts show progress', (await pg.$$('#pypRoot .pyp-card [data-pyp-prog]')).length === 6);
   await open(pg, 'p1');
   const p1 = await pg.evaluate(() => ({ ids: [...document.querySelectorAll('#pypRoot [id^="pypSec-p1-"],#pypRoot [id^="pypEx-"],#pypRoot [id^="pypAs-"]')].map((e) => e.id).join(), txt: document.querySelector('#pypRoot').innerText, tags: document.querySelectorAll('#pypRoot .pyp-srcpg').length }));
   rec('Part I', 'All Part I sections present in manual order (intro, 1–3, Activity 1, 4, 5, summary, Assessment 1)', p1.ids === 'pypSec-p1-intro,pypSec-p1-t1,pypSec-p1-t2,pypEx-st1,pypEx-st2,pypSec-p1-t3,pypEx-a1,pypSec-p1-t4,pypSec-p1-t5,pypSec-p1-sum,pypAs-a1', p1.ids);
@@ -106,7 +106,7 @@ async function answer(pg, aid, map) { for (const [it, v] of Object.entries(map))
   for (const [w, h] of [[375, 700], [768, 900], [1280, 800]]) { await pg.setViewportSize({ width: w, height: h }); await pg.waitForTimeout(250); for (const s of ['p1', 'p2']) { await open(pg, s); rec('Responsive', `No page-level horizontal overflow, ${s} at ${w}`, await pg.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1)); } }
   // ---- scope / isolation / regression
   await pg.setViewportSize({ width: 1280, height: 800 });
-  rec('Scope', 'The end of the manual remains a placeholder (no inputs)', await (async () => { for (const s of ['end']) { await open(pg, s); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
+  rec('Scope', 'Data & report remains a placeholder (no inputs)', await (async () => { for (const s of ['data']) { await open(pg, s); if ((await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length) return false; } return true; })());
   const keys = await pg.evaluate(() => Object.keys(localStorage).sort().join()); rec('Storage', 'Only siyb.iyb.planning.v1 added to localStorage', keys.split(',').filter((k) => !before.split(',').includes(k) && k !== 'siyb-language').join() === 'siyb.iyb.planning.v1', keys);
   for (const t of ['marketing', 'stock', 'costing']) { const o = await pg.evaluate(() => !!document.querySelector('[data-group="iyb"] .sidebar-group-body:not([hidden])')); if (!o) await pg.click('.sidebar-group-head'); await pg.evaluate((x) => document.querySelector(`[data-tool-head="${x}"]`).click(), t); await pg.waitForTimeout(700); rec('Regression', t + ' still opens', await pg.evaluate((x) => (x === 'costing' ? (!document.body.classList.contains('mode-training') && document.querySelector('#costingModuleRoot').innerText.length > 100) : document.body.classList.contains('mode-' + x)) && !document.body.classList.contains('mode-planning'), t)); }
   rec('Console', 'No page errors', errs.length === 0, errs.slice(0, 2).join(' | '));
