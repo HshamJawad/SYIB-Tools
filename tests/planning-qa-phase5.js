@@ -140,7 +140,7 @@ const prog = async (pg) => ad(await pg.evaluate(() => document.querySelector('[d
   rec('Persistence', 'After reload: forecasts, profit, cash flow, loan, assessment and progress restored', (await calc(pg, 'ss0.t')) === '113,325' && (await calc(pg, 'pN.t')) === '5,045' && (await calc(pg, 'cf.close.m2')) === '(4,097)' && (await calc(pg, 'loan.red.i')) === '180' && /16\/16/.test(await prog(pg)));
   // Part IV unchanged, scope, storage, responsive, regression
   rec('Part IV', 'Risk register is unchanged by Part V work', await pg.evaluate(() => { const r = SIYBPlanningStore.get('risks'); return r.length === 1 && r[0].risk === 'Fire in the workshop'; }));
-  await open(pg, 'end'); rec('Scope', 'Only the end of the manual remains a placeholder (no inputs)', (await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length === 0);
+  await open(pg, 'data'); rec('Scope', 'Only data & report remains a placeholder (no inputs)', (await pg.$$('#pypRoot input,#pypRoot textarea,#pypRoot select')).length === 0);
   const keys = await pg.evaluate(() => Object.keys(localStorage).sort().join()); rec('Storage', 'Only siyb.iyb.planning.v1 added to localStorage', keys.split(',').filter((k) => !before.split(',').includes(k) && k !== 'siyb-language').join() === 'siyb.iyb.planning.v1', keys);
   for (const [w, h] of [[375, 700], [768, 900], [1280, 800]]) { await pg.setViewportSize({ width: w, height: h }); await pg.waitForTimeout(250); await open(pg, 'p5'); rec('Responsive', `No page-level horizontal overflow, Part V at ${w}`, await pg.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1)); }
   await pg.setViewportSize({ width: 1280, height: 800 });

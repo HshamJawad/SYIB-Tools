@@ -43,7 +43,7 @@ Storage: records live in `externalForecasts` (array) inside `siyb.iyb.planning.v
 
 Tests: `tests/planning-qa-phase3.js` (41 checks). Earlier Planning suites updated for the new state: the script-count assertion now reads the registry, and the Phase 2 scope/dashboard assertions treat Part III as live.
 
-## Phase 4 – Part IV: Managing Risk (v0.27.0)
+## Phase 4 – Part IV: Managing Risk (v0.28.0)
 Scope: Part IV learning view (printed pp. 37–42): what risk is, risk management (four steps, five questions), the four ways to respond (accept, transfer, reduce, avoid), Activity 6 with the risk-register form, the manual's closing note, summary and Assessment 4.
 
 Source verification (original PDF text compared with the code)
@@ -57,7 +57,7 @@ Storage: records live in `risks` (array) in `siyb.iyb.planning.v1` and are the s
 
 Tests: `tests/planning-qa-phase4.js` (40 checks). Phase 2/3 suites updated for the new state (Part IV is now live; only Part V and end of manual are placeholders).
 
-## Phase 5 – Part V: Making plans (v0.27.0)
+## Phase 5 – Part V: Making plans (v0.28.0)
 Scope: Part V learning view (printed pp. 43–85): objectives, Risk Management in planning, Sales and Marketing Plan, Production and Cost Plan, Profit Plan, Cash Flow Plan, Loan Access Plan, Activities 7–20, summary and Assessment 5. Content in `planning-content-e.js` / `-f.js`; workspaces in `planning-plans.js` (registered into the learning engine); calculations in `planning-calc.js`.
 
 Source verification (original PDF): all Plastic Solutions (Juma) tables were checked against the PDF text (sales 113,325; materials 61,560; labour 15,840; overhead 30,880; gross 35,925; net 5,045; cash flow closing 7,884 / 6,202 / (4,097); loan interest flat 320 and reduced balance 180). Assessment 5 key (p. 97) = b c a c a a b c. Answers to Activities 12, 19 and 20 (pp. 86–87) are hidden until the learner asks; no answer keys or scoring were invented.
@@ -69,3 +69,12 @@ Storage (single key): `objectives`, `plans.nProducts`, `plans.productNames.*`, `
 Known app-wide behaviour (not changed): the shell's UI translator rewrites some English dictionary words typed into inputs/textareas while Arabic is active (display only; stored text is intact).
 
 Tests: `tests/planning-qa-phase5.js` (54 checks, including the full Juma scenario). Earlier suites updated: only the end of the manual remains a placeholder.
+
+## Phase 6 — End of the manual (printed pp. 89–101)
+
+- Source: What Did You Learn, "Can You Help?" (Reliable Tailors, Chimba Carpentry), Action Plan, Answers, Useful Business Words. Case figures and answers verified against the PDF (PDF page = printed page + 11).
+- Content: `src/modules/planning-content-g.js` (`C.end`); workspaces in `src/modules/planning-cases.js` registered through `SIYBPlanningLearn.register`.
+- Storage: `cases.tailors.*`, `cases.chimba.*`, `actionPlan[]` ({what, how, who, when, done}) inside `siyb.iyb.planning.v1`.
+- Tailors uses `calc.cashMonth`; Chimba computes sales, materials, labour, overhead, gross and net profit. Manual answers stay hidden until requested. No scoring or invented answer keys.
+- Progress: 3 items (two cases, Action Plan). Arabic is a preliminary translation; ILO attribution and disclaimers retained.
+- Tests: `tests/planning-qa-phase6.js` (45 checks); earlier suites updated so only Data & report (Phase 7) remains a placeholder.

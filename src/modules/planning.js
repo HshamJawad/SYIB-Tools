@@ -58,7 +58,7 @@
       ${storageNote()}${prelim()}${edu()}
       <div class="pyp-grid">${cards}</div>
       <section class="pyp-panel" aria-labelledby="pypPlansH"><h3 id="pypPlansH">${X('الخطط الخمس في الدليل', 'The five plans in the manual')}</h3><ol class="pyp-plans">${plans}</ol>
-        <p class="pyp-small">${X('الأجزاء من الأول إلى الخامس متاحة الآن، بما فيها أدوات الخطط الخمس. أما نهاية الدليل (حالات «هل تستطيع المساعدة؟» وخطة العمل) فتأتي لاحقاً.', 'Parts I to V are available now, including the tools for the five plans. The end of the manual (the “Can You Help?” cases and the Action Plan) comes later.')}</p></section>
+        <p class="pyp-small">${X('الأجزاء من الأول إلى الخامس ونهاية الدليل (حالتا «هل تستطيع المساعدة؟» وخطة العمل والإجابات والمفردات) متاحة الآن. أما النسخ الاحتياطي والتقرير فيأتيان لاحقاً.', 'Parts I to V and the end of the manual (the two “Can You Help?” cases, the Action Plan, the answers and the useful words) are available now. Backup and the report come later.')}</p></section>
       ${credit()}`;
   }
 
