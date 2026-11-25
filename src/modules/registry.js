@@ -65,5 +65,16 @@
     }
   });
 
+  registry.register({
+    id: 'recordkeeping', order: 6, icon: '▦', group: 'iyb',
+    desc: { ar: 'ثلاثة أجزاء: مسك سجلات المشروع، ونظام مبسط للسجلات، واستخدام السجلات لتحسين المشروع.', en: 'Three parts: keeping business records, a simple system of records, and using records to improve your business.' },
+    title: { ar: 'مسك السجلات', en: 'Record Keeping' },
+    modes: ['recordkeeping'],
+    external: {
+      global: 'SIYBRecordKeeping', rootSelector: '#rkRoot', bodyClass: 'mode-recordkeeping', badge: 'RK', defaultSection: 'home',
+      scripts: ['src/modules/recordkeeping-store.js', 'src/modules/recordkeeping-data.js', 'src/modules/recordkeeping.js']
+    }
+  });
+
   window.SIYBModules = registry;
 })();

@@ -11,7 +11,7 @@ async function newPage(browser, vp) {
   pg.on('console', (m) => { if (m.type() === 'error') pg.errs.push(m.text()); });
   return pg;
 }
-const go = async (pg) => { await pg.goto(URL_); await pg.waitForTimeout(900); };
+const go = async (pg) => { await pg.goto(URL_); await pg.waitForTimeout(2500); };
 const head = async (pg, id) => { await pg.evaluate((t) => document.querySelector(`[data-tool-head="${t}"]`).click(), id); await pg.waitForTimeout(800); };
 const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
@@ -20,7 +20,7 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   const pg = await newPage(browser, { width: 1280, height: 800 });
   await go(pg);
   const reg = await pg.evaluate(() => { const m = SIYBModules.get('planning'); return { order: SIYBModules.list().map((x) => x.id).join(), group: m && m.group, g: m && m.external.global }; });
-  rec('Registry', 'Planning registered 5th under IYB', reg.order === 'gyb,costing,stock,marketing,planning' && reg.group === 'iyb' && reg.g === 'SIYBPlanning', reg.order);
+  rec('Registry', 'Planning registered 5th under IYB', reg.order === 'gyb,costing,stock,marketing,planning,recordkeeping' && reg.group === 'iyb' && reg.g === 'SIYBPlanning', reg.order);
   // Lazy loading, deterministic: (1) not loaded at DOMContentLoaded; (2) with idle preload disabled and no hover it stays
   // unloaded and requests nothing; (3) pointer-over the sidebar head loads it; (4) it is mounted only on opening.
   {
@@ -49,7 +49,7 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   rec('Welcome', 'Welcome page lists Planning automatically', welcome.includes('planning'), welcome);
   await pg.click('.sidebar-group-head'); await pg.waitForTimeout(200);
   const iybOrder = await pg.evaluate(() => [...document.querySelector('[data-group="iyb"]').querySelectorAll('[data-tool-head]')].map((b) => b.dataset.toolHead).join());
-  rec('Sidebar', 'IYB order Costing, Stock, Marketing, Planning', iybOrder === 'costing,stock,marketing,planning', iybOrder);
+  rec('Sidebar', 'IYB order Costing, Stock, Marketing, Planning', iybOrder === 'costing,stock,marketing,planning,recordkeeping', iybOrder);
   const before = await pg.evaluate(() => Object.keys(localStorage).sort().join());
   await head(pg, 'planning');
   rec('Shell', 'Body class mode-planning + badge PL + #pypRoot', await pg.evaluate(() => document.body.classList.contains('mode-planning') && document.getElementById('workspaceBadgeNumber').textContent === 'PL' && !!document.querySelector('#pypRoot.pyp-root')));
@@ -85,11 +85,11 @@ const ad = (x) => x.replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)
   rec('Language', 'Back to Arabic: RTL and data preserved', await pg.evaluate(() => document.documentElement.dir === 'rtl' && JSON.parse(localStorage.getItem('siyb.iyb.planning.v1')).moduleId === 'iyb-planning'));
   // reload restores last section
   await pg.evaluate(() => SIYBPlanning.open('p3')); await pg.waitForTimeout(600);
-  await pg.reload(); await pg.waitForTimeout(900);
+  await pg.reload(); await pg.waitForTimeout(2500);
   await pg.click('.sidebar-group-head'); await head(pg, 'planning');
   rec('Persistence', 'Reload restores last section (p3)', await pg.evaluate(() => SIYBPlanning.current()) === 'p3');
   // corrupt data
-  await pg.evaluate(() => localStorage.setItem('siyb.iyb.planning.v1', '{broken')); await pg.reload(); await pg.waitForTimeout(900);
+  await pg.evaluate(() => localStorage.setItem('siyb.iyb.planning.v1', '{broken')); await pg.reload(); await pg.waitForTimeout(2500);
   await pg.click('.sidebar-group-head'); await head(pg, 'planning');
   rec('Persistence', 'Corrupt data does not crash and is preserved as .unreadable', await pg.evaluate(() => !!document.querySelector('#pypRoot .pyp-card') && localStorage.getItem('siyb.iyb.planning.v1.unreadable') === '{broken'));
   // responsive
