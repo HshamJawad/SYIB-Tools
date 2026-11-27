@@ -72,7 +72,7 @@
     modes: ['recordkeeping'],
     external: {
       global: 'SIYBRecordKeeping', rootSelector: '#rkRoot', bodyClass: 'mode-recordkeeping', badge: 'RK', defaultSection: 'home',
-      scripts: ['src/modules/recordkeeping-store.js', 'src/modules/recordkeeping-data.js', 'src/modules/recordkeeping.js']
+      scripts: ['src/modules/recordkeeping-store.js', 'src/modules/recordkeeping-data.js', 'src/modules/recordkeeping-content-intro.js', 'src/modules/recordkeeping-content-part1.js', 'src/modules/recordkeeping-content-part2.js', 'src/modules/recordkeeping-content-part3.js', 'src/modules/recordkeeping-assessments.js', 'src/modules/recordkeeping-activities.js', 'src/modules/recordkeeping.js']
     }
   });
 

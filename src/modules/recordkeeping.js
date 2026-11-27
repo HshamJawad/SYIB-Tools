@@ -15,7 +15,9 @@
   const byId = (id) => NAV.find((s) => s.id === id) || NAV[0];
   let root = null; let currentId = null;
 
-  const later = (s) => X('المحتوى في المرحلة ' + s.phase + ' من التطوير', 'Content arrives in development phase ' + s.phase);
+  const CONTENT = ['intro', 'p1', 'p2', 'p3'];
+  const subs = {};
+  const later = (s) => (CONTENT.includes(s.id) && window.SIYBRKContent ? X('المحتوى متاح', 'Content available') : X('المحتوى في المرحلة ' + s.phase + ' من التطوير', 'Content arrives in development phase ' + s.phase));
   const pill = (s) => `<span class="rk-status">${esc(later(s))}</span>`;
   const appTag = () => `<span class="rk-apptag">${X('إرشاد التطبيق', 'Application guidance')}</span>`;
   const FORMS = [
@@ -60,7 +62,7 @@
       ${storageNote()}${prelim()}${edu()}
       <div class="rk-grid">${cards}</div>
       <section class="rk-panel" aria-labelledby="rkFoundH"><h3 id="rkFoundH">${X('حالة التطوير', 'Development status')}</h3>
-        <p class="rk-small">${X('هذه مرحلة التأسيس: التنقل والإسناد والتخزين المعزول. لم يُضَف بعد المحتوى التعليمي ولا الأنشطة ولا التقييمات ولا نماذج السجلات التفاعلية ولا الحسابات؛ تأتي في المراحل التالية بعد مراجعتك.', 'This is the foundation phase: navigation, attribution and isolated storage. The learning content, activities, assessments, interactive record forms and calculations are not included yet; they come in later phases after your review.')}</p></section>
+        <p class="rk-small">${X('المحتوى التعليمي للمقدمة والأجزاء الثلاثة والأنشطة والتقييمات الثلاثة متاح الآن. أما نماذج السجلات التفاعلية والحسابات والنسخ الاحتياطي والتقرير فتأتي في المراحل التالية بعد مراجعتك.', 'The educational content of the introduction and the three parts, with the activities and the three assessments, is available now. Interactive record forms, calculations, backup and the report come in later phases after your review.')}</p></section>
       ${credit()}`;
   }
 
@@ -68,8 +70,12 @@
   function renderSection(id) {
     const s = byId(id); const ar = lang() === 'ar';
     const i = NAV.findIndex((x) => x.id === id); const p = NAV[i - 1], n = NAV[i + 1];
-    let body;
-    if (s.id === 'data') {
+    let body; let rp = null;
+    if (CONTENT.includes(s.id) && window.SIYBRKContent) rp = window.SIYBRKContent.renderPart(s.id, subs[s.id]);
+    if (rp) {
+      subs[s.id] = rp.subId;
+      body = rp.html;
+    } else if (s.id === 'data') {
       body = `<p>${X('النسخ الاحتياطي والاستيراد ومسح البيانات والتقرير ستتوفر في المرحلة 7.', 'Backup, import, erase and the report will be available in phase 7.')}</p>
         <p class="rk-small">${X('مفتاح التخزين المعزول لهذه الوحدة: ', 'This module’s isolated storage key: ')}<code dir="ltr">${esc(store.KEY)}</code></p>`;
     } else {
@@ -80,7 +86,7 @@
         <div class="rk-placeholder">${X('المحتوى التعليمي والأنشطة والتقييمات والنماذج التفاعلية لم تُضَف بعد؛ تُنفَّذ في المرحلة ' + s.phase + ' بعد مراجعتك.', 'The learning content, activities, assessments and interactive forms are not included yet; they are implemented in phase ' + s.phase + ' after your review.')}</div>`;
     }
     return `<div class="rk-actions"><button type="button" class="rk-btn" data-act="go" data-id="home">${ar ? '→' : '←'} ${X('العودة إلى اللوحة', 'Back to overview')}</button></div>
-      <section class="rk-panel"><div class="rk-panel-head">${s.no ? `<span class="rk-card-no">${s.no}</span>` : ''}<h2>${esc((s.no ? X('الجزء ', 'Part ') + s.no + ': ' : '') + T(s.title))}</h2>${s.id === 'data' ? '' : pill(s)}</div>${body}</section>
+      <section class="rk-panel"><div class="rk-panel-head">${s.no ? `<span class="rk-card-no">${s.no}</span>` : ''}<h2>${esc((s.no ? X('الجزء ', 'Part ') + s.no + ': ' : '') + T(s.title))}</h2>${s.id === 'data' ? '' : pill(s)}</div>${rp ? prelim() : ''}${body}</section>
       ${s.id === 'data' ? '' : credit()}${pager(p, n, ar)}`;
   }
 
@@ -109,6 +115,10 @@
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       if (b.dataset.act === 'go') open(b.dataset.id);
+    });
+    if (window.SIYBRKContent) window.SIYBRKContent.bind(root, {
+      sub: (id) => { subs[currentId] = id; store.flush(); render(false); },
+      refresh: (sel) => { render(true); const el = sel && root.querySelector(sel); if (el) { try { el.focus({ preventScroll: true }); } catch (_) { /* ignore */ } } }
     });
     if (!currentId) { const last = store.get('lastSection', 'home'); currentId = NAV.some((s) => s.id === last) ? last : 'home'; }
     buildNav();
