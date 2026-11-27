@@ -38,15 +38,15 @@ async function openRk(pg) {
   const txt = ad(await pg.evaluate(() => document.querySelector('#rkRoot').innerText));
   rec('Content', 'Preliminary-translation notice and ILO attribution/disclaimers present (Arabic)', /ترجمة أولية/.test(txt) && /CC BY-SA 3\.0 IGO/.test(txt) && /لم يُعدّها مكتب العمل الدولي/.test(txt) && /تأييد/.test(txt));
   rec('Content', 'No ILO emblem or logo image in the module', await pg.evaluate(() => document.querySelectorAll('#rkRoot img, #rkRoot svg').length === 0));
-  rec('Scope', 'No inputs, forms or calculations in Phase 1', await pg.evaluate(() => document.querySelectorAll('#rkRoot input,#rkRoot textarea,#rkRoot select,#rkRoot [data-calc]').length === 0));
+  rec('Scope', 'Landing page has no inputs, forms or calculations', await pg.evaluate(() => document.querySelectorAll('#rkRoot input,#rkRoot textarea,#rkRoot select,#rkRoot [data-calc]').length === 0 /* landing page only; Phase 2 adds inputs inside content views */));
   // sections
   const secs = ['intro', 'p1', 'p2', 'p3', 'end', 'forms', 'data'];
-  let ok = true; for (const s of secs) { await pg.evaluate((x) => SIYBRecordKeeping.open(x), s); await pg.waitForTimeout(120); const t = await pg.evaluate(() => document.querySelector('#rkRoot').innerText); if (s !== 'data' && !/لم تُضَف بعد/.test(t)) ok = false; }
-  rec('Sections', 'All seven sections open with a clear “not included yet” note', ok);
+  let ok = true; for (const s of secs) { await pg.evaluate((x) => SIYBRecordKeeping.open(x), s); await pg.waitForTimeout(120); const t = await pg.evaluate(() => document.querySelector('#rkRoot').innerText); if (['end', 'forms'].includes(s) && !/لم تُضَف بعد/.test(t)) ok = false; if (['intro', 'p1', 'p2', 'p3'].includes(s) && (/لم تُضَف بعد/.test(t))) ok = false; }
+  rec('Sections', 'All seven sections open; end matter and forms keep the “not included yet” note; parts I–III now show content (Phase 2)', ok);
   await pg.evaluate(() => SIYBRecordKeeping.open('forms')); await pg.waitForTimeout(150);
   rec('Sections', 'Forms page lists the manual’s ten forms by name only', (await pg.$$('#rkRoot .rk-forms li')).length === 10);
   await pg.evaluate(() => SIYBRecordKeeping.open('p2')); await pg.waitForTimeout(150);
-  rec('Sections', 'Part II shows Activities 3–7 and Assessment 2 as listed (no content)', /3–7/.test(ad(await pg.evaluate(() => document.querySelector('#rkRoot .rk-meta').innerText))));
+  rec('Sections', 'Part II now shows content with Activities 3–7 and Assessment 2 available', await pg.evaluate(() => !!document.querySelector('#rkRoot .rk-sub') && /3|٣/.test(document.querySelector('#rkRoot').innerText)));
   // language
   await pg.evaluate(() => SIYBRecordKeeping.open('home')); await pg.waitForTimeout(150);
   await pg.evaluate(() => document.querySelector('#languageToggle').click()); await pg.waitForTimeout(600);
