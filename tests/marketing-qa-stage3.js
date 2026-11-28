@@ -113,8 +113,8 @@ const ad = (x) => String(x).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.in
   }
   rec('Console', 'No console/page errors', errs.length === 0, errs.join(' | ').slice(0, 300));
   const pw = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); await pw.goto(URL_); await pw.waitForTimeout(2500);
-  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.30.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
-  rec('PWA', 'Cache v0.30.0 holds Stage 3 files', !!cache && ['marketing-assess-a.js', 'marketing-assess-b.js', 'marketing-card8.js', 'marketing-glossary.js'].every((f) => cache.includes(f)));
+  const cache = await pw.evaluate(async () => { const k = (await caches.keys()).find((x) => x.includes('v0.31.0')); if (!k) return null; return (await (await caches.open(k)).keys()).map((r) => r.url.split('/').pop().split('?')[0]); });
+  rec('PWA', 'Cache v0.31.0 holds Stage 3 files', !!cache && ['marketing-assess-a.js', 'marketing-assess-b.js', 'marketing-card8.js', 'marketing-glossary.js'].every((f) => cache.includes(f)));
   await pw.context().setOffline(true); await pw.reload().catch(() => {}); await pw.waitForTimeout(1500);
   await pw.evaluate(() => document.querySelector('[data-tool-head="marketing"]').click()).catch(() => {}); await pw.waitForTimeout(1000);
   await pw.evaluate(() => SIYBMarketing.open('c08')).catch(() => {}); await pw.waitForTimeout(300);

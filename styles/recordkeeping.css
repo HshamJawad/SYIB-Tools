@@ -86,3 +86,30 @@
 .rk-score{margin:12px 0;padding:10px 14px;border-radius:12px;background:#24A8E01f;border:1px solid #24A8E0}
 .rk-msg{color:#8a3b00;font-weight:800;margin:6px 0}
 @media (max-width:600px){.rk-blank{min-width:0;display:block}}
+/* Phase 3: interactive forms */
+.rk-form{margin:12px 0;padding:12px;border:1px solid #dce8ec;border-radius:12px;background:#f9fbfc}
+.rk-form h4{margin:0 0 8px}
+.rk-frow{display:flex;flex-wrap:wrap;gap:10px}
+.rk-fld{flex:1 1 150px;min-width:0;margin:0 0 8px}
+.rk-fld label{display:block;font-weight:700;font-size:13px;margin-bottom:3px}
+.rk-fld input[type=text],.rk-fld select{width:100%;max-width:100%;font:inherit;padding:8px;border:1px solid #cfd9e0;border-radius:10px;background:#fff;color:#111}
+.rk-fld input:focus-visible,.rk-fld select:focus-visible,.rk-set input:focus-visible{outline:3px solid #24A8E066;outline-offset:2px}
+.rk-fld input[aria-invalid=true]{border-color:#c25f00;background:#F48D010f}
+.rk-ferr{display:block;color:#8a3b00;font-weight:800;font-size:12px;margin-top:3px}
+.rk-set{margin:0 0 12px;padding:10px 12px;border:1px solid #dce8ec;border-radius:12px}
+.rk-set legend{font-weight:800;padding:0 6px}
+.rk-set input[type=text]{width:100%;font:inherit;padding:8px;border:1px solid #cfd9e0;border-radius:10px}
+.rk-prev{margin:6px 0 10px;padding:6px 10px;border-radius:10px;background:#24A8E014;font-size:13px}
+.rk-eff{margin:0 0 8px}
+.rk-warn{margin-top:3px;font-size:12px;font-weight:800;color:#8a3b00}
+.rk-ok{color:#2c5b00;font-weight:800}
+.rk-num{text-align:end;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rk-empty{text-align:center;color:#2a4656}
+.rk-bf td{background:#f3f8fa}
+.rk-tot th,.rk-tot td{background:#f3f8fa;font-weight:800}
+.rk-rowact{white-space:nowrap}
+.rk-rowact .rk-btn{padding:3px 8px;font-size:12px;margin-inline-end:4px}
+.rk-btn.danger{border-color:#c25f00;background:#F48D011f}
+.rk-brb{font-size:12px}
+.rk-post{margin:14px 0;padding:10px 12px;border:1px dashed #24A8E088;border-radius:12px}
+.rk-clear{justify-content:flex-start;margin-top:14px}

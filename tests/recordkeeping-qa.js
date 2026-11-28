@@ -41,8 +41,8 @@ async function openRk(pg) {
   rec('Scope', 'Landing page has no inputs, forms or calculations', await pg.evaluate(() => document.querySelectorAll('#rkRoot input,#rkRoot textarea,#rkRoot select,#rkRoot [data-calc]').length === 0 /* landing page only; Phase 2 adds inputs inside content views */));
   // sections
   const secs = ['intro', 'p1', 'p2', 'p3', 'end', 'forms', 'data'];
-  let ok = true; for (const s of secs) { await pg.evaluate((x) => SIYBRecordKeeping.open(x), s); await pg.waitForTimeout(120); const t = await pg.evaluate(() => document.querySelector('#rkRoot').innerText); if (['end', 'forms'].includes(s) && !/لم تُضَف بعد/.test(t)) ok = false; if (['intro', 'p1', 'p2', 'p3'].includes(s) && (/لم تُضَف بعد/.test(t))) ok = false; }
-  rec('Sections', 'All seven sections open; end matter and forms keep the “not included yet” note; parts I–III now show content (Phase 2)', ok);
+  let ok = true; for (const s of secs) { await pg.evaluate((x) => SIYBRecordKeeping.open(x), s); await pg.waitForTimeout(120); const t = await pg.evaluate(() => document.querySelector('#rkRoot').innerText); if (['end'].includes(s) && !/لم تُضَف بعد/.test(t)) ok = false; if (['intro', 'p1', 'p2', 'p3', 'forms'].includes(s) && (/لم تُضَف بعد/.test(t))) ok = false; }
+  rec('Sections', 'All seven sections open; end matter keeps the “not included yet” note; parts I–III and forms now show content (Phase 2–3)', ok);
   await pg.evaluate(() => SIYBRecordKeeping.open('forms')); await pg.waitForTimeout(150);
   rec('Sections', 'Forms page lists the manual’s ten forms by name only', (await pg.$$('#rkRoot .rk-forms li')).length === 10);
   await pg.evaluate(() => SIYBRecordKeeping.open('p2')); await pg.waitForTimeout(150);

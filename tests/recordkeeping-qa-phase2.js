@@ -218,7 +218,7 @@ const KEYS = {
   rec('Packaging', 'Service worker APP_SHELL lists the 6 new Record Keeping files', files.every((f) => sw.includes(`./src/modules/recordkeeping-${f}.js`) && fs.existsSync(`src/modules/recordkeeping-${f}.js`)));
   const reg = fs.readFileSync('src/modules/registry.js', 'utf8'); rec('Packaging', 'Registry scripts load the new files before the module script', files.every((f) => reg.includes(`recordkeeping-${f}.js`)) && reg.indexOf('recordkeeping-activities.js') < reg.indexOf("recordkeeping.js']"));
   const ver = (s) => (s.match(/0\.\d+\.\d+/g) || []).filter((v, i, a) => a.indexOf(v) === i);
-  rec('Packaging', 'Version 0.30.0 consistent in service worker, app.js and index.html', /v0\.30\.0/.test(sw) && appJs.includes('0.30.0') && html.includes('0.30.0') && !ver(sw).includes('0.29.0'));
+  rec('Packaging', 'Version 0.31.0 consistent in service worker, app.js and index.html', /v0\.31\.0/.test(sw) && appJs.includes('0.31.0') && html.includes('0.31.0') && !ver(sw).includes('0.29.0'));
   rec('Packaging', 'No JavaScript errors during the whole run', errs.length === 0, errs.slice(0, 3).join('|'));
 
   await browser.close();

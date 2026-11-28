@@ -41,3 +41,20 @@ Answer values are letters/ids (`t`/`f`, `a`–`c`, word ids), not digits, becaus
 - Balance Sheet Arabic: قائمة المركز المالي (Phase 2 terminology table governs over FRS v3).
 
 **Not implemented (later phases)**: interactive record forms and calculators, backup/import/erase/report (Phase 7), end matter and forms pages.
+
+## Phase 3 — Core interactive forms (v0.31.0)
+
+**Implemented** (Forms page, three tabs): Basic Record Book, Daily Cash Sales Record, Customers’ Accounts Record. File: `src/modules/recordkeeping-forms.js` (engine + UI); wired in `recordkeeping.js`, registry, service worker; `.rk-*` CSS only.
+
+**Basic Record Book**: columns and order per p.15 (Date, Details, Voucher No., Cash IN/OUT/BALANCE, Bank IN/OUT/BALANCE, Sales, Material, Labour, Overhead, VAT IN/OUT/BALANCE – VAT columns only when the learner marks the business VAT registered, p.25). Opening balances (B/f) for cash and bank. Entry by transaction type; each type writes the columns the manual prescribes and a live preview shows them: sale; purchase (material/overhead); wages (labour/overhead split); cash→bank deposit; bank→cash; loan received; loan payment (interest only to overhead); asset purchase; stock purchase; stock used; tax payment; depreciation. Deposits, withdrawals and loans are never Sales. Balances are plain running sums; VAT balance = VAT IN − VAT OUT, negative shown in brackets (p.25/28). Warnings (not blocks): duplicate voucher number, negative cash/bank balance. Edit, delete (two-step), clear form.
+**Verified against the manual**: Modern Furniture November (p.28) – every running balance and the totals row; Activity 5 answer (p.48); Reliable Tailors wages, loan, stock and depreciation entries (pp.36–44).
+**Daily Cash Sales Record**: day sheets with item, quantity sold, unit price, amount = quantity × price, total; the total can be transferred once to the Basic Record Book as a cash sale (Cash IN + Sales, optional VAT amount).
+**Customers’ Accounts Record**: customers with address, tel, credit limit; credit sale / payment entries with signature text; running balance (Welcome Hotel p.21 reproduces 200/400/800/300); non-blocking warnings above the credit limit and on overpayment. Credit sales are not cash received and create nothing in the Basic Record Book.
+
+**Assumptions**: no currency, no tax rate – VAT is a typed amount (net = amount − VAT). Dates are free text d/m[/y] or ISO as the manual writes them. Numbers accept Arabic-Indic digits.
+
+**Source ambiguities left un-automated (documented, not guessed)**: (1) whether a customer’s payment is also written in Sales, and when a credit sale enters Sales – the manual says a cash payment is cash from sales but does not state the Basic Record Book columns for it, so customer payments are not auto-posted; (2) the p.27 cupboard narrative (“VAT in”) vs the p.28 table (VAT out) – the table is followed; (3) Daily Cash Sales form VAT fields are not specified – only an optional VAT amount at transfer time.
+
+**Storage (schema 1, header unchanged)**: `forms.brb` {unit, vat, openCash, openBank, seq, rows{r<n>}}, `forms.dcsr` {seq, days{d<n>{date, items{i<n>}, posted}}}, `forms.car` {seq, customers{c<n>{name,address,tel,limit,entries{e<n>}}}}. Keys appear only when the learner acts; Phase 1/2 data is untouched.
+
+**Not implemented (Phase 4+)**: the seven additional record books, receipts as attachments (not required for the first release), cash control comparison (FR-11), reports/PDF, backup/import.
