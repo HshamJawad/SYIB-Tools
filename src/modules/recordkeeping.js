@@ -17,7 +17,7 @@
 
   const CONTENT = ['intro', 'p1', 'p2', 'p3'];
   const subs = {};
-  const later = (s) => (CONTENT.includes(s.id) && window.SIYBRKContent ? X('المحتوى متاح', 'Content available') : X('المحتوى في المرحلة ' + s.phase + ' من التطوير', 'Content arrives in development phase ' + s.phase));
+  const later = (s) => (s.id === 'forms' && window.SIYBRKForms ? X('3 نماذج تفاعلية من 10', '3 of 10 forms interactive') : CONTENT.includes(s.id) && window.SIYBRKContent ? X('المحتوى متاح', 'Content available') : X('المحتوى في المرحلة ' + s.phase + ' من التطوير', 'Content arrives in development phase ' + s.phase));
   const pill = (s) => `<span class="rk-status">${esc(later(s))}</span>`;
   const appTag = () => `<span class="rk-apptag">${X('إرشاد التطبيق', 'Application guidance')}</span>`;
   const FORMS = [
@@ -62,7 +62,7 @@
       ${storageNote()}${prelim()}${edu()}
       <div class="rk-grid">${cards}</div>
       <section class="rk-panel" aria-labelledby="rkFoundH"><h3 id="rkFoundH">${X('حالة التطوير', 'Development status')}</h3>
-        <p class="rk-small">${X('المحتوى التعليمي للمقدمة والأجزاء الثلاثة والأنشطة والتقييمات الثلاثة متاح الآن. أما نماذج السجلات التفاعلية والحسابات والنسخ الاحتياطي والتقرير فتأتي في المراحل التالية بعد مراجعتك.', 'The educational content of the introduction and the three parts, with the activities and the three assessments, is available now. Interactive record forms, calculations, backup and the report come in later phases after your review.')}</p></section>
+        <p class="rk-small">${X('المحتوى التعليمي للمقدمة والأجزاء الثلاثة والأنشطة والتقييمات الثلاثة متاح الآن، ومعه ثلاثة نماذج تفاعلية (السجل الأساسي وسجل المبيعات النقدية اليومية وسجل حسابات العملاء) في صفحة النماذج. أما بقية السجلات والحسابات والنسخ الاحتياطي والتقرير فتأتي في المراحل التالية بعد مراجعتك.', 'The educational content of the introduction and the three parts, with the activities and the three assessments, is available now, together with three interactive forms (Basic Record Book, Daily Cash Sales Record, Customers’ Accounts Record) on the Forms page. The other records, calculations, backup and the report come in later phases after your review.')}</p></section>
       ${credit()}`;
   }
 
@@ -72,7 +72,9 @@
     const i = NAV.findIndex((x) => x.id === id); const p = NAV[i - 1], n = NAV[i + 1];
     let body; let rp = null;
     if (CONTENT.includes(s.id) && window.SIYBRKContent) rp = window.SIYBRKContent.renderPart(s.id, subs[s.id]);
-    if (rp) {
+    if (s.id === 'forms' && window.SIYBRKForms) {
+      body = `<p class="rk-cov"><strong>${X('محتويات الدليل (حسب الفهرس): ', 'Manual contents (per its table of contents): ')}</strong></p><ol class="rk-forms">${FORMS.map((f) => `<li>${esc(X(f[0], f[1]))}</li>`).join('')}</ol>${window.SIYBRKForms.render()}`;
+    } else if (rp) {
       subs[s.id] = rp.subId;
       body = rp.html;
     } else if (s.id === 'data') {
@@ -116,6 +118,8 @@
       const b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
       if (b.dataset.act === 'go') open(b.dataset.id);
     });
+    const fmCtx = { refresh: (sel) => { render(true); const el = sel && root.querySelector(sel); if (el) { try { el.focus({ preventScroll: true }); } catch (_) { /* ignore */ } } } };
+    if (window.SIYBRKForms) window.SIYBRKForms.bind(root, fmCtx);
     if (window.SIYBRKContent) window.SIYBRKContent.bind(root, {
       sub: (id) => { subs[currentId] = id; store.flush(); render(false); },
       refresh: (sel) => { render(true); const el = sel && root.querySelector(sel); if (el) { try { el.focus({ preventScroll: true }); } catch (_) { /* ignore */ } } }
